@@ -7,3 +7,5 @@ Run npm ci --ignore-scripts, npm run engine:fetch, npm run check, then npm run d
 2026-10-27 — E02 browser GPU verification passed 8/8. E02a guided test and automatic local receipt implemented and checked end-to-end. Twelve unit tests plus setup/typecheck/build pass. Instructions: docs/TESTING.md.
 
 2026-10-27 — E03 live phone page, protected automatic numeric-log receiver and temporary HTTPS hosting added. Code/transport checks pass; field stability remains unverified.
+
+2026-10-27 — Analyzed first real phone diagnostic and recorded its limits. Added route capture-manifest validation with three adversarial tests; all 17 unit tests and project checks pass. Live renderer unchanged.

@@ -7,10 +7,11 @@ E01, E02, E02a and E03a are complete; remaining cards are unchecked until their 
 - [x] E02 (1 h) — Calibrated display fixture. First-failing tests: portrait/landscape/DPR sizing, noncentral CPU/GPU point agreement, ring aspect, resize invalidation. Real browser shader check required. G1.
 - [x] E02a (1 h, independent delivery) — Guided synthetic check with automatic local receipt, retry/export on failure, bounded input and server-derived verdict. No physical tracking claim.
 - [x] E03a (1 h, independent fixture) — Bounded diagnostic journal: timestamp rejected frames, retain transitions, explicit capacity failure and configuration identity. No camera integration or field claim.
-- [ ] E03 (1 h) — IMPLEMENTED; awaiting real phone lifecycle/placement verification. Tracker adapter and live diagnostic. Acceptance: permission, pose/projection/frame synchronization, actual display geometry in log, loss/stale hide, stop cleanup, retained placement transitions. G1; phone result remains separate. Depends E02/E03a.
+- [x] E03 (1 h) — Basic phone camera/pose/placement/upload evidence received; physical loss/recovery remains E04. Tracker adapter and live diagnostic. Acceptance: permission, pose/projection/frame synchronization, actual display geometry in log, loss/stale hide, stop cleanup, retained placement transitions. G1; phone result remains separate. Depends E02/E03a.
 - [ ] E04 (human gate) — Rigid-reference iPhone comparison, then short loop and recovery trials. Preserve raw private logs. No stability claim from numeric pose acceptance. G1.
 - [ ] E05 (1 h, independent of E04) — Eligible model access smoke: one permitted input, real output, exact version/license and zero-spend evidence. Do not assume credits. G0/model gate.
-- [ ] E06 (1 h) — RouteBundle schema and adversarial fixtures: units, calibration, version/config identity, privacy and destination validation. Fixtures clearly synthetic. Independent of E04.
+- [x] E06 (1 h) — Capture-manifest schema and adversarial fixtures: units, calibration, version/config identity, privacy and destination validation. Fixtures clearly synthetic. Independent of E04.
+- [ ] E06b — Versioned sparse map/descriptor artifacts, after geometry runtime selection. No invented model-output schema.
 - [ ] E07 (1 h) — Host capture/export with frame calibration and invalid-tracking rejection. Test first. Depends E03/E06; field capture after E04 and permission.
 - [ ] E08 (human gate) — One permitted short author walk and a separate visitor session. Ground truth and publication consent recorded privately. G2.
 - [ ] E09 (1 h) — First offline geometry runtime smoke on reviewed capture; record actual output/failure. Depends E08 and verified compute. Split map-build implementation based on observed runtime.
