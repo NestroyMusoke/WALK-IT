@@ -1,0 +1,112 @@
+{
+  "build": "E02-1",
+  "kind": "synthetic GPU rasterization; not phone tracking",
+  "configSha256": "13f9891dace43bbfd9cbc12cf53e76f5b67d851e11a8eae13b70cfc753e8e60c",
+  "passed": true,
+  "results": [
+    {
+      "width": 428,
+      "height": 781,
+      "dpr": 1,
+      "moved": false,
+      "bufferWidth": 428,
+      "bufferHeight": 781,
+      "pixels": 208,
+      "errorPx": 0.3048691983043558,
+      "shapeErrorPx": 0,
+      "glError": 0,
+      "passed": true
+    },
+    {
+      "width": 428,
+      "height": 781,
+      "dpr": 1,
+      "moved": true,
+      "bufferWidth": 428,
+      "bufferHeight": 781,
+      "pixels": 232,
+      "errorPx": 0.36374250425499316,
+      "shapeErrorPx": 0,
+      "glError": 0,
+      "passed": true
+    },
+    {
+      "width": 428,
+      "height": 781,
+      "dpr": 2,
+      "moved": false,
+      "bufferWidth": 856,
+      "bufferHeight": 1562,
+      "pixels": 880,
+      "errorPx": 0.3442065703215565,
+      "shapeErrorPx": 0,
+      "glError": 0,
+      "passed": true
+    },
+    {
+      "width": 428,
+      "height": 781,
+      "dpr": 2,
+      "moved": true,
+      "bufferWidth": 856,
+      "bufferHeight": 1562,
+      "pixels": 880,
+      "errorPx": 0.18817031427877037,
+      "shapeErrorPx": 0,
+      "glError": 0,
+      "passed": true
+    },
+    {
+      "width": 781,
+      "height": 428,
+      "dpr": 1,
+      "moved": false,
+      "bufferWidth": 781,
+      "bufferHeight": 428,
+      "pixels": 208,
+      "errorPx": 0.3065791129537052,
+      "shapeErrorPx": 0,
+      "glError": 0,
+      "passed": true
+    },
+    {
+      "width": 781,
+      "height": 428,
+      "dpr": 1,
+      "moved": true,
+      "bufferWidth": 781,
+      "bufferHeight": 428,
+      "pixels": 208,
+      "errorPx": 0.34941191869100285,
+      "shapeErrorPx": 0,
+      "glError": 0,
+      "passed": true
+    },
+    {
+      "width": 781,
+      "height": 428,
+      "dpr": 2,
+      "moved": false,
+      "bufferWidth": 1562,
+      "bufferHeight": 856,
+      "pixels": 880,
+      "errorPx": 0.20398909542000637,
+      "shapeErrorPx": 0,
+      "glError": 0,
+      "passed": true
+    },
+    {
+      "width": 781,
+      "height": 428,
+      "dpr": 2,
+      "moved": true,
+      "bufferWidth": 1562,
+      "bufferHeight": 856,
+      "pixels": 880,
+      "errorPx": 0.12447028093357727,
+      "shapeErrorPx": 0,
+      "glError": 0,
+      "passed": true
+    }
+  ]
+}

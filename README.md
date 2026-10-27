@@ -8,7 +8,7 @@ The intended users include delivery workers, customers, visitors and anyone meet
 
 ## Event build status — 27 October 2026
 
-The pinned web setup, synthetic display fixture and diagnostic timing journal are implemented. One setup test and nine unit tests pass, along with typecheck and production build. Browser GPU verification, live tracking, model execution and field navigation remain pending. See [PLAN.md](PLAN.md), [TASKS.md](TASKS.md) and [BUILD_LEDGER](docs/BUILD_LEDGER.md).
+The pinned web setup, synthetic display fixture and diagnostic timing journal are implemented. One setup test and fourteen unit tests pass, along with typecheck and production build. The browser GPU fixture passed 8/8 cases and automatically saved its report on the laptop. The live camera diagnostic and automatic numeric uploads are now implemented. Physical phone verification, model execution and field navigation remain pending. See [guided testing instructions](docs/TESTING.md). See [PLAN.md](PLAN.md), [TASKS.md](TASKS.md) and [BUILD_LEDGER](docs/BUILD_LEDGER.md).
 
 Target: Meta Global AI Developer Hackathon, Indie track, Build for Your World. The demo will identify the features developed during the event and distinguish live results from recorded replay. Codex assists with engineering and documentation.
 

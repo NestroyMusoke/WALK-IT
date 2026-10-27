@@ -1,12 +1,13 @@
 # Event task queue
 
-E01 setup is complete; remaining cards are unchecked until their own acceptance checks pass. Follow dependency order; only independent fixture/access/documentation work may proceed while a physical gate is pending.
+E01, E02, E02a and E03a are complete; remaining cards are unchecked until their own acceptance checks pass. Follow dependency order; only independent fixture/access/documentation work may proceed while a physical gate is pending.
 
 - [x] P00 — Read supplied plan and participant guide; prepare revised product scope, schedule and operating rules. Documentation only. Repository cloned empty on 27 October. No code or event phone-test pass.
 - [x] E01 (1 h) — Pin the minimal web/test dependencies and verify SDK licensing/loading. Acceptance: exact versions, source/license ledger, clean reproducible install, no committed engine binary. G0.
-- [ ] E02 (1 h) — Calibrated display fixture. First-failing tests: portrait/landscape/DPR sizing, noncentral CPU/GPU point agreement, ring aspect, resize invalidation. Real browser shader check required. G1.
+- [x] E02 (1 h) — Calibrated display fixture. First-failing tests: portrait/landscape/DPR sizing, noncentral CPU/GPU point agreement, ring aspect, resize invalidation. Real browser shader check required. G1.
+- [x] E02a (1 h, independent delivery) — Guided synthetic check with automatic local receipt, retry/export on failure, bounded input and server-derived verdict. No physical tracking claim.
 - [x] E03a (1 h, independent fixture) — Bounded diagnostic journal: timestamp rejected frames, retain transitions, explicit capacity failure and configuration identity. No camera integration or field claim.
-- [ ] E03 (1 h) — Tracker adapter and live diagnostic. Acceptance: permission, pose/projection/frame synchronization, actual display geometry in log, loss/stale hide, stop cleanup, retained placement transitions. G1; phone result remains separate. Depends E02/E03a.
+- [ ] E03 (1 h) — IMPLEMENTED; awaiting real phone lifecycle/placement verification. Tracker adapter and live diagnostic. Acceptance: permission, pose/projection/frame synchronization, actual display geometry in log, loss/stale hide, stop cleanup, retained placement transitions. G1; phone result remains separate. Depends E02/E03a.
 - [ ] E04 (human gate) — Rigid-reference iPhone comparison, then short loop and recovery trials. Preserve raw private logs. No stability claim from numeric pose acceptance. G1.
 - [ ] E05 (1 h, independent of E04) — Eligible model access smoke: one permitted input, real output, exact version/license and zero-spend evidence. Do not assume credits. G0/model gate.
 - [ ] E06 (1 h) — RouteBundle schema and adversarial fixtures: units, calibration, version/config identity, privacy and destination validation. Fixtures clearly synthetic. Independent of E04.

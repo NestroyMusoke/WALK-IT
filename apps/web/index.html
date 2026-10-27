@@ -11,8 +11,11 @@
 <p class="legend"><span>○ Green: screen projection</span><span>+ Magenta: GPU projection</span></p>
 <div class="actions"><button id="place">Place reference</button><button id="move">Move test camera</button><button id="loss">Simulate tracking loss</button></div>
 <p id="display-status" role="status">Place a reference to compare the two symbols.</p>
-<button id="checks" class="primary">Run display checks</button>
+<p><strong>Your instructions:</strong> stay on this page, press the button below once, then wait for “Saved on laptop”. No walking or camera permission is needed for this test.</p>
+<button id="checks" class="primary">Start guided display test</button>
 <p id="check-status" role="status">Portrait, landscape, pixel ratio and camera motion.</p>
+<p id="receipt-status" role="status">Results will be sent automatically to this laptop. No camera images, audio or location are collected by this test.</p>
+<div class="actions"><button id="retry" hidden>Retry sending</button><button id="download" hidden>Download result</button></div>
 <details><summary>Test evidence</summary><pre id="report">No GPU checks run yet.</pre></details></section>
 <p id="status" role="status">Loading tracking engine…</p>
 <p class="note">No camera starts in this build. Phone tracking and navigation remain unverified.</p>
