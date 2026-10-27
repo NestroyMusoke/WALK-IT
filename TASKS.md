@@ -12,7 +12,8 @@ E01, E02, E02a and E03a are complete; remaining cards are unchecked until their 
 - [ ] E05 (1 h, independent of E04) — Eligible model access smoke: one permitted input, real output, exact version/license and zero-spend evidence. Do not assume credits. G0/model gate.
 - [x] E06 (1 h) — Capture-manifest schema and adversarial fixtures: units, calibration, version/config identity, privacy and destination validation. Fixtures clearly synthetic. Independent of E04.
 - [ ] E06b — Versioned sparse map/descriptor artifacts, after geometry runtime selection. No invented model-output schema.
-- [ ] E07 (1 h) — Host capture/export with frame calibration and invalid-tracking rejection. Test first. Depends E03/E06; field capture after E04 and permission.
+- [x] E07a (1 h) — In-memory host recorder, image-calibration conversion, timestamp retention, loss/stale/resize rejection and reviewed/masked export boundary. Synthetic fixtures only; not connected to phone capture.
+- [ ] E07b (1 h) — Connect same-frame camera-pixel extraction and review controls; prove image/pose alignment, encode only reviewed images and persist privately. Depends E07a; field capture after E04 and permission.
 - [ ] E08 (human gate) — One permitted short author walk and a separate visitor session. Ground truth and publication consent recorded privately. G2.
 - [ ] E09 (1 h) — First offline geometry runtime smoke on reviewed capture; record actual output/failure. Depends E08 and verified compute. Split map-build implementation based on observed runtime.
 - [ ] E10 (1 h) — Localizer geometric fixture: real selected OpenCV runtime, correct/wrong correspondences, degenerate alignment rejection, no synthetic arrow authorization. Depends exact dependencies/schema; real map integration after E09.

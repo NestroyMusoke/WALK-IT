@@ -9,3 +9,5 @@ Run npm ci --ignore-scripts, npm run engine:fetch, npm run check, then npm run d
 2026-10-27 — E03 live phone page, protected automatic numeric-log receiver and temporary HTTPS hosting added. Code/transport checks pass; field stability remains unverified.
 
 2026-10-27 — Analyzed first real phone diagnostic and recorded its limits. Added route capture-manifest validation with three adversarial tests; all 17 unit tests and project checks pass. Live renderer unchanged.
+
+2026-10-27 — E07a host recording core added with calibration, frame timing, privacy review/masking and invalid-tracking rejection. All 22 tests and project checks pass. Phone capture controls and persistent export are E07b, not yet implemented.
