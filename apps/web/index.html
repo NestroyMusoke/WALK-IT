@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>WALK IT · Field test</title>
+<script src="./vendor/xr/xr.js" async data-preload-chunks="slam"></script>
+<script type="module" src="/src/main.ts"></script></head>
+<body><main><header><strong>WALK IT</strong><span>FIELD LAB / E02-1</span></header>
+<p class="eyebrow">ONE PATH. AN EXACT DESTINATION.</p><h1>Share the way.</h1><p class="intro">First, make every point land where it belongs.</p>
+<section class="test-panel"><div class="panel-head"><h2>Display calibration</h2><span class="badge">SYNTHETIC</span></div>
+<p>This is a drawing test, not a camera feed or navigation demo.</p>
+<div id="stage"><canvas id="display" aria-label="Synthetic 3D reference"></canvas><span id="overlay" hidden aria-label="Green CPU projection ring"></span><span class="stage-label">GENERATED TEST SCENE · NO CAMERA</span></div>
+<p class="legend"><span>○ Green: screen projection</span><span>+ Magenta: GPU projection</span></p>
+<div class="actions"><button id="place">Place reference</button><button id="move">Move test camera</button><button id="loss">Simulate tracking loss</button></div>
+<p id="display-status" role="status">Place a reference to compare the two symbols.</p>
+<button id="checks" class="primary">Run display checks</button>
+<p id="check-status" role="status">Portrait, landscape, pixel ratio and camera motion.</p>
+<details><summary>Test evidence</summary><pre id="report">No GPU checks run yet.</pre></details></section>
+<p id="status" role="status">Loading tracking engine…</p>
+<p class="note">No camera starts in this build. Phone tracking and navigation remain unverified.</p>
+<footer>Tracking engine by Niantic Spatial. © 2026 Niantic Spatial, Inc.
+<a href="./vendor/xr/LICENSE">XR Engine License and warranty disclaimer</a>.</footer>
+</main></body></html>

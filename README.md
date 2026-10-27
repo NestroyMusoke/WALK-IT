@@ -8,7 +8,7 @@ The intended users include delivery workers, customers, visitors and anyone meet
 
 ## Event build status — 27 October 2026
 
-This repository currently contains the implementation plan and working rules. Application code, model execution, field accuracy and a working navigation demo are not yet verified for this build. See [PLAN.md](PLAN.md), [TASKS.md](TASKS.md) and [BUILD_LEDGER](docs/BUILD_LEDGER.md).
+The pinned web setup, synthetic display fixture and diagnostic timing journal are implemented. One setup test and nine unit tests pass, along with typecheck and production build. Browser GPU verification, live tracking, model execution and field navigation remain pending. See [PLAN.md](PLAN.md), [TASKS.md](TASKS.md) and [BUILD_LEDGER](docs/BUILD_LEDGER.md).
 
 Target: Meta Global AI Developer Hackathon, Indie track, Build for Your World. The demo will identify the features developed during the event and distinguish live results from recorded replay. Codex assists with engineering and documentation.
 
