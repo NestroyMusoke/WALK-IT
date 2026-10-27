@@ -1,0 +1,15 @@
+# Decisions
+
+2026-10-27 — Product framing covers routes to destinations for delivery workers and visitors, including entrances, shops and meeting points. One short university route is an evaluation scope, not a market boundary.
+
+2026-10-27 — New event checkout contains planning only. No application source or private test media imported. The supplied guide requires event-built functionality and clear original contributions. Do not treat fresh commit timestamps as a substitute for provenance.
+
+2026-10-27 — Correct canvas/projection calibration before escalating to a different tracker. Acceptance fixtures include explicit portrait buffer sizing, noncentral projection agreement and stale GPU-buffer hiding. A physical retest remains required.
+
+2026-10-27 — Reduce draft scope to available human capacity: at most 18 hours through proposed feature freeze, then 12 through rehearsal, assuming stated availability. Prioritize one complete route and one meaningful eligible Meta model. Three models, stairs, a longer route and larger pilot are not baseline commitments.
+
+2026-10-27 — No free-compute path is assumed successful. Model access, license, quota and real output must pass a smoke test. No provider grant or account status claimed.
+
+2026-10-27 — Similarity scale estimation must reject rotation-only and degenerate pose sequences. Segmentation alone must not authorize correct-destination arrival. These corrections supersede unsafe assumptions in the imported draft.
+
+2026-10-27 — No platform, route expansion or post-hoc-only submission pivot made. Such choices require human agreement after the relevant failure evidence.
