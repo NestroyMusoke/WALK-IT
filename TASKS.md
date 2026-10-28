@@ -31,3 +31,5 @@ These budgets are implementation timeboxes, not a claim that field capture, mode
 - [x] E08a — Private capture audit and first recording inspection. Validated actual saved bundle; no fresh-session or geometric gate pass. E08/E09 remain open.
 
 - [x] E09a — Isolated pinned OpenCV 5 runtime and known-pose paired-frame triangulation diagnostic on saved trials; no held-out localization or navigation claim.
+
+- [x] E09b — Mutual observation tracks, all-view triangulation, parallax/reprojection rejection and private per-frame coverage report. Real retained tracks: 120 short / 193 longer. Endpoint coverage inadequate; no navigation gate passed.
