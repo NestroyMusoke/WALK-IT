@@ -31,5 +31,15 @@ export class LiveUpload{
     }catch{this.notify(`Upload pending: ${this.events.length-this.sent} events. Keep this page open; retry is automatic.`);}
     finally{this.busy=false;}
   }
+  async saveCapture(report:unknown){
+    if(!this.session)throw Error('No connected session. Keep the page open and retry.');
+    const body=JSON.stringify({id:this.session.id,report});
+    if(new Blob([body]).size>settings.HOST_UPLOAD_LIMIT_BYTES)throw Error('Route is too large. Record a shorter walk.');
+    const response=await fetch('/__walkit/capture',{method:'POST',headers:{'Content-Type':'application/json','X-Walkit-Token':this.session.token},body,signal:AbortSignal.timeout(settings.HOST_UPLOAD_TIMEOUT_MS)});
+    if(!response.ok)throw Error(`Route not saved (${response.status}). Keep this page open and retry.`);
+    const receipt=await response.json();
+    if(receipt.saved!==true||receipt.id!==this.session.id||!/^[a-f0-9]{64}$/.test(receipt.sha256))throw Error('Invalid route receipt');
+    return receipt as {id:string;frames:number;sha256:string};
+  }
   download(){const a=document.createElement('a'),url=URL.createObjectURL(new Blob([JSON.stringify({build:'E03-1',configSha256:this.sha,sent:this.sent,events:this.events})],{type:'application/json'}));a.href=url;a.download='walkit-live-diagnostic.json';a.click();URL.revokeObjectURL(url);}
 }

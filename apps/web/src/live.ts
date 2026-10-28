@@ -5,6 +5,8 @@ import {ViewportCalibration,DiagnosticAnchor,projectReference,type CameraFrame} 
 import {ReferenceRenderer} from './reference-renderer';
 import {readReality} from './tracker';
 import {LiveUpload} from './live-upload';
+import {CaptureUI} from './capture-ui';
+import {viewportCoversCanvas} from './capture-frame';
 import './live.css';
 type Pipeline=Record<string,unknown>;
 type LiveSdk={initialize:()=>Promise<void>;run:(options:Record<string,unknown>)=>void;stop:()=>void;clearCameraPipelineModules:()=>void;addCameraPipelineModules:(modules:Pipeline[])=>void;
@@ -19,6 +21,8 @@ let sdk:LiveSdk,renderer:ReferenceRenderer|undefined,gl:WebGL2RenderingContext|u
 let running=false,frame:CameraFrame|null=null,lastFresh=-Infinity,lastStatus='',phase=0,lastUi=0;
 let size=calibration.sync(canvas,innerWidth,innerHeight,devicePixelRatio);
 let viewport=[0,0,0,0];
+let videoTime=NaN,repeatFrame=true;
+const capture=new CaptureUI(upload,()=>running&&Boolean(frame)&&performance.now()-lastFresh<=settings.MARKER_MAX_AGE_MS,()=>stop('host-capture-review'));
 const instructions=[
   'Slowly move the phone sideways to scan the textured floor. Aim the centre crosshair at a tile corner or distinctive mark, then press Place reference.',
   '1/3 · Keep the phone still for about 10 seconds. Look for a magenta cross on your chosen spot. Then press Next step.',
@@ -28,12 +32,13 @@ const instructions=[
 function hide(reason:string){anchor.clear();el('blocked').hidden=false;el('blocked').style.background='#081514';el('blocked').textContent=reason;}
 function geometry(){
   const rect=canvas.getBoundingClientRect();size=calibration.sync(canvas,rect.width,rect.height,devicePixelRatio);
-  if(size.changed){anchor.clear();frame=null;
+  if(size.changed){capture.interrupt('display resized');anchor.clear();frame=null;
     if(sdk&&running)sdk.XrController.updateCameraProjectionMatrix({cam:{pixelRectWidth:size.width,pixelRectHeight:size.height,nearClipPlane:settings.NEAR_CLIP_M,farClipPlane:settings.FAR_CLIP_M}});
     upload.add('status','display-resized',[size.width,size.height,size.cssWidth,size.cssHeight,size.ratio]);
   }
 }
 function stop(reason='user-finished'){
+  capture.interrupt(reason);
   if(!running)return;running=false;upload.add('end',reason);hide('Test ended. Keep this page open until logs are saved.');
   try{sdk.stop();sdk.clearCameraPipelineModules();}catch{}
   renderer?.dispose();renderer=undefined;button('place').hidden=true;button('next').hidden=true;button('stop').hidden=true;el('answers').hidden=true;
@@ -42,9 +47,9 @@ function stop(reason='user-finished'){
 function fail(message:string){upload.add('error',message);el('tracking').textContent=message;stop('error');hide(message);void upload.flush();}
 window.addEventListener('resize',geometry);
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&running)stop('page-hidden');});
-window.addEventListener('pagehide',()=>{if(running){sdk.stop();running=false;}});
+window.addEventListener('pagehide',()=>{capture.interrupt('page closed');if(running){sdk.stop();running=false;}});
 setInterval(()=>{
-  if(running&&performance.now()-lastFresh>settings.MARKER_MAX_AGE_MS)hide('Tracking unavailable. Slowly scan a textured area.');
+  if(running&&performance.now()-lastFresh>settings.MARKER_MAX_AGE_MS){capture.interrupt('tracking became stale');hide('Tracking unavailable. Slowly scan a textured area.');}
 },settings.LIVE_WATCHDOG_INTERVAL_MS);
 setInterval(()=>void upload.flush(),settings.LIVE_UPLOAD_INTERVAL_MS);
 prepareSdk(XR8Promise,settings.SDK_READY_TIMEOUT_MS).then(value=>{
@@ -72,7 +77,9 @@ button('start').addEventListener('click',async()=>{
           if(!running)return;
           const now=performance.now(),reality=processCpuResult?.reality as {trackingStatus?:string}|undefined;
           const status=reality?.trackingStatus||'UNAVAILABLE';frame=readReality(reality);
-          const vp=processGpuResult?.gltexturerenderer?.viewport;if(vp)viewport=[vp.width,vp.height,vp.offsetX,vp.offsetY];
+          videoTime=frameStartResult?.videoTime??NaN;repeatFrame=frameStartResult?.repeatFrame??true;
+          if(!frame)capture.interrupt('tracking lost');
+          const vp=processGpuResult?.gltexturerenderer?.viewport;viewport=vp?[vp.width,vp.height,vp.offsetX,vp.offsetY]:[0,0,0,0];
           if(frame&&!frameStartResult?.repeatFrame)lastFresh=now;
           if(!frame)anchor.clear();
           if(status!==lastStatus){upload.add('status',status);lastStatus=status;}
@@ -83,6 +90,8 @@ button('start').addEventListener('click',async()=>{
         },
         onRender:()=>{
           if(!running||!renderer||!gl||!frame)return;
+          if(!viewportCoversCanvas(viewport,canvas.width,canvas.height))capture.interrupt('camera image does not cover the calibrated canvas');
+          else if(!repeatFrame){capture.frame(canvas,frame,lastFresh,videoTime,size.revision);if(!running)return;}
           const point=anchor.read({revision:size.revision,tracking:true,frameMs:lastFresh,nowMs:performance.now()});
           const visible=point&&projectReference(point,frame,size.cssWidth,size.cssHeight);
           const state=sdk.GlTextureRenderer.getGLctxParameters(gl,[gl.TEXTURE0]);

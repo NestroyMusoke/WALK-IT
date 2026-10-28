@@ -11,3 +11,7 @@ Run npm ci --ignore-scripts, npm run engine:fetch, npm run check, then npm run d
 2026-10-27 — Analyzed first real phone diagnostic and recorded its limits. Added route capture-manifest validation with three adversarial tests; all 17 unit tests and project checks pass. Live renderer unchanged.
 
 2026-10-27 — E07a host recording core added with calibration, frame timing, privacy review/masking and invalid-tracking rejection. All 22 tests and project checks pass. Phone capture controls and persistent export are E07b, not yet implemented.
+
+2026-10-28 — E07b: experimental route recording, destination marking, in-memory image review/masking, reviewed private upload with receipt, shared manifest validation and capture acceptance tests. E07c retains physical camera alignment validation.
+
+2026-10-28 — E07d: fix host recorder rejection of the observed iPhone camera fill crop; invalidate missing viewport metadata rather than retain old values.

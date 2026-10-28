@@ -3,6 +3,7 @@ import {createHash,randomBytes,randomUUID} from 'node:crypto';
 import {readFileSync} from 'node:fs';
 import {mkdir,writeFile,readFile} from 'node:fs/promises';
 import {validateLiveBatch} from './live-schema.ts';
+import {validateCapture} from './capture-schema.ts';
 import {join} from 'node:path';
 const raw=readFileSync(new URL('../config/vision.yaml',import.meta.url),'utf8');
 const settings=JSON.parse(raw) as Record<string,number>;
@@ -52,12 +53,24 @@ export function createReceiver(directory:string,accessKey?:string){
         sessions.set(id,{token,expires:Date.now()+settings.DIAGNOSTIC_SESSION_TTL_MS});
         reply(201,{id,token});return;
       }
-      if(req.url!=='/__walkit/result'&&req.url!=='/__walkit/live'){reply(404,{error:'Unknown endpoint'});return;}
+      if(req.url!=='/__walkit/result'&&req.url!=='/__walkit/live'&&req.url!=='/__walkit/capture'){reply(404,{error:'Unknown endpoint'});return;}
+      if(req.url==='/__walkit/capture'&&![...sessions.values()].some(s=>s.expires>=Date.now()&&s.token===req.headers['x-walkit-token'])){reply(403,{error:'Invalid session'});return;}
       let body='';
-      for await(const chunk of req){body+=chunk.toString();if(Buffer.byteLength(body)>settings.DIAGNOSTIC_UPLOAD_LIMIT_BYTES){reply(413,{error:'Result too large'});return;}}
+      const limit=req.url==='/__walkit/capture'?settings.HOST_UPLOAD_LIMIT_BYTES:settings.DIAGNOSTIC_UPLOAD_LIMIT_BYTES;
+      for await(const chunk of req){body+=chunk.toString();if(Buffer.byteLength(body)>limit){reply(413,{error:'Result too large'});return;}}
       const payload=object(JSON.parse(body),['id','report']);
       const session=typeof payload.id==='string'?sessions.get(payload.id):undefined;
       if(!session||session.expires<Date.now()||req.headers['x-walkit-token']!==session.token){reply(403,{error:'Test session expired or invalid'});return;}
+      if(req.url==='/__walkit/capture'){
+        const capture=validateCapture(payload.report,settings);
+        if(capture.manifest.configSha256!==configSha256){reply(409,{error:'Reload the current build before recording'});return;}
+        const encoded=JSON.stringify(capture),path=join(directory,`${payload.id}-capture.json`);
+        try{await writeFile(path,encoded,{flag:'wx'});}catch(error){
+          if((error as NodeJS.ErrnoException).code!=='EEXIST')throw error;
+          if(await readFile(path,'utf8')!==encoded){reply(409,{error:'A different route is already saved in this session'});return;}
+        }
+        reply(201,{saved:true,id:payload.id,frames:capture.images.length,sha256:createHash('sha256').update(encoded).digest('hex')});return;
+      }
       if(req.url==='/__walkit/live'){
         const batch=validateLiveBatch(payload.report);
         if(batch.events.length>settings.LIVE_BATCH_EVENT_COUNT||batch.seq>=settings.LIVE_BATCH_LIMIT_COUNT){reply(413,{error:'Test capacity reached'});return;}

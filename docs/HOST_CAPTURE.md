@@ -13,3 +13,10 @@ Raw pixels are transient RAM only. Every frame must be explicitly reviewed befor
 The reviewed export contains the validated route manifest, masked pixel buffers and a timing table linked by keyframe ID. Positions remain in unverified tracker units. A translated trajectory is required, but that simple check is not proof of well-conditioned geometry or metric scale. The endpoint is the final accepted keyframe. This data does not authorize route arrows or arrival.
 
 Pending: actual camera-pixel extraction, per-frame alignment verification, review/masking UI, encoding and authenticated private persistence, then a permitted field capture. Existing live diagnostic remains unchanged.
+
+## Recording controls (E07b software; E07c phone validation pending)
+Open live.html via the complete private HTTPS test link. Start camera, wait for NORMAL, expand Record permitted route, then Record walk. Keep portrait orientation and walk slowly along the approved short route. At the destination stop moving and press Mark destination; the next sampled camera frame ends capture. Recording aborts on tracking loss, resize, stale pose or mismatched viewport. Do not operate while driving.
+
+Review each image. Drag over faces, plates or private details to black them out; Clear masks resets the current preview. Approve each image only after inspection. Then Save reviewed route to laptop. Keep the page open until a saved receipt appears. Failed saving retains reviewed data in memory for retry; reload/closing loses unsaved data. The laptop and tunnel must remain running.
+
+Saved capture is one private `<session>-capture.json` in ignored eval/sessions containing validated manifest, timestamps and reviewed PNGs encoded as base64. It is not a reconstructed map and cannot authorize navigation. No raw media enters Git. Numeric logs still upload automatically; images upload only after explicit review/save. One route per session; reload for another route. Session expiry can prevent saving after an hour. Desktop tests do not prove the camera canvas contains the expected phone image; check this before recording the whole walk.

@@ -13,7 +13,8 @@ E01, E02, E02a and E03a are complete; remaining cards are unchecked until their 
 - [x] E06 (1 h) — Capture-manifest schema and adversarial fixtures: units, calibration, version/config identity, privacy and destination validation. Fixtures clearly synthetic. Independent of E04.
 - [ ] E06b — Versioned sparse map/descriptor artifacts, after geometry runtime selection. No invented model-output schema.
 - [x] E07a (1 h) — In-memory host recorder, image-calibration conversion, timestamp retention, loss/stale/resize rejection and reviewed/masked export boundary. Synthetic fixtures only; not connected to phone capture.
-- [ ] E07b (1 h) — Connect same-frame camera-pixel extraction and review controls; prove image/pose alignment, encode only reviewed images and persist privately. Depends E07a; field capture after E04 and permission.
+- [x] E07b (software, 1 h) — Connect synchronous camera-canvas extraction, image review/masking and authenticated private capture receipt. Synthetic/schema/HTTP tests pass; no phone image alignment claim.
+- [ ] E07c (human gate) — Verify actual camera pixels, crop, pose synchronization and destination capture on iPhone; confirm loss/resize discards recording. Depends E04/E07b before usable field map.
 - [ ] E08 (human gate) — One permitted short author walk and a separate visitor session. Ground truth and publication consent recorded privately. G2.
 - [ ] E09 (1 h) — First offline geometry runtime smoke on reviewed capture; record actual output/failure. Depends E08 and verified compute. Split map-build implementation based on observed runtime.
 - [ ] E10 (1 h) — Localizer geometric fixture: real selected OpenCV runtime, correct/wrong correspondences, degenerate alignment rejection, no synthetic arrow authorization. Depends exact dependencies/schema; real map integration after E09.
@@ -24,3 +25,5 @@ E01, E02, E02a and E03a are complete; remaining cards are unchecked until their 
 - [ ] E15 (human + documentation) — Independent visitor, adversarial approaches, three-minute video, final build ledger and logged-out access checks. Freeze scope 31 October; rehearse 3 November; submit by internal 4 November noon EAT target.
 
 These budgets are implementation timeboxes, not a claim that field capture, model download or human testing takes one hour. Split cards before exceeding scope; log unmet gates instead of checking them off.
+
+- [x] E07d — Correct camera-fill crop guard using received phone geometry; regression first, full check, physical retry pending.
