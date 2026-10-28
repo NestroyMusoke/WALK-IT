@@ -21,3 +21,5 @@ Run npm ci --ignore-scripts, npm run engine:fetch, npm run check, then npm run d
 2026-10-28 — E09a: pinned local OpenCV 5 environment, known-pose triangulation diagnostic, synthetic geometry checks, private reports for both real author recordings, and nondisruptive verification build output.
 
 2026-10-28 — E09b: experimental multiview landmark tracks, weak-depth rejection, retained descriptors and explicit route coverage report.
+
+2026-10-28 — E10a: geometric pose estimator, consistency/coverage rejection and ambiguity abstention; navigation remains disabled.

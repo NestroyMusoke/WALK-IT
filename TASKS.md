@@ -33,3 +33,5 @@ These budgets are implementation timeboxes, not a claim that field capture, mode
 - [x] E09a — Isolated pinned OpenCV 5 runtime and known-pose paired-frame triangulation diagnostic on saved trials; no held-out localization or navigation claim.
 
 - [x] E09b — Mutual observation tracks, all-view triangulation, parallax/reprojection rejection and private per-frame coverage report. Real retained tracks: 120 short / 193 longer. Endpoint coverage inadequate; no navigation gate passed.
+
+- [x] E10a — Independent synthetic PnP/localizer gate with outlier recovery, duplicate/degenerate rejection and ambiguity abstention. E10 map-consumer integration and E11 visitor gate remain open.
