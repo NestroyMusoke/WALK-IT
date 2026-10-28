@@ -15,3 +15,5 @@ Run npm ci --ignore-scripts, npm run engine:fetch, npm run check, then npm run d
 2026-10-28 — E07b: experimental route recording, destination marking, in-memory image review/masking, reviewed private upload with receipt, shared manifest validation and capture acceptance tests. E07c retains physical camera alignment validation.
 
 2026-10-28 — E07d: fix host recorder rejection of the observed iPhone camera fill crop; invalidate missing viewport metadata rather than retain old values.
+
+2026-10-28 — E08a: repeatable private capture integrity/timing/trajectory audit and first real recording inspection.

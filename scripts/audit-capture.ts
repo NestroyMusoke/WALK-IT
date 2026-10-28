@@ -1,0 +1,12 @@
+import {readFile,writeFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {resolve,dirname,basename} from 'node:path';
+import {validateCapture} from '../server/capture-schema.ts';
+import {summarizeTrajectory} from '../server/capture-audit.ts';
+const input=process.argv[2];if(!input)throw Error('Usage: node scripts/audit-capture.ts <private capture.json>');
+const path=resolve(input),raw=await readFile(path,'utf8');
+const config=await readFile(new URL('../config/vision.yaml',import.meta.url),'utf8');
+const capture=validateCapture(JSON.parse(raw),JSON.parse(config));
+const report={kind:'capture integrity and trajectory audit; not geometric verification',captureSha256:createHash('sha256').update(raw).digest('hex'),configSha256:capture.manifest.configSha256,configurationMatches:createHash('sha256').update(config).digest('hex')===capture.manifest.configSha256,...summarizeTrajectory(capture.manifest.keyframes.map(k=>k.position),capture.timing.map(t=>t.receivedAtMs)),uniqueEncodedImages:new Set(capture.images.map(i=>createHash('sha256').update(Buffer.from(i.png,'base64')).digest('hex'))).size,dimensions:[...new Set(capture.manifest.keyframes.map(k=>`${k.width}x${k.height}`))],scaleVerified:capture.manifest.scaleVerified,destinationFrame:capture.manifest.destination.keyframeId};
+await writeFile(resolve(dirname(path),basename(path,'.json')+'-audit.json'),JSON.stringify(report,null,2));
+console.log(JSON.stringify(report,null,2));

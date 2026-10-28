@@ -27,3 +27,5 @@ E01, E02, E02a and E03a are complete; remaining cards are unchecked until their 
 These budgets are implementation timeboxes, not a claim that field capture, model download or human testing takes one hour. Split cards before exceeding scope; log unmet gates instead of checking them off.
 
 - [x] E07d — Correct camera-fill crop guard using received phone geometry; regression first, full check, physical retry pending.
+
+- [x] E08a — Private capture audit and first recording inspection. Validated actual saved bundle; no fresh-session or geometric gate pass. E08/E09 remain open.
