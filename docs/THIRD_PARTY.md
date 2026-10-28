@@ -21,3 +21,7 @@ Node observed 25.9.0, npm 11.12.1. npm's user-wide cache was not writable in the
 Before installation record exact package/model version or revision, official source, code license, separate weight license, distribution restrictions, attribution, checksum/lockfile, purpose and runnable import/smoke result.
 
 Special checks: 8th Wall distributed engine has a custom license and is not ordinary MIT engine source; never commit its binary. MapAnything variant matters. SAM and Muse weight/API terms must be checked separately. Do not publish a blanket Apache-2.0 license over third-party assets. Project license selection remains to be finalized before code publication.
+
+Geometry runtime candidate (2026-10-28): numpy 2.3.5 (BSD-3-Clause), opencv-python-headless 5.0.0.93 (Apache-2.0; bundled third-party notices apply). Pins in geometry/requirements.txt before installation. Official distribution https://pypi.org/project/opencv-python-headless/5.0.0.93/ ; purpose: local feature extraction and geometry smoke, no model weights. Import/runtime verification required; no OpenCV 4 fallback.
+
+Verified local import: OpenCV 5.0.0 / NumPy 2.3.5. Downloaded Windows wheel SHA-256 829717b6a95554f273e49e357cee3b3a2a26b6f4842fbc1bed2b45bdd8f87e0e matches official PyPI JSON metadata. Installation completed offline from verified wheel after slow/stalled pip downloads; NumPy installed from verified package metadata/cache. Platform wheel hashes: geometry/requirements-win-py312.lock.

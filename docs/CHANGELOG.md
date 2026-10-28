@@ -17,3 +17,5 @@ Run npm ci --ignore-scripts, npm run engine:fetch, npm run check, then npm run d
 2026-10-28 — E07d: fix host recorder rejection of the observed iPhone camera fill crop; invalidate missing viewport metadata rather than retain old values.
 
 2026-10-28 — E08a: repeatable private capture integrity/timing/trajectory audit and first real recording inspection.
+
+2026-10-28 — E09a: pinned local OpenCV 5 environment, known-pose triangulation diagnostic, synthetic geometry checks, private reports for both real author recordings, and nondisruptive verification build output.
