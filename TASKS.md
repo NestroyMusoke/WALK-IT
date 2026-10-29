@@ -41,3 +41,5 @@ These budgets are implementation timeboxes, not a claim that field capture, mode
 - [x] E09c — Compare wider frame window and geometric pre-merge checks on author data. Retain filtered development candidate: 259 tracks, 4 uncovered frames; destination coverage 2 and cross-query 4/18 unchanged. No navigation pass.
 
 - [x] E11a — Synthetic map-to-session similarity fixture and real author alignment diagnostic. Synthetic tests pass; real four-pose alignment fails (relative residual 0.38884275293727005 > 0.05). Live alignment/visitor gate remains open.
+
+- [x] E14a — Private local recorded-route review with source-identity checks and explicit failed gates. HTTP/script checks pass; browser visual verification pending. Not live navigation.

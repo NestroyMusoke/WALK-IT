@@ -49,3 +49,5 @@
 2026-10-29 — E11a independent similarity-alignment fixture: require 4 paired camera centers and second/first singular-value ratio 0.01 in both trajectories; maximum residual 0.05 of session trajectory extent. These are configured initial diagnostic defaults, not ground-truth accuracy claims. Reject straight/rotation-only trajectories and inconsistent correspondences. Fitted scale relates tracker coordinate systems, not verified metres; navigation remains false.
 
 2026-10-29 — Do not promote individual PnP hypotheses into anchors: paired-center alignment failed on current development recordings. Keep thresholds unchanged and investigate calibration/matches. Fit residual is internal consistency evidence, not external location accuracy. Existing endpoint track evidence is insufficient despite many matches in the final two frames.
+
+2026-10-29 — User requests rapid visible progress with limited credits. Add one local review screen using existing private evidence; no dashboard/accounts/platform pivot. Recorded review is explicitly not a substitute for live AR. No private media published, no additional compute provider or model use.
