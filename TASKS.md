@@ -39,3 +39,5 @@ These budgets are implementation timeboxes, not a claim that field capture, mode
 - [x] E10b — Experimental map validation, mutual query matching, duplicate suppression and offline author diagnostics. 4/18 cross-recording and 27/53 self-query hypotheses; not accuracy or navigation. Full artifact/visitor gates remain open.
 
 - [x] E09c — Compare wider frame window and geometric pre-merge checks on author data. Retain filtered development candidate: 259 tracks, 4 uncovered frames; destination coverage 2 and cross-query 4/18 unchanged. No navigation pass.
+
+- [x] E11a — Synthetic map-to-session similarity fixture and real author alignment diagnostic. Synthetic tests pass; real four-pose alignment fails (relative residual 0.38884275293727005 > 0.05). Live alignment/visitor gate remains open.

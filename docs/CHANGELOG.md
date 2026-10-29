@@ -27,3 +27,5 @@ Run npm ci --ignore-scripts, npm run engine:fetch, npm run check, then npm run d
 2026-10-28 — E10b: experimental map consumer, descriptor-to-PnP integration and author-only offline diagnostics.
 
 2026-10-29 — E09c: wider frame matching, pair-geometry validation before track merging and documented baseline comparison.
+
+2026-10-29 — E11a: map/session similarity fixture, degeneracy rejection and explicit failed real-data alignment report.
