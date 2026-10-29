@@ -25,3 +25,5 @@ Run npm ci --ignore-scripts, npm run engine:fetch, npm run check, then npm run d
 2026-10-28 — E10a: geometric pose estimator, consistency/coverage rejection and ambiguity abstention; navigation remains disabled.
 
 2026-10-28 — E10b: experimental map consumer, descriptor-to-PnP integration and author-only offline diagnostics.
+
+2026-10-29 — E09c: wider frame matching, pair-geometry validation before track merging and documented baseline comparison.

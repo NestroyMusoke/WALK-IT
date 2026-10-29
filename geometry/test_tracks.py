@@ -1,7 +1,16 @@
 import unittest
 import numpy as np
-from tracks import observation_tracks,fit_track
+from tracks import observation_tracks,fit_track,frame_pairs,geometric_pair_mask
 class TrackTests(unittest.TestCase):
+ def test_pair_geometry_removes_inconsistent_matches_before_union(self):
+  k=np.array([[400.,0,320],[0,400,240],[0,0,1.]])
+  a=np.c_[np.eye(3),[0.,0,0]];b=np.c_[np.eye(3),[-1.,0,0]]
+  left=np.array([[320.,240],[340,240]]);right=np.array([[220.,240],[240,270]])
+  self.assertEqual(geometric_pair_mask(left,right,k,k,a,b,3.).tolist(),[True,False])
+ def test_frame_window_has_no_duplicates_or_out_of_range_pairs(self):
+  self.assertEqual(frame_pairs(4,1),[(0,1),(1,2),(2,3)])
+  self.assertEqual(frame_pairs(4,2),[(0,1),(0,2),(1,2),(1,3),(2,3)])
+  with self.assertRaises(ValueError):frame_pairs(4,0)
  def test_shared_observations_merge_but_conflicting_component_is_rejected(self):
   edges=[((0,1),(1,2)),((1,2),(2,3)),((3,1),(4,1)),((4,1),(3,2))]
   tracks,rejected=observation_tracks(edges)

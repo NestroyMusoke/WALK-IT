@@ -37,3 +37,5 @@ These budgets are implementation timeboxes, not a claim that field capture, mode
 - [x] E10a — Independent synthetic PnP/localizer gate with outlier recovery, duplicate/degenerate rejection and ambiguity abstention. E10 map-consumer integration and E11 visitor gate remain open.
 
 - [x] E10b — Experimental map validation, mutual query matching, duplicate suppression and offline author diagnostics. 4/18 cross-recording and 27/53 self-query hypotheses; not accuracy or navigation. Full artifact/visitor gates remain open.
+
+- [x] E09c — Compare wider frame window and geometric pre-merge checks on author data. Retain filtered development candidate: 259 tracks, 4 uncovered frames; destination coverage 2 and cross-query 4/18 unchanged. No navigation pass.

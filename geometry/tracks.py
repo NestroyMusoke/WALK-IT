@@ -3,7 +3,15 @@ import argparse,base64,hashlib,json
 from pathlib import Path
 import cv2
 import numpy as np
-from reconstruct import extrinsic
+from reconstruct import extrinsic,triangulate_known
+
+def geometric_pair_mask(a,b,k1,k2,e1,e2,max_error):
+ if not len(a):return np.zeros(0,dtype=bool)
+ return triangulate_known(a,b,k1,k2,e1,e2,max_error)[2]
+
+def frame_pairs(count,window):
+ if type(count) is not int or count<0 or type(window) is not int or window<1:raise ValueError('Invalid frame window')
+ return [(i,j) for i in range(count) for j in range(i+1,min(count,i+window+1))]
 
 def observation_tracks(edges):
  parent={}
@@ -61,10 +69,16 @@ def run(path):
   if im is None or im.shape!=(k['height'],k['width']) or image['id']!=k['id']:raise ValueError('Image mismatch')
   features.append(sift.detectAndCompute(im,None))
  edges=[];pair_counts=[]
- for i in range(len(ks)-1):
-  f=ratio_matches(features[i][1],features[i+1][1],cfg['GEOMETRY_MATCH_RATIO']);b=ratio_matches(features[i+1][1],features[i][1],cfg['GEOMETRY_MATCH_RATIO'])
-  matches=[((i,q),(i+1,t)) for q,t in f.items() if b.get(t)==q]
-  edges.extend(matches);pair_counts.append(len(matches))
+ es=[extrinsic(k) for k in ks];calibrations=[np.array(k['intrinsics']).reshape(3,3) for k in ks]
+ for i,j in frame_pairs(len(ks),cfg['GEOMETRY_PAIR_WINDOW_FRAMES_COUNT']):
+  f=ratio_matches(features[i][1],features[j][1],cfg['GEOMETRY_MATCH_RATIO']);b=ratio_matches(features[j][1],features[i][1],cfg['GEOMETRY_MATCH_RATIO'])
+  matches=[((i,q),(j,t)) for q,t in f.items() if b.get(t)==q]
+  raw_count=len(matches)
+  if matches:
+   a=np.array([features[i][0][q].pt for (_,q),_ in matches]);b=np.array([features[j][0][t].pt for _,(_,t) in matches])
+   valid=geometric_pair_mask(a,b,calibrations[i],calibrations[j],es[i],es[j],cfg['GEOMETRY_REPROJECTION_LIMIT_PX'])
+   matches=[m for m,keep in zip(matches,valid) if keep]
+  edges.extend(matches);pair_counts.append({'a':ks[i]['id'],'b':ks[j]['id'],'matches':raw_count,'geometryAccepted':len(matches)})
  tracks,conflicts=observation_tracks(edges);landmarks=[];too_short=0;rejected=0
  es=[extrinsic(k) for k in ks];ps=[np.array(k['intrinsics']).reshape(3,3)@e for k,e in zip(ks,es)]
  for track in tracks:
@@ -78,7 +92,9 @@ def run(path):
  for landmark in landmarks:
   for obs in landmark['observations']:coverage[obs['keyframeId']]+=1
  report={'schemaVersion':1,'kind':'experimental known-pose SIFT tracks; no localization validation','captureSha256':hashlib.sha256(path.read_bytes()).hexdigest(),'captureConfigSha256':manifest['configSha256'],'geometryConfigSha256':hashlib.sha256(raw).hexdigest(),'opencv':cv2.__version__,'numpy':np.__version__,'units':manifest['units'],'scaleVerified':False,'navigationReady':False,'descriptorType':'SIFT-float32-128-L2','mutualMatchesByPair':pair_counts,'conflictingComponents':conflicts,'shortTracks':too_short,'geometryRejectedTracks':rejected,'landmarkCount':len(landmarks),'coverageByKeyframe':coverage,'landmarks':landmarks}
- path.with_name(path.stem+'-tracks.json').write_text(json.dumps(report,allow_nan=False))
+ report['pairWindowFrames']=cfg['GEOMETRY_PAIR_WINDOW_FRAMES_COUNT']
+ report['pairGeometryFilter']=True
+ path.with_name(path.stem+f"-tracks-window{cfg['GEOMETRY_PAIR_WINDOW_FRAMES_COUNT']}-filtered.json").write_text(json.dumps(report,allow_nan=False))
  print(json.dumps({k:v for k,v in report.items() if k!='landmarks'},indent=2))
 if __name__=='__main__':
  parser=argparse.ArgumentParser();parser.add_argument('capture',type=Path);run(parser.parse_args().capture)
