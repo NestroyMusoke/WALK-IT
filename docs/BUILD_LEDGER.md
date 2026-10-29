@@ -49,3 +49,7 @@ E10a verification note: initial full web run timed out in two existing HTTP rece
 2026-10-29 — E11a test-first missing-module failure then 15 geometry tests pass; 29 web tests/typecheck/isolated build pass (tmp/e11a-python-check.txt, tmp/e11a-web-check.txt). Real author alignment rejects four pose hypotheses, relative residual 0.38884275293727005. Raw diagnostic retained privately in eval/sessions/author-alignment-diagnostic.json. Endpoint pair/track evidence recorded in ALIGNMENT_GATE.md. No navigation or metric-scale claim.
 
 2026-10-29 — E14a test-first missing-module failure then source join validation and local recorded-route review. scripts/check.ps1 passes 30 tests/setup/typecheck/isolated build (tmp/e14a-check.txt). Actual private server HTTP 200, generated script parses, unknown path 404. Template string newline handling corrected before script-parse verification. Browser automation timed out; no visual-verification claim. Direct link kept in ignored tmp/route-review-link.txt.
+
+## E11b — 29 October
+Added geometry/motion_evidence.py, first-failing acceptance test, then 18 passing Python tests. Executed on four actual author-query hypotheses; constant-scale inconsistency remains. No cloud spend, model execution or live navigation claim. Details: MOTION_EVIDENCE.md.
+Full scripts/check.ps1 passed (isolated verification build), including web tests, typecheck and production build. Live phone assets unchanged. git diff --check passed.

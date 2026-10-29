@@ -51,3 +51,6 @@
 2026-10-29 — Do not promote individual PnP hypotheses into anchors: paired-center alignment failed on current development recordings. Keep thresholds unchanged and investigate calibration/matches. Fit residual is internal consistency evidence, not external location accuracy. Existing endpoint track evidence is insufficient despite many matches in the final two frames.
 
 2026-10-29 — User requests rapid visible progress with limited credits. Add one local review screen using existing private evidence; no dashboard/accounts/platform pivot. Recorded review is explicitly not a substitute for live AR. No private media published, no additional compute provider or model use.
+
+## E11b — 29 October: preserve inconsistent hypotheses
+All-pairs motion evidence isolates disagreement involving frame 12. Do not tune away or drop that frame to pass alignment. No thresholds changed. Investigate capture/match evidence next; see MOTION_EVIDENCE.md.

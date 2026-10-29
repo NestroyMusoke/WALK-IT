@@ -31,3 +31,6 @@ Run npm ci --ignore-scripts, npm run engine:fetch, npm run check, then npm run d
 2026-10-29 — E11a: map/session similarity fixture, degeneracy rejection and explicit failed real-data alignment report.
 
 2026-10-29 — E14a: private recorded-route review screen with real frame results, trajectory and failed alignment evidence.
+
+## E11b — 29 October
+Added reproducible private motion-consistency CLI and three synthetic tests; preserved failed navigation gate.
