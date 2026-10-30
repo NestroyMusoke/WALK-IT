@@ -54,3 +54,6 @@
 
 ## E11b — 29 October: preserve inconsistent hypotheses
 All-pairs motion evidence isolates disagreement involving frame 12. Do not tune away or drop that frame to pass alignment. No thresholds changed. Investigate capture/match evidence next; see MOTION_EVIDENCE.md.
+
+## E11c — 30 October: require broader image evidence
+The accepted frame-12 PnP inliers covered 0.01649 of the image, despite low residual and a motion contradiction. Raise LOCALIZER_MIN_IMAGE_COVERAGE_FRACTION from 0.01 to 0.05 as a conservative development-data gate. Preserve the old report privately, do not remove the frame from evaluation, and do not claim alignment passes with only three remaining poses. See IMAGE_COVERAGE_GATE.md.

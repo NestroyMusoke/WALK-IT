@@ -34,3 +34,6 @@ Run npm ci --ignore-scripts, npm run engine:fetch, npm run check, then npm run d
 
 ## E11b — 29 October
 Added reproducible private motion-consistency CLI and three synthetic tests; preserved failed navigation gate.
+
+## E11c — 30 October
+Localizer now rejects pose hypotheses whose inlier image hull covers less than 5 percent of the frame and reports that fraction on rejection.

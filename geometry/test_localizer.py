@@ -26,4 +26,14 @@ class LocalizerTests(unittest.TestCase):
   good={'accepted':True,'navigationReady':False}
   self.assertEqual(select_unambiguous([good,good])['reason'],'ambiguous')
   self.assertEqual(select_unambiguous([])['reason'],'no-valid-candidate')
+ def test_rejects_pose_supported_by_small_image_patch(self):
+  rng=np.random.default_rng(123)
+  xyz=rng.uniform([-2,-1,4],[2,1,9],(40,3));xyz[:,:2]*=.4
+  k=np.array([[500.,0,320],[0,500,240],[0,0,1.]])
+  uv=cv2.projectPoints(xyz,np.array([.03,-.04,.02]),np.array([.2,-.1,.3]),k,None)[0].reshape(-1,2)
+  result=self.call(xyz,uv,k)
+  self.assertFalse(result['accepted'])
+  self.assertEqual(result['reason'],'insufficient-image-coverage')
+  self.assertGreater(result['imageCoverageFraction'],.01)
+  self.assertLess(result['imageCoverageFraction'],.05)
 if __name__=='__main__':unittest.main()

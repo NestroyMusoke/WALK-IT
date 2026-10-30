@@ -45,3 +45,5 @@ These budgets are implementation timeboxes, not a claim that field capture, mode
 - [x] E14a — Private local recorded-route review with source-identity checks and explicit failed gates. HTTP/script checks pass; browser visual verification pending. Not live navigation.
 
 - [x] E11b — Reproducible all-pairs motion evidence with input identity checks. Four real author hypotheses cannot share one scale; no navigation pass or excluded outlier.
+
+- [x] E11c — Reject narrow image-patch PnP hypotheses; 4/18 to 3/18 author-query passes with frame 12 rejected. Four-pose alignment and visitor accuracy remain open.

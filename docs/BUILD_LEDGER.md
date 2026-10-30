@@ -53,3 +53,8 @@ E10a verification note: initial full web run timed out in two existing HTTP rece
 ## E11b — 29 October
 Added geometry/motion_evidence.py, first-failing acceptance test, then 18 passing Python tests. Executed on four actual author-query hypotheses; constant-scale inconsistency remains. No cloud spend, model execution or live navigation claim. Details: MOTION_EVIDENCE.md.
 Full scripts/check.ps1 passed (isolated verification build), including web tests, typecheck and production build. Live phone assets unchanged. git diff --check passed.
+
+## E11c — 30 October
+Acceptance test for a narrow-patch pose failed first, then passed. Development author query rerun: 3/18 accepted, frame 12 explicitly rejected; alignment still unavailable. New threshold in config/vision.yaml, rationale in IMAGE_COVERAGE_GATE.md. No spend, model execution or live navigation pass.
+Full scripts/check.ps1 passed with isolated verification build; live phone assets unchanged. git diff --check passed.
+Final suite: 19 Python tests and 30 web tests passed, plus typecheck and isolated production build.

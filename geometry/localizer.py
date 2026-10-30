@@ -6,7 +6,7 @@ import numpy as np
 def estimate_pose(xyz,pixels,intrinsics,image_size,landmark_ids,cfg):
  started=time.perf_counter()
  identity={'configSha256':hashlib.sha256(json.dumps(cfg,sort_keys=True,separators=(',',':')).encode()).hexdigest(),'configHashEncoding':'canonical-json','opencv':cv2.__version__}
- def reject(reason):return {**identity,'accepted':False,'reason':reason,'navigationReady':False,'elapsedMs':(time.perf_counter()-started)*1000}
+ def reject(reason,**evidence):return {**identity,**evidence,'accepted':False,'reason':reason,'navigationReady':False,'elapsedMs':(time.perf_counter()-started)*1000}
  if cv2.__version__.split('.')[0]!='5':return reject('opencv-version')
  xyz=np.asarray(xyz,dtype=np.float64);uv=np.asarray(pixels,dtype=np.float64);k=np.asarray(intrinsics,dtype=np.float64)
  if xyz.ndim!=2 or xyz.shape[1:]!=(3,) or uv.shape!=(len(xyz),2) or k.shape!=(3,3):return reject('invalid-shape')
@@ -36,7 +36,7 @@ def estimate_pose(xyz,pixels,intrinsics,image_size,landmark_ids,cfg):
   if len(selected)<cfg['LOCALIZER_MIN_INLIERS_COUNT'] or len(selected)/len(xyz)<cfg['LOCALIZER_MIN_INLIER_RATIO']:return reject('refined-pose-inconsistent')
   if not rank_ok(xyz[selected]):return reject('degenerate-refined-inliers')
   coverage=float(cv2.contourArea(cv2.convexHull(uv[selected].astype(np.float32))))/(w*h)
-  if coverage<cfg['LOCALIZER_MIN_IMAGE_COVERAGE_FRACTION']:return reject('insufficient-image-coverage')
+  if coverage<cfg['LOCALIZER_MIN_IMAGE_COVERAGE_FRACTION']:return reject('insufficient-image-coverage',imageCoverageFraction=coverage)
   return {**identity,'accepted':True,'reason':'geometric-hypothesis-only','navigationReady':False,'rotationVector':r.ravel().tolist(),'translation':t.ravel().tolist(),'cameraCenter':(-rotation.T@t).ravel().tolist(),'inlierIndices':selected.tolist(),'inliers':len(selected),'matches':len(xyz),'inlierRatio':len(selected)/len(xyz),'maxInlierErrorPx':float(errors[selected].max()),'imageCoverageFraction':coverage,'elapsedMs':(time.perf_counter()-started)*1000}
  except cv2.error:return reject('opencv-failure')
 
