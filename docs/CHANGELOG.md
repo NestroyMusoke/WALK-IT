@@ -37,3 +37,6 @@ Added reproducible private motion-consistency CLI and three synthetic tests; pre
 
 ## E11c — 30 October
 Localizer now rejects pose hypotheses whose inlier image hull covers less than 5 percent of the frame and reports that fraction on rejection.
+
+## E06b — 30 October
+Added a versioned private sparse route artifact builder with capture/map hash binding, path/destination checks and observation bounds validation.

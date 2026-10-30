@@ -11,7 +11,7 @@ E01, E02, E02a and E03a are complete; remaining cards are unchecked until their 
 - [ ] E04 (human gate) — Rigid-reference iPhone comparison, then short loop and recovery trials. Preserve raw private logs. No stability claim from numeric pose acceptance. G1.
 - [ ] E05 (1 h, independent of E04) — Eligible model access smoke: one permitted input, real output, exact version/license and zero-spend evidence. Do not assume credits. G0/model gate.
 - [x] E06 (1 h) — Capture-manifest schema and adversarial fixtures: units, calibration, version/config identity, privacy and destination validation. Fixtures clearly synthetic. Independent of E04.
-- [ ] E06b — Versioned sparse map/descriptor artifacts, after geometry runtime selection. No invented model-output schema.
+- [x] E06b — Versioned sparse route artifact binds reviewed capture, path, destination and OpenCV 5 map by hashes; 53 path points/259 landmarks on author data. Tracker units and navigation remain unverified.
 - [x] E07a (1 h) — In-memory host recorder, image-calibration conversion, timestamp retention, loss/stale/resize rejection and reviewed/masked export boundary. Synthetic fixtures only; not connected to phone capture.
 - [x] E07b (software, 1 h) — Connect synchronous camera-canvas extraction, image review/masking and authenticated private capture receipt. Synthetic/schema/HTTP tests pass; no phone image alignment claim.
 - [ ] E07c (human gate) — Verify actual camera pixels, crop, pose synchronization and destination capture on iPhone; confirm loss/resize discards recording. Depends E04/E07b before usable field map.

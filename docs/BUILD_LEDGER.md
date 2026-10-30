@@ -58,3 +58,7 @@ Full scripts/check.ps1 passed (isolated verification build), including web tests
 Acceptance test for a narrow-patch pose failed first, then passed. Development author query rerun: 3/18 accepted, frame 12 explicitly rejected; alignment still unavailable. New threshold in config/vision.yaml, rationale in IMAGE_COVERAGE_GATE.md. No spend, model execution or live navigation pass.
 Full scripts/check.ps1 passed with isolated verification build; live phone assets unchanged. git diff --check passed.
 Final suite: 19 Python tests and 30 web tests passed, plus typecheck and isolated production build.
+
+## E06b — 30 October
+Acceptance tests failed first with missing module, then 3 passed. Built private author artifact: 53 path points, 259 sparse landmarks, source/map SHA verified. No images copied, no metric or navigation claim. See SPARSE_ROUTE_ARTIFACT.md.
+Full scripts/check.ps1 initially had an existing receiver-test 5 s timeout during concurrent Python testing; the unchanged check passed when rerun alone (30 web tests, typecheck, isolated build). Full Python suite: 22 tests passed.
