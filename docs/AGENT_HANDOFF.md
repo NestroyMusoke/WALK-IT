@@ -1,5 +1,7 @@
 # WALK IT agent handoff — 30 October 2026, Africa/Kampala
 
+**Priority update, 30 October:** The user supplied `TASKS_NEXT.md`, `docs/CAPTURE_PROTOCOL.md` and `docs/DEMO_SPEC.md`. The next-card sequence in `TASKS.md` is now **E05 → E08b one field session → E09d → E09e → E10c**. Its pass rules were declared before the new field data. Author walk 2 is validation; independent visitor attempts are held-out. This update supersedes the older priority order below. Inspect Git status and the newly supplied files before acting; the older staged E06b warning below may have changed.
+
 This is a working checkpoint for any local coding agent and for Codex when its usage resets. **Update this file at the end of every completed task** with the new commit state, measured result, remaining gates, exact next card, and any human input needed. Inspect files and tests before trusting this summary. The repository is `C:\Users\X1 Yoga\Documents\Codex\WALK-IT`, remote `https://github.com/NestroyMusoke/WALK-IT.git`.
 
 ## Product and demo contract

@@ -60,3 +60,6 @@ The accepted frame-12 PnP inliers covered 0.01649 of the image, despite low resi
 
 ## E06b — 30 October: bind map to reviewed capture
 Create one private sparse-route-v1 artifact without image pixels or paths. Verify provenance and observation locations before consuming it. Keep tracker units and navigationReady=false; two endpoint landmarks and failed alignment remain blockers. See SPARSE_ROUTE_ARTIFACT.md.
+
+## Next-card pre-registration — 30 October, before new field data
+User requested E05, one capture session, E09d, E09e, E10c in that order using `TASKS_NEXT.md`, the capture protocol and the demo rubric. Pass definitions now live in `TASKS.md`; they are targets, not measured results. Preserve stricter existing rules: model licences/account actions belong to the human; no extra spend or fabricated cost; author walk 2 is validation under the capture protocol, so visitor queries alone are held-out; no matcher selection or threshold tuning on held-out visitor data; arrows still require live tracking, fresh geometric anchor, unambiguous metric alignment. The supplied rubric is attributed to the human's participant guide until independently checked. Existing E04/E07c/E08/E11/E12 gates remain open. The root capture and demo files were moved to the requested `docs/` locations; the identical extra `docs/CAPTURE_PROTOCOL (1).md` copy was left untouched.

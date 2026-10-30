@@ -40,3 +40,6 @@ Localizer now rejects pose hypotheses whose inlier image hull covers less than 5
 
 ## E06b — 30 October
 Added a versioned private sparse route artifact builder with capture/map hash binding, path/destination checks and observation bounds validation.
+
+## Next-card planning — 30 October
+Added predeclared E05 → E08b → E09d → E09e → E10c sequence and canonical capture/demo documents under `docs/`. No new data was evaluated or feature implemented.

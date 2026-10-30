@@ -62,3 +62,6 @@ Final suite: 19 Python tests and 30 web tests passed, plus typecheck and isolate
 ## E06b — 30 October
 Acceptance tests failed first with missing module, then 3 passed. Built private author artifact: 53 path points, 259 sparse landmarks, source/map SHA verified. No images copied, no metric or navigation claim. See SPARSE_ROUTE_ARTIFACT.md.
 Full scripts/check.ps1 initially had an existing receiver-test 5 s timeout during concurrent Python testing; the unchanged check passed when rerun alone (30 web tests, typecheck, isolated build). Full Python suite: 22 tests passed.
+
+## Next-card pre-registration — 30 October
+Read the user-supplied TASKS_NEXT, capture protocol and demo spec. Added five ordered task cards with pass rules before any new field collection or held-out evaluation. Reconciled validation/held-out split and kept live-arrow, privacy, licence and zero-spend gates. Documentation only; no feature or field result claimed.
