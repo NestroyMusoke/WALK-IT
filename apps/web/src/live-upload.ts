@@ -14,7 +14,7 @@ export class LiveUpload{
   }
   add(kind:string,label:string,values:number[]=[]){
     if(this.events.length>=settings.DIAGNOSTIC_FRAME_CAPACITY_COUNT)return false;
-    this.events.push({t:performance.now(),kind,label:label.replace(/[^a-zA-Z0-9 _.:/-]/g,' ').slice(0,128),values:values.map(n=>Number.isFinite(n)?n:-1)});return true;
+    this.events.push({t:performance.now(),kind,label:kind==='sdk'?label.slice(0,512):label.replace(/[^a-zA-Z0-9 _.:/-]/g,' ').slice(0,128),values:values.map(n=>Number.isFinite(n)?n:-1)});return true;
   }
   async flush(){
     if(this.busy||!this.session)return;this.busy=true;

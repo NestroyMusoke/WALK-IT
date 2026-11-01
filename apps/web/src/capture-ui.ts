@@ -9,17 +9,23 @@ export class CaptureUI{
  private message=document.getElementById('capture-status')!;
  private btn=(id:string)=>document.getElementById(id) as HTMLButtonElement;
  constructor(private upload:LiveUpload,private ready:()=>boolean,private finishCamera:()=>void){
+  this.btn('sway-first').onclick=()=>{
+   if(!this.ready()){this.message.textContent='Wait for NORMAL tracking, then start the sway.';return;}
+   const started=performance.now();this.btn('sway-first').disabled=true;this.message.textContent='Slowly sway sideways while keeping the scene visible. Record will unlock after three seconds.';
+   this.upload.add('step','sway-start',[started]);
+   setTimeout(()=>{this.btn('record-walk').disabled=false;this.message.textContent='Sway interval ended. If tracking is NORMAL, tap Record walk.';this.upload.add('step','sway-interval-ended',[performance.now()-started]);},3000);
+  };
   this.btn('record-walk').onclick=async()=>{
    try{
     if(!this.ready())throw Error('Wait for NORMAL tracking before recording.');
     this.btn('record-walk').disabled=true;
     const sha=await configurationHash();if(!this.ready())throw Error('Tracking changed. Wait for NORMAL and retry.');
-    this.recorder?.dispose();this.reviewedReport=undefined;this.recorder=new HostCapture(crypto.randomUUID(),sha,true);this.recorder.start();
-    this.btn('finish-walk').hidden=false;this.upload.add('step','host-recording-started');this.message.textContent='Recording. Walk slowly; keep the phone upright. Stop at your destination and tap Mark destination.';
+    this.recorder?.dispose();this.reviewedReport=undefined;this.recorder=new HostCapture(crypto.randomUUID(),sha,true);this.recorder.start();document.dispatchEvent(new Event('walkit-record-start'));
+    this.btn('finish-walk').hidden=false;this.btn('mark-distance').hidden=false;this.upload.add('step','host-recording-started');this.message.textContent='Recording. Walk slowly; keep the phone upright. Tap each measured mark if using the 10 m line.';
    }catch(e){this.btn('record-walk').disabled=false;this.message.textContent=(e as Error).message;}
   };
   this.btn('finish-walk').onclick=()=>{this.pendingFinish=true;this.message.textContent='Hold still at the destination while the final frame is captured…';};
-  this.btn('discard-walk').onclick=()=>{this.recorder?.dispose();this.reviewedReport=undefined;this.clearReview();this.btn('backup-reviewed-route').hidden=true;this.message.textContent='Discarded from memory. Reload to start a new session.';this.finishCamera();};
+  this.btn('discard-walk').onclick=()=>{this.recorder?.dispose();this.reviewedReport=undefined;this.clearReview();this.btn('backup-reviewed-route').hidden=true;this.btn('mark-distance').hidden=true;this.message.textContent='Discarded from memory. Reload to start a new session.';this.finishCamera();};
   this.canvas.onpointerdown=e=>{this.startPoint=this.point(e);this.canvas.setPointerCapture(e.pointerId);};
   this.canvas.onpointerup=e=>{
    if(!this.startPoint)return;const end=this.point(e),start=this.startPoint;this.startPoint=undefined;
@@ -51,7 +57,8 @@ export class CaptureUI{
   ctx.fillStyle='#000';for(const m of this.masks)ctx.fillRect(m.x,m.y,m.width,m.height);
   this.message.textContent=`Review image ${this.index+1} of ${this.recorder!.count}. Drag rectangles over faces, plates or private details. Then approve.`;
  }
- interrupt(reason:string){if(this.recorder?.state!=='recording')return;this.recorder.abort();this.pendingFinish=false;this.btn('finish-walk').hidden=true;this.btn('record-walk').disabled=false;this.message.textContent=`Recording discarded: ${reason}. Wait for stable tracking and start again.`;this.upload.add('error','host-capture-aborted');}
+ get recording(){return this.recorder?.state==='recording';}
+ interrupt(reason:string){if(this.recorder?.state!=='recording')return;this.recorder.abort();this.pendingFinish=false;this.btn('finish-walk').hidden=true;this.btn('mark-distance').hidden=true;this.btn('record-walk').disabled=true;this.btn('sway-first').disabled=false;this.message.textContent=`Recording discarded: ${reason}. Wait for stable tracking, repeat the sway and start again.`;this.upload.add('error','host-capture-aborted');}
  frame(source:HTMLCanvasElement,frame:CameraFrame,t:number,videoTime:number,revision:number){
   const r=this.recorder;if(r?.state!=='recording'||!r.needsFrame(t))return;
   try{
@@ -59,7 +66,7 @@ export class CaptureUI{
    let accepted=false;try{accepted=r.offer(sample,performance.now());}finally{sample.rgba.fill(0);}
    if((r.state as string)==='aborted')throw Error('Invalid capture frame');
    if(accepted){this.message.textContent=`Recorded ${r.count} images. ${this.pendingFinish?'Finishing…':'Continue slowly, then mark your destination.'}`;
-    if(this.pendingFinish){r.finish();this.pendingFinish=false;this.btn('finish-walk').hidden=true;this.finishCamera();this.index=0;document.getElementById('image-review')!.hidden=false;this.draw();}
+    if(this.pendingFinish){r.finish();this.pendingFinish=false;this.btn('finish-walk').hidden=true;this.btn('mark-distance').hidden=true;this.finishCamera();this.index=0;document.getElementById('image-review')!.hidden=false;this.draw();}
    }
   }catch(e){if(r.state==='recording')this.interrupt((e as Error).message);else{this.message.textContent=(e as Error).message;this.btn('record-walk').disabled=false;}}
  }

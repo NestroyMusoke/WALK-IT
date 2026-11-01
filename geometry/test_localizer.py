@@ -32,8 +32,31 @@ class LocalizerTests(unittest.TestCase):
   k=np.array([[500.,0,320],[0,500,240],[0,0,1.]])
   uv=cv2.projectPoints(xyz,np.array([.03,-.04,.02]),np.array([.2,-.1,.3]),k,None)[0].reshape(-1,2)
   result=self.call(xyz,uv,k)
-  self.assertFalse(result['accepted'])
+  self.assertFalse(result['accepted'],result)
   self.assertEqual(result['reason'],'insufficient-image-coverage')
   self.assertGreater(result['imageCoverageFraction'],.01)
   self.assertLess(result['imageCoverageFraction'],.05)
+ def test_planar_ippe_accepts_spread_unambiguous_anchor(self):
+  xx,yy=np.meshgrid(np.linspace(-.8,.8,5),np.linspace(-.6,.6,4))
+  xyz=np.c_[xx.ravel(),yy.ravel(),np.zeros(xx.size)]
+  k=np.array([[500.,0,320],[0,500,240],[0,0,1.]])
+  uv=cv2.projectPoints(xyz,np.array([.35,.1,.05]),np.array([.1,.1,3.]),k,None)[0].reshape(-1,2)
+  result=self.call(xyz,uv,k)
+  self.assertTrue(result['accepted'],result)
+  self.assertEqual(result['solver'],'IPPE')
+ def test_planar_front_view_abstains_on_ambiguous_two_solution_pose(self):
+  xx,yy=np.meshgrid(np.linspace(-.5,.5,4),np.linspace(-.5,.5,4))
+  xyz=np.c_[xx.ravel(),yy.ravel(),np.zeros(xx.size)]
+  k=np.array([[500.,0,320],[0,500,240],[0,0,1.]])
+  uv=cv2.projectPoints(xyz,np.zeros(3),np.array([0.,0.,4.]),k,None)[0].reshape(-1,2)
+  result=self.call(xyz,uv,k)
+  self.assertFalse(result['accepted'])
+  self.assertEqual(result['reason'],'planar-ambiguous')
+ def test_pnp_camera_center_scales_with_map_units(self):
+  xyz,uv,k,_,_=self.fixture()
+  original=self.call(xyz,uv,k)
+  scaled=self.call(xyz*4,uv,k)
+  self.assertTrue(original['accepted'],original)
+  self.assertTrue(scaled['accepted'],scaled)
+  np.testing.assert_allclose(scaled['cameraCenter'],np.array(original['cameraCenter'])*4,atol=1e-4)
 if __name__=='__main__':unittest.main()

@@ -1,5 +1,9 @@
 # Changes
 
+## 2 November — Tracker scale investigation
+
+Added a test-first read-only five-capture time-series audit, exact SDK and motion/depth/mark instrumentation for the next phone capture, synthetic-tested gravity-aligned robust windowed alignment, planar IPPE ambiguity abstention, image-spread coverage, and GL/OpenCV plus scale-equivariance tests. The old five captures cannot establish within-run scale behavior or pass a field-navigation gate. New instrumentation has only build and synthetic verification; no new phone result is claimed.
+
 ## 1 November — E13b-3 receipt binding
 
 Added an offline, fail-closed Spark/SAM receipt adapter with image/config/model/concept matching and synthetic tests. Historical real smoke receipts correctly abstain on different config hashes; no new API request was sent.

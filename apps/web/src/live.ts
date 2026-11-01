@@ -7,6 +7,7 @@ import {readReality} from './tracker';
 import {LiveUpload} from './live-upload';
 import {CaptureUI} from './capture-ui';
 import {viewportCoversCanvas} from './capture-frame';
+import {medianWorldPointDepth,serializeSdkCall} from './capture-telemetry';
 import './live.css';
 type Pipeline=Record<string,unknown>;
 type LiveSdk={initialize:()=>Promise<void>;run:(options:Record<string,unknown>)=>void;stop:()=>void;clearCameraPipelineModules:()=>void;addCameraPipelineModules:(modules:Pipeline[])=>void;
@@ -22,6 +23,10 @@ let running=false,frame:CameraFrame|null=null,lastFresh=-Infinity,lastStatus='',
 let size=calibration.sync(canvas,innerWidth,innerHeight,devicePixelRatio);
 let viewport=[0,0,0,0];
 let videoTime=NaN,repeatFrame=true;
+let runAtMs=NaN,markIndex=0;
+const marks=[0,2,4,6,8,10];
+function logSdk(method:'configure'|'updateCameraProjectionMatrix'|'run',args:Record<string,unknown>){const call=serializeSdkCall(method,args,performance.now(),runAtMs);upload.add(call.kind,call.label,call.values);}
+function updateProjection(args:Record<string,unknown>){logSdk('updateCameraProjectionMatrix',args);sdk.XrController.updateCameraProjectionMatrix(args);}
 const capture=new CaptureUI(upload,()=>running&&Boolean(frame)&&performance.now()-lastFresh<=settings.MARKER_MAX_AGE_MS,()=>stop('host-capture-review'));
 const instructions=[
   'Slowly move the phone sideways to scan the textured floor. Aim the centre crosshair at a tile corner or distinctive mark, then press Place reference.',
@@ -33,12 +38,13 @@ function hide(reason:string){anchor.clear();el('blocked').hidden=false;el('block
 function geometry(){
   const rect=canvas.getBoundingClientRect();size=calibration.sync(canvas,rect.width,rect.height,devicePixelRatio);
   if(size.changed){capture.interrupt('display resized');anchor.clear();frame=null;
-    if(sdk&&running)sdk.XrController.updateCameraProjectionMatrix({cam:{pixelRectWidth:size.width,pixelRectHeight:size.height,nearClipPlane:settings.NEAR_CLIP_M,farClipPlane:settings.FAR_CLIP_M}});
+    if(sdk&&running)updateProjection({cam:{pixelRectWidth:size.width,pixelRectHeight:size.height,nearClipPlane:settings.NEAR_CLIP_M,farClipPlane:settings.FAR_CLIP_M}});
     upload.add('status','display-resized',[size.width,size.height,size.cssWidth,size.cssHeight,size.ratio]);
   }
 }
 function stop(reason='user-finished'){
   capture.interrupt(reason);
+  window.removeEventListener('devicemotion',onDeviceMotion);
   if(!running)return;running=false;upload.add('end',reason);hide('Test ended. Keep this page open until logs are saved.');
   try{sdk.stop();sdk.clearCameraPipelineModules();}catch{}
   renderer?.dispose();renderer=undefined;button('place').hidden=true;button('next').hidden=true;button('stop').hidden=true;el('answers').hidden=true;
@@ -58,24 +64,30 @@ prepareSdk(XR8Promise,settings.SDK_READY_TIMEOUT_MS).then(value=>{
 button('start').addEventListener('click',async()=>{
   button('start').disabled=true;
   try{
+    const motionPermission=typeof DeviceMotionEvent==='undefined'?undefined:(DeviceMotionEvent as typeof DeviceMotionEvent & {requestPermission?:()=>Promise<string>}).requestPermission;
+    if(motionPermission){
+      try{const granted=await motionPermission.call(DeviceMotionEvent);upload.add('status',`motion-permission-${granted}`);if(granted==='granted')window.addEventListener('devicemotion',onDeviceMotion);}catch{upload.add('status','motion-permission-error');}
+    }else if(typeof DeviceMotionEvent!=='undefined')window.addEventListener('devicemotion',onDeviceMotion);
     await upload.start();upload.add('begin','E03-1');running=true;geometry();
-    sdk.XrController.configure({disableWorldTracking:false,enableWorldPoints:false,scale:'absolute'});
+    const configureArgs={disableWorldTracking:false,enableWorldPoints:true,scale:'absolute'};
+    logSdk('configure',configureArgs);sdk.XrController.configure(configureArgs);
     sdk.clearCameraPipelineModules();
     sdk.addCameraPipelineModules([
       sdk.GlTextureRenderer.pipelineModule(),sdk.XrController.pipelineModule(),{
         name:'walkit-live-reference',
+        onAttach:({version}:{version?:string})=>upload.add('status',`engine-${version||'unreported'}`),
         onStart:({GLctx}:{GLctx:WebGL2RenderingContext})=>{
           try{
             if(!(GLctx instanceof WebGL2RenderingContext))throw Error('WebGL2 unavailable');
             gl=GLctx;const state=sdk.GlTextureRenderer.getGLctxParameters(gl,[gl.TEXTURE0]);
             try{renderer=new ReferenceRenderer(canvas,gl);}finally{sdk.GlTextureRenderer.setGLctxParameters(gl,state);}
-            sdk.XrController.updateCameraProjectionMatrix({cam:{pixelRectWidth:canvas.width,pixelRectHeight:canvas.height,nearClipPlane:settings.NEAR_CLIP_M,farClipPlane:settings.FAR_CLIP_M},origin:{x:0,y:0,z:0},facing:{x:0,y:0,z:0,w:1}});
+            updateProjection({cam:{pixelRectWidth:canvas.width,pixelRectHeight:canvas.height,nearClipPlane:settings.NEAR_CLIP_M,farClipPlane:settings.FAR_CLIP_M},origin:{x:0,y:0,z:0},facing:{x:0,y:0,z:0,w:1}});
             upload.add('status','camera-started');el('instruction').textContent=instructions[0];
           }catch(error){fail((error as Error).message);}
         },
         onUpdate:({frameStartResult,processCpuResult,processGpuResult}:{frameStartResult?:{videoTime?:number;repeatFrame?:boolean};processCpuResult?:{reality?:unknown};processGpuResult?:{gltexturerenderer?:{viewport?:{width:number;height:number;offsetX:number;offsetY:number}}}})=>{
           if(!running)return;
-          const now=performance.now(),reality=processCpuResult?.reality as {trackingStatus?:string}|undefined;
+          const now=performance.now(),reality=processCpuResult?.reality as {trackingStatus?:string;worldPoints?:unknown}|undefined;
           const status=reality?.trackingStatus||'UNAVAILABLE';frame=readReality(reality);
           videoTime=frameStartResult?.videoTime??NaN;repeatFrame=frameStartResult?.repeatFrame??true;
           if(!frame)capture.interrupt('tracking lost');
@@ -83,6 +95,8 @@ button('start').addEventListener('click',async()=>{
           if(frame&&!frameStartResult?.repeatFrame)lastFresh=now;
           if(!frame)anchor.clear();
           if(status!==lastStatus){upload.add('status',status);lastStatus=status;}
+          const depth=frame?medianWorldPointDepth(reality?.worldPoints,frame):{count:0,validDepthCount:0,medianDepth:null};
+          upload.add('world-points',status,[depth.count,depth.validDepthCount,depth.medianDepth??-1,videoTime,now]);
           if(!upload.add('frame',status,[frameStartResult?.videoTime??-1,frameStartResult?.repeatFrame?1:0,frame?1:0,canvas.width,canvas.height,size.cssWidth,size.cssHeight,size.ratio,...viewport,...(frame?[...frame.position,...frame.rotation,...frame.projection]:[])])){stop('recording-capacity');return;}
           el('blocked').hidden=Boolean(frame&&now-lastFresh<=settings.MARKER_MAX_AGE_MS);
           if(!frame){el('blocked').style.background='#08151466';el('blocked').textContent='Tracking limited. Slowly scan a textured area.';}
@@ -101,10 +115,25 @@ button('start').addEventListener('click',async()=>{
         onCameraStatusChange:({status}:{status:string})=>{upload.add('status',`camera-${status}`);if(status==='failed')fail('Camera permission or device failed');}
       }
     ]);
-    sdk.run({canvas,webgl2:true,glContextConfig:{alpha:false,antialias:false}});
+    const runArgs={canvas:'camera',webgl2:true,glContextConfig:{alpha:false,antialias:false}};
+    runAtMs=performance.now();logSdk('run',runArgs);
+    sdk.run({canvas,webgl2:true,glContextConfig:runArgs.glContextConfig});
     button('start').hidden=true;button('place').hidden=false;button('stop').hidden=false;button('backup').hidden=false;
   }catch(error){fail((error as Error).message);button('start').disabled=false;}
 });
+function onDeviceMotion(event:DeviceMotionEvent){
+ const a=event.acceleration,gravity=event.accelerationIncludingGravity,r=event.rotationRate;
+ upload.add('motion','devicemotion',[event.timeStamp,performance.now(),event.interval??-1,a?.x??-1,a?.y??-1,a?.z??-1,gravity?.x??-1,gravity?.y??-1,gravity?.z??-1,r?.alpha??-1,r?.beta??-1,r?.gamma??-1]);
+}
+button('mark-distance').addEventListener('click',()=>{
+ if(!capture.recording||!frame||performance.now()-lastFresh>settings.MARKER_MAX_AGE_MS){el('capture-status').textContent='Wait for a fresh NORMAL pose at the floor mark.';return;}
+ const mark=marks[markIndex];
+ upload.add('step',`mark-${mark}m`,[performance.now(),videoTime,...frame.position,...frame.rotation]);
+ markIndex++;
+ if(markIndex>=marks.length){button('mark-distance').hidden=true;el('capture-status').textContent='All six marks logged. Finish and review the recording.';}
+ else button('mark-distance').textContent=`Tap at ${marks[markIndex]} m mark`;
+});
+document.addEventListener('walkit-record-start',()=>{markIndex=0;button('mark-distance').textContent='Tap at 0 m mark';});
 button('place').addEventListener('click',()=>{
   if(!frame||performance.now()-lastFresh>settings.MARKER_MAX_AGE_MS){el('instruction').textContent='Wait for NORMAL tracking, then try placing again.';return;}
   const hit=sdk.XrController.hitTest(0.5,0.5,['FEATURE_POINT']).find(h=>[h.position.x,h.position.y,h.position.z,h.distance].every(Number.isFinite));
