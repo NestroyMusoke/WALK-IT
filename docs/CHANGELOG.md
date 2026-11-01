@@ -123,3 +123,16 @@ Predeclared all-observation SIFT descriptor indexing experiment on the same 277 
 Predeclared ORB start-map experiment failed its >=4/9 author-2 early-frame screening rule: 0/9 accepted with existing PnP, image-coverage and 3-view/parallax gates. The first 10 author-1 frames produced 60 ORB landmarks; validation kf2 had 11 raw matches but failed image coverage. Private report `eval/sessions/e08b-orb-start-validation.json`; scratch implementation remains ignored in tmp. This is a failed experiment, not a production change.
 
 For diagnostic separation only, existing 17 accepted PnP hypotheses were divided before and after the route turn. The 11 before-turn pairs fit a similarity with max relative residual 0.0341383 (under 0.05) and map-to-session scale 0.1119172; this is a validation-only partial trajectory, not a start anchor, metric scale or guidance authorization. Six after-turn accepted PnP camera centers could not establish a full-rank standalone 3D alignment; under the before-turn transform their session-position discrepancies increase from 0.992 to 2.731 tracker units by kf44. Since tracker units have no verified metres, these errors are not reported in metres. The full 17-pair alignment remains rejected at residual 0.4259017. No threshold changes or fallback taken.
+# 1 November — UI01 product entry and route illustration
+
+Added a separate React/Tailwind entry page with the WALK IT murmuration wordmark, responsive product story, real links to field capture and evidence, and a custom Hairline isometric route study. The existing camera and evidence pages retain their behavior. Added shadcn-compatible component directory, alias and configuration. This is a visual explanation, not proof of live navigation.
+
+# 1 November — UI02 liquid action treatment
+
+Added a semantic React liquid button for entry links and the matching lightweight glass/pressed style for native field and diagnostic buttons. Preserved focus and reduced-motion states; no SVG filter was added to the camera screen.
+
+# 1 November: UI03 editorial landing layout
+
+Rebuilt the entry page with a tactile split hero, framed flock, clear product journey, Hairline route study, pause rule and honest field-build actions. Used the supplied 8B template as layout inspiration without importing its product content or scripts. Removed em dashes from page copy.
+
+Tightened flock convergence so WALK IT becomes legible inside the smaller framed hero. Added a failed-first convergence test and inspected the formed result in the browser.

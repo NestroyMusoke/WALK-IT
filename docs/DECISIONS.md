@@ -1,5 +1,19 @@
 # Decisions
 
+## 1 November: UI03 editorial page rebuild
+
+The user rejected the earlier full-screen entry layout and supplied the 8B product landing page template as visual inspiration. Use its calm, tactile, asymmetric layout language without copying its device-specific sections or scripts. Preserve the WALK IT flock, Hairline figure and liquid actions. Show the product journey from familiar start to exact destination, then the uncertainty pause rule and current evidence state. Keep the camera and evidence paths intact. The template file's AGENTS.md describes rules for modifying that template itself; it is reference material, not WALK IT project instructions. Do not import the template's invented pricing, specs, contact, photos or performance claims.
+
+In the smaller framed hero, the flock initially failed to settle into readable letters during its hold. A failed-first formation-step test now checks convergence; exponential target attraction is active only during formation, while reduced-motion rendering still places birds directly on the word. Browser inspection after a fresh cycle showed readable centered lettering. The flock remains an illustration, never route evidence.
+
+## 1 November — UI02 liquid actions
+
+The supplied demo shows `LiquidButton`. Use its glass surface, inset light and pressed depth on the entry calls to action and the existing native field/diagnostic buttons. Retain semantic anchors for navigation with a single Radix Slot child; the pasted multi-child Slot would not render correctly. Use a CSS glass layer rather than the pasted SVG displacement filter on camera controls, to avoid a costly filter competing with live tracking and to retain a visible treatment if the browser lacks filter support. Keep keyboard focus visible and disable movement for reduced-motion users. The Hairline page is a self-contained licensed figure with its own controls.
+
+## 1 November — UI01 entry-screen architecture
+
+The user requested both a React murmuration wordmark and a Hairline figure. Keep the existing Vite/TypeScript camera implementation; mount React only on the product entry page and place UI source at `apps/web/src/components/ui` (the `/components/ui` path relative to the web app's `src`). Serve that entry at `/` and `/welcome.html`; preserve the prior root calibration test at `/diagnostic.html`. Use Tailwind and shadcn-compatible aliases for future copied components, but do not replace the working camera pipeline or install unused shadcn UI primitives. The animation is a brand moment, not an AR arrow or evidence of tracking. Its controls must remain visible while birds move, and reduced-motion users receive a legible still wordmark.
+
 ## 1 November — E13b-3 receipt provenance gate
 
 Do not merge the old Spark and SAM smoke receipts into a positive example solely because their image bytes match: their config hashes differ. The new adapter refuses a pair unless both receipts and route context share the active config hash and expected models. The existing receipts remain valid access smokes, not a paired navigation result. New paired calls should only be made against a reviewed route frame with live geometry and declared evaluation protocol; no provider or spending fallback was taken.
