@@ -15,7 +15,8 @@ import cv2
 import numpy as np
 
 
-MODEL = "meta-models/muse-spark-open"
+# Sponsor email specifies this alias for the separately issued hackathon key.
+MODEL = "meta-models/muse-spark-open-1026"
 ENDPOINT = "https://inference.baseten.co/v1/chat/completions"
 PROMPT = (
     "Inspect this candidate destination image for a pedestrian wayfinding verifier. "
@@ -41,6 +42,7 @@ def build_payload(image_bytes: bytes, mime: str) -> dict:
     return {
         "model": MODEL,
         "max_tokens": CONFIG["E05_MODEL_OUTPUT_MAX_TOKENS_COUNT"],
+        "reasoning_effort": CONFIG["E05_REASONING_EFFORT"],
         "messages": [
             {"role": "system", "content": "Return only valid JSON. Describe visible evidence; never certify a destination."},
             {"role": "user", "content": [
@@ -52,11 +54,21 @@ def build_payload(image_bytes: bytes, mime: str) -> dict:
 
 
 def parse_evidence(response: dict) -> dict:
+    choices = response.get("choices")
+    if not isinstance(choices, list) or not choices or not isinstance(choices[0], dict):
+        raise ValueError("Model response has no completion choice")
+    choice = choices[0]
+    reason = choice.get("finish_reason", "unknown")
+    if reason != "stop":
+        raise ValueError(f"Model completion was incomplete (finish_reason={reason})")
+    message = choice.get("message", {})
+    if message.get("refusal"):
+        raise ValueError("Model refused the request")
     try:
-        content = response["choices"][0]["message"]["content"]
+        content = message["content"]
         evidence = json.loads(content)
     except (KeyError, IndexError, TypeError, json.JSONDecodeError) as error:
-        raise ValueError("Model did not return a JSON evidence object") from error
+        raise ValueError(f"Model did not return a JSON evidence object (finish_reason={reason})") from error
     for field in ("visible_text", "visual_cues"):
         if not isinstance(evidence.get(field), list) or not all(isinstance(x, str) for x in evidence[field]):
             raise ValueError(f"Invalid evidence field: {field}")
@@ -72,6 +84,14 @@ def parse_evidence(response: dict) -> dict:
         "provider_response_id": response.get("id"),
         "provider_model": response.get("model"),
     }
+
+
+def persist_provider_response(response: dict, private_dir: Path) -> Path:
+    """Save a successful HTTP response privately before any strict parsing."""
+    private_dir.mkdir(parents=True, exist_ok=True)
+    path = private_dir / f"e05-muse-response-{time.time_ns()}.json"
+    path.write_text(json.dumps(response, indent=2), encoding="utf-8")
+    return path
 
 
 def summarize_http_error(error: urllib.error.HTTPError, key: str) -> dict:
@@ -162,11 +182,17 @@ def main() -> int:
         failure_path = private_dir / f"e05-baseten-error-{int(time.time())}.json"
         failure_path.write_text(json.dumps(summary, indent=2), encoding="utf-8")
         raise RuntimeError(f"Baseten HTTP {error.code}; private diagnostic saved at {failure_path}") from None
-    evidence = parse_evidence(response)
+    raw_path = persist_provider_response(response, Path("eval/sessions"))
+    print(f"Saved private provider response: {raw_path}")
+    try:
+        evidence = parse_evidence(response)
+    except ValueError as error:
+        raise RuntimeError(f"{error}; inspect private provider response at {raw_path}") from None
     private_dir = Path("eval/sessions")
     private_dir.mkdir(parents=True, exist_ok=True)
     record = {
         "provider": "Baseten",
+        "raw_provider_receipt": str(raw_path),
         "requested_model": MODEL,
         "model_revision": "unreported_by_provider",
         "input_sha256": hashlib.sha256(image_bytes).hexdigest(),

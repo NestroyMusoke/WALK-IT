@@ -74,3 +74,18 @@ The human's first Baseten image request returned HTTP 403; initial script expose
 
 ## E16a — 1 November
 Implemented the requested static evidence explorer after its acceptance tests failed on the missing module. Three explorer tests pass; scripts/check.ps1 passes setup, typecheck, all 33 web tests and isolated production build. Desktop browser visual inspection confirmed the replay label, empty state and zero published cases. No actual model pair, populated real-case rendering, phone layout or live navigation claim. Vite was not running; restarted local dev server on 127.0.0.1:5173. META_USAGE.md and the critical-path queue now reflect the actual blocked E05 state. User-supplied root PATH_TO_FINAL.md and duplicate capture file remain untouched.
+
+1 November E05 follow-up: read the second human attempt's private diagnostic. Baseten asks to check the API key; 403, no inference output. No new code or model call made by the agent. E05 remains open; credential/account validation requires the human's local key entry.
+
+E05 sponsor correction, 1 November: regression test first failed because the request used the public model alias. Changed it to the exact sponsor-email alias meta-models/muse-spark-open-1026. No secret link copied into project files; no remote request made by the agent.
+Verification for sponsor-alias correction: all five E05 tests pass; scripts/check.ps1 passes 33 web tests, setup, typecheck and isolated build. Live provider result still pending.
+
+E05 follow-up: sponsor-scoped request reached the provider, but parser received null final content. No raw response was retained by the old runner, so no finish reason, token usage or billing count can be reported for that call. Baseten's documented always-on reasoning makes 512 total completion tokens a plausible limit; changed config to low reasoning and 2048 maximum completion tokens. A first-failing completion-budget/receipt test and a first-failing incomplete-JSON rejection test now pass. Provider response is written privately before parsing, including any future failure. Six focused E05 tests pass; live rerun pending. No commit made at user's request.
+
+## E05 Spark receipt verified — 1 November 2026
+
+One real sponsor-scoped Baseten call returned final structured JSON: requested and returned model `meta-models/muse-spark-open-1026`, finish reason `stop`, latency 24.875 seconds, 1,204 prompt tokens and 416 completion tokens (1,620 total reported). Private receipts: `eval/sessions/e05-muse-1793520831.json` and `eval/sessions/e05-muse-response-1793520831731796500.json`. Offline reparsing reproduces the saved evidence and its config SHA matches the current configuration. No additional API call was made for verification.
+
+The model reported text D10 and D9 and appearance cues, with `usable_as_destination_evidence=false` and `navigationReady=false`. These are model observations, not independently scored OCR accuracy or destination confirmation. One call is not a latency benchmark. Spark transport/structured-output smoke passes; full E05 stays OPEN: SAM real response, terms review, backend revision disclosure and sponsor billing/zero-additional-charge evidence remain unverified. Do not infer remaining credits from token usage or personal dashboard balance.
+
+Next: complete E05's separately tested SAM adapter/access check, then the declared field session. Keep all receipts/media private; no public explorer cases added and no commits made. Human supplies credentials only locally; no provider fallback is taken.

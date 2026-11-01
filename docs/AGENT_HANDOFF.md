@@ -1,4 +1,17 @@
+
+## E05 Spark receipt verified — 1 November 2026
+
+One real sponsor-scoped Baseten call returned final structured JSON: requested and returned model `meta-models/muse-spark-open-1026`, finish reason `stop`, latency 24.875 seconds, 1,204 prompt tokens and 416 completion tokens (1,620 total reported). Private receipts: `eval/sessions/e05-muse-1793520831.json` and `eval/sessions/e05-muse-response-1793520831731796500.json`. Offline reparsing reproduces the saved evidence and its config SHA matches the current configuration. No additional API call was made for verification.
+
+The model reported text D10 and D9 and appearance cues, with `usable_as_destination_evidence=false` and `navigationReady=false`. These are model observations, not independently scored OCR accuracy or destination confirmation. One call is not a latency benchmark. Spark transport/structured-output smoke passes; full E05 stays OPEN: SAM real response, terms review, backend revision disclosure and sponsor billing/zero-additional-charge evidence remain unverified. Do not infer remaining credits from token usage or personal dashboard balance.
+
+Next: complete E05's separately tested SAM adapter/access check, then the declared field session. Keep all receipts/media private; no public explorer cases added and no commits made. Human supplies credentials only locally; no provider fallback is taken.
+
+The historical checkpoints below are superseded by the receipt status above.
+
 # WALK IT agent handoff — 30 October 2026, Africa/Kampala
+
+**E05 sponsor correction — 1 November:** The sponsor email requires meta-models/muse-spark-open-1026, not the public alias. Runner and regression test corrected. Use the saved sponsor-issued key, not a new personal key; no need to reopen the single-use secret link. Personal dashboard credit balance is not evidence of sponsor-key balance. Five E05 tests and full 33-test web check/build pass; corrected remote call still pending.
 
 **Latest checkpoint — 1 November:** User supplied PATH_TO_FINAL.md (found at repo root; copied to docs/PATH_TO_FINAL.md). The active TASKS section supersedes the older ordering: E05 → E08b → E11d start-anchor SfM/relocalization → E12b bounded tracker-follow → E13b/E14b Spark-to-SAM and paired ablation → film/submission. Ask before EVERY fallback. Author validation and visitor hold-out remain distinct; five correct/five wrong start trials are separate from twenty approach trials. E05 still has no successful receipt: human saw Baseten 403, and the updated runner will save a redacted private diagnostic on retry. User needs to rerun scripts/run-e05.ps1 once with their key; do not request it in chat. No provider switch is authorized by this new plan.
 
@@ -54,3 +67,5 @@ For **every** completed build, give the human a Windows `cmd` block with `cd /d`
 ## Return-to-Codex checkpoint
 
 When Codex usage resets, the user can say: “Open `C:\Users\X1 Yoga\Documents\Codex\WALK-IT\docs\AGENT_HANDOFF.md`, inspect `git status`, `git log`, `TASKS.md` and the latest test reports, then continue the highest-priority unfinished card. Do not assume the handoff is up to date.”
+
+**Latest E05:** The sponsor-model request reached Baseten; `content` was null. The old parser discarded the response so provider usage for that request is unknown. The next runner revision saves raw response privately before parsing. No structured image evidence or decision effect yet.

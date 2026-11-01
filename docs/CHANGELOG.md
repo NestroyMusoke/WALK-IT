@@ -51,3 +51,17 @@ After the first human Baseten attempt returned HTTP 403, added a bounded, redact
 
 ## 1 November — critical path and evidence shell
 Reordered tasks to E05, one field session, small start-anchor relocalization, bounded tracker-follow arrows, Spark-to-SAM verification and paired ablation. Added META_USAGE.md, a static replay explorer with validated publication manifest, and case-format documentation. Empty public evidence set; no fabricated model output, provider switch or fallback. Tests: 33 web tests, typecheck and isolated build pass.
+
+1 November: recorded the second E05 refusal and provider key-validation message; no runtime changes or successful model result.
+
+1 November: corrected E05 request to the sponsor-required meta-models/muse-spark-open-1026 alias. Sponsor key required; no inference pass claimed.
+
+1 November: save a successful HTTP provider response privately before parsing; require complete final JSON, use low reasoning and a 2048-token completion cap for the sponsor model. Earlier null-content response remains unmeasured because the old runner discarded it.
+
+## E05 Spark receipt verified — 1 November 2026
+
+One real sponsor-scoped Baseten call returned final structured JSON: requested and returned model `meta-models/muse-spark-open-1026`, finish reason `stop`, latency 24.875 seconds, 1,204 prompt tokens and 416 completion tokens (1,620 total reported). Private receipts: `eval/sessions/e05-muse-1793520831.json` and `eval/sessions/e05-muse-response-1793520831731796500.json`. Offline reparsing reproduces the saved evidence and its config SHA matches the current configuration. No additional API call was made for verification.
+
+The model reported text D10 and D9 and appearance cues, with `usable_as_destination_evidence=false` and `navigationReady=false`. These are model observations, not independently scored OCR accuracy or destination confirmation. One call is not a latency benchmark. Spark transport/structured-output smoke passes; full E05 stays OPEN: SAM real response, terms review, backend revision disclosure and sponsor billing/zero-additional-charge evidence remain unverified. Do not infer remaining credits from token usage or personal dashboard balance.
+
+Next: complete E05's separately tested SAM adapter/access check, then the declared field session. Keep all receipts/media private; no public explorer cases added and no commits made. Human supplies credentials only locally; no provider fallback is taken.
