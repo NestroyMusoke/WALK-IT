@@ -1,5 +1,11 @@
 # Event task queue
 
+E13b-3 (1 November): [x] Offline Spark/SAM receipt-pair adapter binds model IDs, exact reviewed-image SHA, config SHA, SAM concept and trusted geometry context before invoking mask raster and decision gates. Two synthetic tests passed. The two earlier real E05 receipts abstain because their config SHAs differ, so they cannot be presented as a paired decision. Fresh route-bound receipts and live geometric projections are still needed; E13b remains open.
+
+E13b-2 (1 November): [x] Official SAM parser pinned, wheel hash verified, actual saved SAM response decoded and mask membership adapter built. The inspected test pixels were diagnostic examples, not route projections. Live geometry/receipt binding and paired evaluation remain open; this does not mark E13b complete.
+
+E13b-1 (1 November, independent split of E13b): [x] Synthetic-tested destination decision contract. It requires a live geometric anchor, tracking, same-image Spark/SAM evidence, actual decoded mask membership for target and decoy, and two distinct consistent frames before confirmation. Receipt adapters, live geometry input and held-out trials are **not implemented**; E13b remains open. Verifier thresholds are in `config/vision.yaml`; the prior capture configuration is archived by exact hash.
+
 E08b scale screening (1 November): Three additional same-endpoint Apple Measure approximately 10 m walks saved (20/17/17 frames), with 4.4359/1.6183/6.5292 tracker units. The 4.03x spread despite NORMAL tracking fails repeatability screening. One more attempt aborted. These are not verified scale or held-out visitor trials; E08b remains open.
 
 ## Active critical path — 1 November 2026, predeclared before new data

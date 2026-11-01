@@ -1,5 +1,17 @@
 # Changes
 
+## 1 November — E13b-3 receipt binding
+
+Added an offline, fail-closed Spark/SAM receipt adapter with image/config/model/concept matching and synthetic tests. Historical real smoke receipts correctly abstain on different config hashes; no new API request was sent.
+
+## 1 November — E13b-2 SAM raster decoding
+
+Pinned and verified Meta's Python parser, added a fail-closed decoded-mask membership adapter and synthetic tests, and confirmed it parses the saved private SAM response. No live projection, model request or field claim was added.
+
+## 1 November — E13b-1 verifier contract
+
+Added a synthetic-tested, fail-closed Spark/SAM/geometric decision and repeated-observation module. Added verifier count/time configuration and archived the exact earlier capture config; the capture audit CLI can now use a matching historical config snapshot. No live guidance or model adapter was connected.
+
 ## 1 November — E08b scale screening evidence
 
 Audited three privately saved same-endpoint screening captures and one separately aborted attempt. Logged raw tracker paths, recording-state counts, unquantified Apple Measure uncertainty and failed repeatability gate in the ledger, decision log, task queue and handoff. No runtime code, thresholds or public media changed.

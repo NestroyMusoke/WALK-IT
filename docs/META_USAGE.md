@@ -1,5 +1,11 @@
 # Meta model usage — WALK IT
 
+E13b-3 update (1 November): `geometry/receipt_pair.py` binds model outputs, input-image SHA, active config SHA and route geometry to the verifier. The two prior real access-smoke receipts share image bytes but have **different config SHAs** and therefore abstain as a pair; Spark also reported the image unusable as destination evidence. This is correct provenance behavior, not a paired ablation or an arrival result. No new API call was made.
+
+E13b-2 update (1 November): `geometry/sam_mask.py` now uses Meta's [official Python parser](https://dev.meta.ai/docs/sam/client-libraries) to decode real SAM mask pixels. The saved private SAM response parsed into two masks with zero parser diagnostics. The checked pixels were arbitrary diagnostics, not projected route locations. Real Spark/SAM/geometry fusion and paired outcome counts remain absent.
+
+E13b-1 update (1 November): `geometry/destination_verifier.py` now defines a synthetic-tested decision contract for matching Spark, SAM and geometric evidence. This is **not** a real paired pipeline yet: live geometric projections and receipt binding are absent, and no field confirmation or ablation has run. It makes no additional API call. The verifier's positive result is only meaningful after those adapters and independent visitor tests are connected.
+
 Status checked 1 November 2026: real Spark and SAM still-image calls are saved privately and described below. No real paired ablation or meaningful-model-use pass is claimed. Promotional credits are human-reported active; billed usage is unknown, not zero.
 
 | Component | Endpoint / requested model | Calling source | Current evidence | Intended decision effect |

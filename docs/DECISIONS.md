@@ -1,5 +1,17 @@
 # Decisions
 
+## 1 November — E13b-3 receipt provenance gate
+
+Do not merge the old Spark and SAM smoke receipts into a positive example solely because their image bytes match: their config hashes differ. The new adapter refuses a pair unless both receipts and route context share the active config hash and expected models. The existing receipts remain valid access smokes, not a paired navigation result. New paired calls should only be made against a reviewed route frame with live geometry and declared evaluation protocol; no provider or spending fallback was taken.
+
+## 1 November — E13b-2 official SAM mask decoding
+
+Use Meta's official pinned Python parser for the complete SAM mask instead of treating a box or a paired mask token as pixel evidence. It has no runtime dependencies, and its public raster API was verified by import and by decoding the saved private response. Store only per-point membership and counts in the decision contract; keep payloads private. The adapter abstains on malformed output, mismatched source size or unresolved decoy. The inclusive-wire versus half-open-parser box conversion is explicit. Do not interpret arbitrary diagnostic pixels as actual destination geometry or claim the model pipeline is live.
+
+## 1 November — E13b-1 independent verifier split
+
+Build the destination decision contract while scale/start-anchor diagnosis proceeds separately. It is deliberately independent of the phone renderer and provider transport, so the later Spark/SAM adapters and geometric projections can plug into it. A model result cannot independently confirm arrival; the engine requires one live anchor, target-versus-decoy mask evidence, same-image provenance and two fresh distinct observations. The current SAM smoke only parses box and paired-mask records, not mask pixels, so no real confirmation can be passed yet. Two provisional time/count gates are pinned in config; retain the old capture config bytes by hash for reproducibility. No platform, provider, route or replay fallback is taken.
+
 ## 1 November — E08b scale screening decision
 
 Predeclared use of three same-mark 10 m runs was to screen whether tracker path scale repeats. The human confirmed the same endpoints and Apple Measure as the distance source. Audited path values were 4.435891, 1.618258 and 6.529155 tracker units (max/min 4.034681) even though all saved recording intervals had zero LIMITED frames. One other attempt aborted and is counted separately. The repeatability screen fails. Apple Measure uncertainty is unknown, so no metric accuracy claim follows. Preserve the current safety gate: no universal scale factor or live arrows from these captures. Do not retune held-out data or take a platform/replay/provider/route fallback without human approval. The next approved investigation is the already queued start-anchor reconstruction, subject to its synthetic and metric binding tests.

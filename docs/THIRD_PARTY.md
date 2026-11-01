@@ -1,5 +1,7 @@
 # Third-party ledger
 
+E13b-2 pin before install (1 November): `meta-sam-parser==0.1.0`, Meta's dependency-free Python parser for SAM 3.1 streamed outputs and actual mask raster decoding. [Meta's API docs](https://dev.meta.ai/docs/sam/client-libraries) document `decode_mask_to_raster`; the [publisher's PyPI release](https://pypi.org/project/meta-sam-parser/0.1.0/) reports Python >=3.10, SAM License, wheel SHA-256 `eca156907911c56cef3a350ffc81c34b7e70655e5fa3ccdddb77042c541a0152`, and provenance from `github.com/meta-models/meta-sam`. Exact package and hash are pinned in both Python requirement files. This is parser code, separate from SAM model/API terms. No weights are installed or license accepted on the human's behalf. Import and decoding must be runtime-tested before it is used.
+
 ## E01 pins recorded before installation — 27 October 2026
 
 | Package | Exact version | License from official npm metadata | Purpose |
