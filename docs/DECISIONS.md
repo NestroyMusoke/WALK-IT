@@ -1,5 +1,9 @@
 # Decisions
 
+## 1 November — E08b scale screening decision
+
+Predeclared use of three same-mark 10 m runs was to screen whether tracker path scale repeats. The human confirmed the same endpoints and Apple Measure as the distance source. Audited path values were 4.435891, 1.618258 and 6.529155 tracker units (max/min 4.034681) even though all saved recording intervals had zero LIMITED frames. One other attempt aborted and is counted separately. The repeatability screen fails. Apple Measure uncertainty is unknown, so no metric accuracy claim follows. Preserve the current safety gate: no universal scale factor or live arrows from these captures. Do not retune held-out data or take a platform/replay/provider/route fallback without human approval. The next approved investigation is the already queued start-anchor reconstruction, subject to its synthetic and metric binding tests.
+
 2026-10-27 — Reviewed user-supplied ARROW_STABILIZATION.md. Adopt display sizing, synchronized rendering and explicit logging; reject frozen guidance during LIMITED and the claim that short-lived arrows remove drift. Do not accept quoted measurements without raw evidence. Split independent timing-journal fixture into E03a while E02 browser verification is blocked by tool timeouts. Keep E03 live integration gated on E02. No platform change or smoothing parameters adopted. See STABILIZATION_REVIEW.md.
 
 2026-10-27 — Product framing covers routes to destinations for delivery workers and visitors, including entrances, shops and meeting points. One short university route is an evaluation scope, not a market boundary.

@@ -1,5 +1,7 @@
 # Event task queue
 
+E08b scale screening (1 November): Three additional same-endpoint Apple Measure approximately 10 m walks saved (20/17/17 frames), with 4.4359/1.6183/6.5292 tracker units. The 4.03x spread despite NORMAL tracking fails repeatability screening. One more attempt aborted. These are not verified scale or held-out visitor trials; E08b remains open.
+
 ## Active critical path — 1 November 2026, predeclared before new data
 
 This section supersedes the older queue ordering below. Execute **E05 → E08b → E11d → E12b → E13b/E14b → E15**. Source: `docs/PATH_TO_FINAL.md`, supplied by the human. Each implementation card is at most one hour; split work before overrunning. Keep the original stronger privacy, scale, calibration, ambiguity, expiry and held-out rules. **Ask the human before every fallback**, including switching model/provider, shortening/changing the route, replay navigation or native platform. No fallback is authorized by a failure column in the imported plan. Independent documentation and the explicitly requested static evidence explorer may proceed while E05 awaits account access.

@@ -1,5 +1,11 @@
 # Build ledger
 
+## 1 November — E08b same-endpoint 10 m scale screening
+
+The human says all three saved walks used the same physical start/end marks, whose separation was estimated at 10 m with Apple Measure. That estimate has no recorded uncertainty or independent tape reference. Existing capture audits passed for sessions `002cd7b2-a2ec-4e6b-bb17-d32921d7e30e`, `3d2318d6-6b32-4bf0-b12c-8f685ce6f40b` and `c9a40d11-40ce-447d-a910-e6b8f62b512f`: respectively 20, 17 and 17 reviewed frames, and 4.435891, 1.618258 and 6.529155 tracker units of path. All used config SHA `0c3e8c7569cb837c046f07ff0cfa9a6378041e673c1d52b6861f6e2d4a1c7151`; all report `scaleVerified=false` and `navigationReady=false`. Their maximum/minimum path ratio is 4.034681. Recording-interval frame logs show NORMAL/LIMITED counts of 554/0, 476/0 and 465/0. An additional started session `e6d7fab0-8ad1-4cc9-a30a-c8e5f9559237` aborted after one LIMITED frame and saved no route. This is three saved screening runs plus one aborted attempt, not four successful runs.
+
+The same-endpoint report is human supplied; matching first/last images of runs 2 and 3 supports shared scenes but does not establish metric ground truth. The fourfold tracker spread despite NORMAL state fails scale consistency screening. Do not derive metres-per-tracker-unit, navigate from these poses, or count these as held-out visitor trials. Private report `eval/sessions/e04-10m-scale-screening.json` preserves IDs, capture hashes and raw values; images remain private and unapproved for publication. E08b/E04/E12b remain open, with arrows hidden.
+
 Dates are Africa/Kampala. Commit timestamps are ordinary timestamps, not independent proof of authorship. Record actual work and outputs; never relabel imported work as newly implemented.
 
 | Date | Component | Origin | Verified state |

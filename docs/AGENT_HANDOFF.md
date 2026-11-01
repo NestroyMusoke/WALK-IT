@@ -1,5 +1,9 @@
 # Current checkpoint — 1 November 2026
 
+## E08b same-endpoint scale screening
+
+Human confirmed three new saved runs used the same marks about 10 m apart by Apple Measure; measurement uncertainty is unknown. Capture audits passed: 20/17/17 frames and path lengths 4.435891/1.618258/6.529155 tracker units, max/min 4.034681. During actual recording, NORMAL/LIMITED frame counts were 554/0, 476/0 and 465/0. A fourth attempt aborted after one LIMITED frame and saved no route. Private `eval/sessions/e04-10m-scale-screening.json` has session IDs, capture hashes and config SHA. This fails tracker scale repeatability despite NORMAL status. These are neither verified metric calibration nor held-out visitor trials. E08b and live-arrow gates remain open; no fallback was taken. The next approved engineering investigation is E11d synthetic/start-anchor work, with metric binding still required.
+
 Spark and SAM real still-image access has been demonstrated on the same reviewed input. SAM returned two box/mask records. See the latest dated entries below for receipts and exact limitations. E05 full gate awaits billing/terms/revision; E08b field session is next. Temporary supervised iPhone link is private at ignored tmp/phone-link.txt, server PID 39780 and tunnel PID 12736 at this checkpoint; verify before reusing. No live route navigation has passed. Last observed commit 7cb2d14. Only two unrelated duplicate documents remain untracked alongside the E05 SAM changes.
 
 
