@@ -4,7 +4,7 @@ import {configurationHash} from './settings';
 import type {CameraFrame} from './display';
 import type {LiveUpload} from './live-upload';
 export class CaptureUI{
- private recorder?:HostCapture;private index=0;private masks:MaskRect[]=[];private pendingFinish=false;private startPoint?:{x:number;y:number};
+ private recorder?:HostCapture;private index=0;private masks:MaskRect[]=[];private pendingFinish=false;private startPoint?:{x:number;y:number};private reviewedReport?:unknown;
  private canvas=document.getElementById('review-image') as HTMLCanvasElement;
  private message=document.getElementById('capture-status')!;
  private btn=(id:string)=>document.getElementById(id) as HTMLButtonElement;
@@ -14,12 +14,12 @@ export class CaptureUI{
     if(!this.ready())throw Error('Wait for NORMAL tracking before recording.');
     this.btn('record-walk').disabled=true;
     const sha=await configurationHash();if(!this.ready())throw Error('Tracking changed. Wait for NORMAL and retry.');
-    this.recorder?.dispose();this.recorder=new HostCapture(crypto.randomUUID(),sha,true);this.recorder.start();
+    this.recorder?.dispose();this.reviewedReport=undefined;this.recorder=new HostCapture(crypto.randomUUID(),sha,true);this.recorder.start();
     this.btn('finish-walk').hidden=false;this.upload.add('step','host-recording-started');this.message.textContent='Recording. Walk slowly; keep the phone upright. Stop at your destination and tap Mark destination.';
    }catch(e){this.btn('record-walk').disabled=false;this.message.textContent=(e as Error).message;}
   };
   this.btn('finish-walk').onclick=()=>{this.pendingFinish=true;this.message.textContent='Hold still at the destination while the final frame is captured…';};
-  this.btn('discard-walk').onclick=()=>{this.recorder?.dispose();this.clearReview();this.message.textContent='Discarded from memory. Reload to start a new session.';this.finishCamera();};
+  this.btn('discard-walk').onclick=()=>{this.recorder?.dispose();this.reviewedReport=undefined;this.clearReview();this.btn('backup-reviewed-route').hidden=true;this.message.textContent='Discarded from memory. Reload to start a new session.';this.finishCamera();};
   this.canvas.onpointerdown=e=>{this.startPoint=this.point(e);this.canvas.setPointerCapture(e.pointerId);};
   this.canvas.onpointerup=e=>{
    if(!this.startPoint)return;const end=this.point(e),start=this.startPoint;this.startPoint=undefined;
@@ -29,10 +29,19 @@ export class CaptureUI{
   this.btn('clear-masks').onclick=()=>{this.masks=[];this.draw();};
   this.btn('approve-frame').onclick=()=>{
    try{this.recorder!.review(`kf${this.index}`,this.masks);this.index++;this.masks=[];
-    if(this.index<this.recorder!.count)this.draw();else{this.clearReview();this.btn('save-walk').hidden=false;this.message.textContent='Every image reviewed. Save the route privately to your laptop.';}
+    if(this.index<this.recorder!.count)this.draw();else{this.clearReview();this.btn('save-walk').hidden=false;this.btn('backup-reviewed-route').hidden=false;this.message.textContent='Every image reviewed. Save to laptop, or download a private backup if the connection is slow.';}
    }catch(e){this.message.textContent=(e as Error).message;}
   };
   this.btn('save-walk').onclick=()=>void this.save();
+  this.btn('backup-reviewed-route').onclick=()=>{
+   try{
+    const body=JSON.stringify(this.prepareReviewedReport());
+    const url=URL.createObjectURL(new Blob([body],{type:'application/json'}));
+    const link=document.createElement('a');link.href=url;link.download='walkit-reviewed-route-backup.json';link.click();
+    setTimeout(()=>URL.revokeObjectURL(url),30_000);
+    this.message.textContent='Private route backup downloaded. Keep it off Git; you can still retry Save to laptop.';
+   }catch(e){this.message.textContent=(e as Error).message;}
+  };
  }
  private point(e:PointerEvent){const r=this.canvas.getBoundingClientRect();return {x:Math.max(0,Math.min(this.canvas.width,Math.round((e.clientX-r.left)*this.canvas.width/r.width))),y:Math.max(0,Math.min(this.canvas.height,Math.round((e.clientY-r.top)*this.canvas.height/r.height)))};}
  private clearReview(){document.getElementById('image-review')!.hidden=true;this.canvas.width=this.canvas.height=0;this.masks=[];}
@@ -54,19 +63,24 @@ export class CaptureUI{
    }
   }catch(e){if(r.state==='recording')this.interrupt((e as Error).message);else{this.message.textContent=(e as Error).message;this.btn('record-walk').disabled=false;}}
  }
- private async save(){
-  this.btn('save-walk').disabled=true;
-  try{
+ private prepareReviewedReport(){
+   if(this.reviewedReport)return this.reviewedReport;
    const out=this.recorder!.exportReviewed();
    const images=out.images.map(f=>{
     const c=document.createElement('canvas');c.width=f.width;c.height=f.height;
     c.getContext('2d')!.putImageData(new ImageData(new Uint8ClampedArray(f.rgba),f.width,f.height),0,0);
     const png=c.toDataURL('image/png').split(',')[1];f.rgba.fill(0);c.width=c.height=0;return {id:f.id,png};
    });
+   this.reviewedReport={manifest:out.manifest,images,timing:out.timing};
+   return this.reviewedReport;
+ }
+ private async save(){
+  this.btn('save-walk').disabled=true;
+  try{
    this.message.textContent='Saving reviewed route to laptop. Keep this page open…';
-   const receipt=await this.upload.saveCapture({manifest:out.manifest,images,timing:out.timing});
+   const receipt=await this.upload.saveCapture(this.prepareReviewedReport());
    this.message.textContent=`Saved on laptop: ${receipt.frames} images. Receipt ${receipt.sha256.slice(0,12)}. You can close this page.`;
-   this.upload.add('step','host-route-saved',[receipt.frames]);void this.upload.flush();this.recorder!.dispose();this.btn('save-walk').hidden=true;
+   this.upload.add('step','host-route-saved',[receipt.frames]);void this.upload.flush();this.recorder!.dispose();this.reviewedReport=undefined;this.btn('save-walk').hidden=true;this.btn('backup-reviewed-route').hidden=true;
   }catch(e){this.message.textContent=(e as Error).message;}finally{this.btn('save-walk').disabled=false;}
  }
 }

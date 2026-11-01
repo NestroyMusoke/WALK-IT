@@ -35,7 +35,9 @@ export class LiveUpload{
     if(!this.session)throw Error('No connected session. Keep the page open and retry.');
     const body=JSON.stringify({id:this.session.id,report});
     if(new Blob([body]).size>settings.HOST_UPLOAD_LIMIT_BYTES)throw Error('Route is too large. Record a shorter walk.');
-    const response=await fetch('/__walkit/capture',{method:'POST',headers:{'Content-Type':'application/json','X-Walkit-Token':this.session.token},body,signal:AbortSignal.timeout(settings.HOST_UPLOAD_TIMEOUT_MS)});
+    // The route can be tens of MB on slow field Wi-Fi. Session expiry remains
+    // enforced by the receiver; a local backup remains available during upload.
+    const response=await fetch('/__walkit/capture',{method:'POST',headers:{'Content-Type':'application/json','X-Walkit-Token':this.session.token},body});
     if(!response.ok)throw Error(`Route not saved (${response.status}). Keep this page open and retry.`);
     const receipt=await response.json();
     if(receipt.saved!==true||receipt.id!==this.session.id||!/^[a-f0-9]{64}$/.test(receipt.sha256))throw Error('Invalid route receipt');
