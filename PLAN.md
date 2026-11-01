@@ -2,6 +2,8 @@
 
 Prepared 27 October 2026, Africa/Kampala. Planning document, not a completion claim.
 
+1 November update: the active task order is the critical-path section at the top of TASKS.md, based on docs/PATH_TO_FINAL.md: Meta smoke, one field session, small start-anchor SfM and held-out relocalization, bounded tracker-follow guidance, then Spark-to-SAM destination verification and paired ablation. The earlier full-route localization queue below is historical context. Retain the strict scale/transform, privacy, expiry and held-out gates. Every fallback requires a human decision. The supplied rubric is now captured in docs/DEMO_SPEC.md §2; it supersedes the earlier note that tables were missing. The planned 31 October freeze has elapsed; remaining work is unfinished, not retrospectively frozen or passed.
+
 ## 1. Product and first proof
 
 **Share the way. Follow it to the exact destination.**

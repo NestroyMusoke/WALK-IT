@@ -65,3 +65,12 @@ Full scripts/check.ps1 initially had an existing receiver-test 5 s timeout durin
 
 ## Next-card pre-registration — 30 October
 Read the user-supplied TASKS_NEXT, capture protocol and demo spec. Added five ordered task cards with pass rules before any new field collection or held-out evaluation. Reconciled validation/held-out split and kept live-arrow, privacy, licence and zero-spend gates. Documentation only; no feature or field result claimed.
+
+## E05 preparation — 30 October
+Three E05 acceptance tests were first run failing on a missing runner, then passed with the guarded Baseten Muse Spark Open request and private structured receipt parser. Local image pixels are re-encoded to PNG before upload. A PowerShell launcher keeps the API key out of history and Git. This is a preparation build, not a real model run. E05 remains unchecked pending a reviewed image, provider response, model revision and credit evidence. See E05_MODEL_SMOKE.md.
+Verification: 25 geometry tests passed; `scripts/check.ps1` passed 30 web tests, typecheck and isolated production build; `git diff --check` had no whitespace errors. The launcher rejected a missing reviewed image before requesting a key, as designed.
+While E05 waits for human input, added a blank E08b field sheet with eight predeclared independent attempts and separate position/heading uncertainty entries. No field result or E08b pass claimed.
+The human's first Baseten image request returned HTTP 403; initial script exposed only status, so no inference was made about its cause. Added two first-failing-then-passing tests for redacted JSON and non-JSON error handling. A subsequent failure now writes `eval/sessions/e05-baseten-error-*.json` without the key or raw HTML. E05 remains open.
+
+## E16a — 1 November
+Implemented the requested static evidence explorer after its acceptance tests failed on the missing module. Three explorer tests pass; scripts/check.ps1 passes setup, typecheck, all 33 web tests and isolated production build. Desktop browser visual inspection confirmed the replay label, empty state and zero published cases. No actual model pair, populated real-case rendering, phone layout or live navigation claim. Vite was not running; restarted local dev server on 127.0.0.1:5173. META_USAGE.md and the critical-path queue now reflect the actual blocked E05 state. User-supplied root PATH_TO_FINAL.md and duplicate capture file remain untouched.

@@ -43,3 +43,11 @@ Added a versioned private sparse route artifact builder with capture/map hash bi
 
 ## Next-card planning — 30 October
 Added predeclared E05 → E08b → E09d → E09e → E10c sequence and canonical capture/demo documents under `docs/`. No new data was evaluated or feature implemented.
+
+## E05 preparation — 30 October
+Added a guarded, metadata-stripping one-image Baseten Muse Spark Open smoke runner and private receipt format, plus a hidden-key PowerShell launcher and three acceptance tests. No model output or E05 pass is claimed.
+Added a blank E08b field sheet for eight predeclared visitor attempts, measurements and uncertainty; no field data collected yet.
+After the first human Baseten attempt returned HTTP 403, added a bounded, redacted private provider-error receipt. No model result claimed.
+
+## 1 November — critical path and evidence shell
+Reordered tasks to E05, one field session, small start-anchor relocalization, bounded tracker-follow arrows, Spark-to-SAM verification and paired ablation. Added META_USAGE.md, a static replay explorer with validated publication manifest, and case-format documentation. Empty public evidence set; no fabricated model output, provider switch or fallback. Tests: 33 web tests, typecheck and isolated build pass.

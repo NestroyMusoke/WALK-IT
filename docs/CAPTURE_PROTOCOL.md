@@ -5,6 +5,8 @@ Goal: collect data good enough to answer, with evidence, "does fresh-session loc
 Labels: all thresholds are **targets** until measured. Keep raw logs private (never in Git).
 
 ## 0. Before leaving the desk (10 min)
+**1 November critical-path addendum (supersedes smaller example counts below):** prepare five separately initiated correct fresh-session start trials and five wrong-start/decoy start trials. Separately declare twenty labelled approach attempts, five each correct/decoy/wrong-direction/wrong-start, for the paired verification ablation. Record any shared session IDs; these denominators are not interchangeable. The start map uses author walk 1 only; author walk 2 is validation; visitor starts/approaches are held-out. Collect enough calibrated translated views at the start to establish scale and map-to-route alignment, with independently measured position and heading uncertainty at query stops. A stationary pan cannot supply baseline. Save sticker screen evidence for the 15 CSS pixel / 3 m arc target in DEMO_SPEC. Live follow is not ready: record offline query/approach inputs until its gates pass. Ask before shortening/changing the approved route or taking any fallback. Three pilot walkers are optional and require their participation/recording permission; do not claim them if unavailable.
+
 - Phone charged above 80%, power bank packed, Do Not Disturb on, camera lens wiped, screen-lock disabled, auto-brightness off.
 - Build running from the exact commit under test; write the commit hash and config hash in the session sheet.
 - Written permission for the route (capture and, separately, publication) confirmed. No capture where people's faces dominate; pause when someone walks through.

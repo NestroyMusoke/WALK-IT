@@ -1,5 +1,10 @@
 # WALK IT
 
+Meta Global AI Developer Hackathon · **Build for Your World / Indie** (supplied guide).
+Planned model pipeline: **Muse Spark → SAM 3.1**, fused with geometric destination evidence. **No successful model response or live navigation pass is claimed yet.** See [Meta usage and current evidence](docs/META_USAGE.md).
+
+Run locally: `npm run dev`, then open `http://127.0.0.1:5173/evidence.html` for the static **RECORDED REPLAY** evidence explorer. The explorer is implemented with zero real cases published. The current critical path and predeclared gates are at the top of [TASKS.md](TASKS.md); [PATH_TO_FINAL](docs/PATH_TO_FINAL.md) is the supplied direction. All fallbacks need the user's decision.
+
 **Share the way. Follow it to the exact destination.**
 
 WALK IT is a planned camera-guided navigation experience: someone who knows a route captures it once, shares a link, and another person follows verified AR directions to the destination.

@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WALK IT · Evidence explorer</title><script type="module" src="./src/evidence.ts"></script></head>
+<body><main><header><strong>WALK IT</strong><span class="badge">RECORDED REPLAY</span></header>
+<h1>See the evidence.</h1><p class="intro">Inspect what the models saw, what the geometry allowed, and where the system refused to confirm.</p>
+<p>This page displays saved, publication-reviewed test cases. It does not run models, access your camera or provide live navigation.</p>
+<p id="status" role="status">Loading published evidence…</p>
+<section aria-label="Paired results"><h2>With and without model evidence</h2>
+<label for="split">Show split </label><select id="split"><option value="held-out">Held-out visitor cases</option><option value="validation">Validation cases</option></select>
+<p id="scope"></p><div id="counts"></div><p>Counts describe the published cases in this split only. A selected sample cannot establish accuracy for the complete trial set.</p></section>
+<section><h2>Case explorer</h2><div id="cases"></div></section>
+<footer>Missing evidence stays missing. A mask or a readable number alone does not identify the destination.</footer>
+</main></body></html>
