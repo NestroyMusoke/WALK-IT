@@ -55,3 +55,8 @@ Walk the permitted route twice, at different times if possible (first in even li
 - Export logs; copy to the private `eval/sessions/` folder (not committed). Record sizes and hashes in the session sheet.
 - Delete any frame with a recognizable face before further use; review before any image leaves the laptop.
 - Tell Codex: session sheet contents, anything unusual (lighting change, people, tracking loss moments by clock time).
+# One-walk product capture
+
+For the current one-author-recording product flow, follow [ONE_WALK_CAPTURE.md](ONE_WALK_CAPTURE.md). The multi-walk procedure below is historical development evaluation and must not be presented as a requirement for a host to author one route.
+
+\n

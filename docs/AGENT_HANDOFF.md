@@ -1,4 +1,8 @@
-# Current checkpoint — 1 November 2026
+# Current checkpoint — 2 November 2026
+
+E11d-3e/3f: experimental full-route reference-image-to-3D matcher passed author repeats 7/8 at 39/40 and 40/40 but both previously inspected saved fresh scans still yielded 0/10 accepted. Candidate code is not installed in visitor guidance and must not be treated as success. E11d-3g added `geometry/author_intake.py` with four synthetic tests: reviewed capture, map identity, image/calibration/path consistency and start/end map coverage; prior backup 6 had 10/10 start and 3/3 final covered yet only 9.1805° first-ten viewing span. E11d-3h added `docs/LOCALIZATION_ARCHITECTURE.md` for one recording and an independent live visitor gate. All 74 Python geometry tests passed, and `scripts/check.ps1` passed 56 web tests, typecheck and build. No field navigation, 95% probability, metric alignment or live arrow is established. Private reports are in ignored `eval/sessions`. User commits manually; current changes including TASKS/docs/experimental matcher/intake remain uncommitted. Next card must solve natural-landmark fresh-session localization and map/route scale before arrows can be authorized. Do not ask for a new recording until a phone capture-to-map-to-visitor workflow is preflighted end to end.
+
+# Older checkpoint — 1 November 2026
 
 E13b-3 added `geometry/receipt_pair.py` and two synthetic tests (12 across verifier/mask/receipt suites). It checks image/config/model/concept provenance and passes trusted route pixels through actual mask decoding before candidate evaluation. The old real Spark and SAM access-smoke receipts share image SHA but differ in config SHA; offline adapter returns `abstain: image-or-config-mismatch`, and Spark's own usability flag was false. No real paired destination decision, live projection or visitor ablation exists. Do not force old receipts together or relax the config gate. No new model call or agent commit.
 

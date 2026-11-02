@@ -208,4 +208,14 @@ Ran synthetic yaw stress and a multi-view descriptor candidate on author validat
 
 Added a print-size-checked A4 start marker PDF, pinned its physical dimensions in vision config, archived the previous configuration, and added an OpenCV 5 detector that refuses wrong IDs. The synthetic detector test passed. Phone pose, route scale and live guidance remain open.
 
-\n
+## 2 November: E11d-3b frozen full-route map diagnostic
+
+Queried the two saved fresh scans against the pre-existing full-route author map with its archived configuration. Both still refused all ten declared start frames. No production matcher or threshold changed.
+
+## 2 November: one-walk protocol and image-pair diagnostic
+
+Added the one-session author capture instructions and linked them from the older multi-walk protocol. Compared saved fresh scans to frozen author reference images without changing production matching. Some image pairs have geometric overlap; no visitor pose or live route passed.
+
+## 2 November: reference matching screen and one-walk intake
+
+Added an experimental OpenCV 5 reference-image matcher and a private one-walk intake CLI. Author-repeat poses passed the matcher screen, but two previously inspected fresh scans each remained at 0/10 accepted under frozen gates. The intake CLI checks reviewed images, calibration, map identity and start/end coverage. The prior recording passed these structural checks while spanning only 9.1805° at the start. No live guidance is authorized. Python geometry tests and the full web check passed.
