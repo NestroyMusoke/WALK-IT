@@ -1,5 +1,9 @@
 # Changes
 
+## 2 November — Reviewed start-scan query
+
+Added an offline scan command that runs the existing OpenCV 5 start-map query on the configured first frames of a separately captured, privacy-reviewed walk. Its report counts refused frames and records raw input/config hashes without copying images. It explicitly leaves live freshness, metric scale, navigation and arrow authorization unresolved. Two existing author validation walks ran successfully; no visitor navigation claim follows from them.
+
 ## 2 November — Fresh geometric anchor gate
 
 Added a tested decision function requiring current tracking, a fresh latest OpenCV pose and a contiguous run of consistent poses. It rejects stale or newly failed poses instead of carrying an older anchor forward. Its output remains a diagnostic candidate with arrows disabled until the separate metric, wrong-start and visitor gates pass.
