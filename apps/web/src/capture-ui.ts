@@ -3,6 +3,7 @@ import {copyCaptureFrame} from './capture-frame';
 import {configurationHash} from './settings';
 import type {CameraFrame} from './display';
 import type {LiveUpload} from './live-upload';
+import {makePrivateRouteBackup} from './route-backup';
 export class CaptureUI{
  private recorder?:HostCapture;private index=0;private masks:MaskRect[]=[];private pendingFinish=false;private startPoint?:{x:number;y:number};private reviewedReport?:unknown;
  private canvas=document.getElementById('review-image') as HTMLCanvasElement;
@@ -35,18 +36,13 @@ export class CaptureUI{
   this.btn('clear-masks').onclick=()=>{this.masks=[];this.draw();};
   this.btn('approve-frame').onclick=()=>{
    try{this.recorder!.review(`kf${this.index}`,this.masks);this.index++;this.masks=[];
-    if(this.index<this.recorder!.count)this.draw();else{this.clearReview();this.btn('save-walk').hidden=false;this.btn('backup-reviewed-route').hidden=false;this.message.textContent='Every image reviewed. Save to laptop, or download a private backup if the connection is slow.';}
+    if(this.index<this.recorder!.count)this.draw();else{this.clearReview();this.btn('save-walk').hidden=false;this.btn('backup-reviewed-route').hidden=false;this.message.textContent='Every image reviewed. Saving will first download a private backup with the route and numeric logs.';}
    }catch(e){this.message.textContent=(e as Error).message;}
   };
   this.btn('save-walk').onclick=()=>void this.save();
   this.btn('backup-reviewed-route').onclick=()=>{
-   try{
-    const body=JSON.stringify(this.prepareReviewedReport());
-    const url=URL.createObjectURL(new Blob([body],{type:'application/json'}));
-    const link=document.createElement('a');link.href=url;link.download='walkit-reviewed-route-backup.json';link.click();
-    setTimeout(()=>URL.revokeObjectURL(url),30_000);
-    this.message.textContent='Private route backup downloaded. Keep it off Git; you can still retry Save to laptop.';
-   }catch(e){this.message.textContent=(e as Error).message;}
+   try{this.downloadPrivateBackup();this.message.textContent='Private route and numeric log backup downloaded together. Keep it off Git; you can still retry Save to laptop.';}
+   catch(e){this.message.textContent=(e as Error).message;}
   };
  }
  private point(e:PointerEvent){const r=this.canvas.getBoundingClientRect();return {x:Math.max(0,Math.min(this.canvas.width,Math.round((e.clientX-r.left)*this.canvas.width/r.width))),y:Math.max(0,Math.min(this.canvas.height,Math.round((e.clientY-r.top)*this.canvas.height/r.height)))};}
@@ -81,10 +77,17 @@ export class CaptureUI{
    this.reviewedReport={manifest:out.manifest,images,timing:out.timing};
    return this.reviewedReport;
  }
+ private downloadPrivateBackup(){
+   const body=JSON.stringify(makePrivateRouteBackup(this.prepareReviewedReport(),this.upload.diagnosticSnapshot()));
+   const url=URL.createObjectURL(new Blob([body],{type:'application/json'}));
+   const link=document.createElement('a');link.href=url;link.download='walkit-reviewed-route-evidence.json';link.click();
+   setTimeout(()=>URL.revokeObjectURL(url),30_000);
+ }
  private async save(){
   this.btn('save-walk').disabled=true;
   try{
-   this.message.textContent='Saving reviewed route to laptop. Keep this page open…';
+   this.downloadPrivateBackup();
+   this.message.textContent='Private evidence backup downloaded. Saving reviewed route to laptop. Keep this page open…';
    const receipt=await this.upload.saveCapture(this.prepareReviewedReport());
    this.message.textContent=`Saved on laptop: ${receipt.frames} images. Receipt ${receipt.sha256.slice(0,12)}. You can close this page.`;
    this.upload.add('step','host-route-saved',[receipt.frames]);void this.upload.flush();this.recorder!.dispose();this.reviewedReport=undefined;this.btn('save-walk').hidden=true;this.btn('backup-reviewed-route').hidden=true;

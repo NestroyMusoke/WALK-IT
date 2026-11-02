@@ -19,7 +19,7 @@ For each of three **separate** runs:
 2. Expand **Record permitted route**. At the 0 mark, tap **Start 3-second sway** and move the phone gently sideways while facing a textured fixed scene. When **Record walk** unlocks, tap it. Keep the phone upright at approximately the same height.
 3. While standing at the 0 mark, tap **Tap at 0 m mark**. Walk at a natural steady pace. Stop briefly at each physical mark and tap its matching button. Do not tap while between marks. Keep the camera facing forward; no running or fast turns.
 4. At the last mark, stand still and tap **Mark destination**. Wait for the review screen. Inspect every image, mask any face, plate or private detail, then approve every frame.
-5. Tap **Save reviewed route to laptop**. Wait for the saved receipt and frame count. If saving stalls, download the private backup before closing the page. Do not put the backup in Git. Record run number, receipt prefix, frame count and anything unusual. Reload the page before the next run so it is a new engine session.
+5. Tap **Download backup and save to laptop**. The download must finish before you close Safari. The new `walkit-reviewed-route-evidence.json` contains the reviewed images and numeric mark logs together; keep it private and off Git. Wait for the saved receipt and frame count. If saving stalls, keep the downloaded backup and note the failed attempt. Record run number, receipt prefix if any, frame count and anything unusual. Reload the page before the next run so it is a new engine session. Old `walkit-reviewed-route-backup*.json` files contain images but cannot recover mark taps.
 
 Do not redo a bad run without recording that it was attempted and why it failed. If the app aborts, write that down; it is part of the denominator.
 
@@ -31,7 +31,7 @@ Run the same capture flow twice with the same physical start and end. Label walk
 
 ## What to tell Codex after saving
 
-Send only: `three marked runs saved`, the six physical mark distances, how you measured them and estimated uncertainty or `unknown`, the five capture receipt prefixes and frame counts, the 20 to 25 m route length and uncertainty, whether the two author walks used identical start/turn/end marks, and any aborted attempts. The server stores numeric logs and reviewed captures under ignored `eval/sessions/`; Codex can inspect them directly while this workspace is available. The new `geometry/marked_scale.py` report extracts the tap positions, per-segment tracker units per metre, missing taps and source hashes without treating them as navigation success. Do not paste private images, access keys or the completed location sheet into chat.
+Send only: `three marked runs saved`, the six physical mark distances, how you measured them and estimated uncertainty or `unknown`, the five capture receipt prefixes and frame counts, the 20 to 25 m route length and uncertainty, whether the two author walks used identical start/turn/end marks, and any aborted attempts. The server stores numeric logs and reviewed captures under ignored `eval/sessions/` when upload succeeds. The new backup preserves both if upload fails. `geometry/marked_scale.py --backup <private-file> --marks-m ... --uncertainty-m unknown` extracts the tap positions, per-segment tracker units per metre and source hashes without treating them as navigation success. Do not paste private images, access keys or the completed location sheet into chat.
 
 ## Later visitor gate
 

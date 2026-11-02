@@ -1,5 +1,9 @@
 # Changes
 
+## 2 November — Recoverable field evidence backup
+
+The reviewed route backup now includes numeric camera, motion and mark events in one private download with a matching configuration hash and no access token. Saving starts that download before server upload. The marked-scale analyzer can read the new backup and selects taps from the latest recording attempt. The field protocol and task queue record why the five old route-only backups cannot support the marked-scale gate.
+
 ## 2 November — Marked field run preparation
 
 Added a private marked-walk analyzer and synthetic tests, plus one exact field protocol for three measured short walks and two author walks. It records per-segment tracker displacement, source/config hashes, missing marks and stated measurement uncertainty, without treating a diagnostic as navigation evidence. A user-approved temporary protected tunnel was verified for the existing iPhone capture page. The visitor share-link flow remains unconnected.

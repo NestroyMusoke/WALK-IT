@@ -43,5 +43,6 @@ export class LiveUpload{
     if(receipt.saved!==true||receipt.id!==this.session.id||!/^[a-f0-9]{64}$/.test(receipt.sha256))throw Error('Invalid route receipt');
     return receipt as {id:string;frames:number;sha256:string};
   }
+  diagnosticSnapshot(){return {configSha256:this.sha,events:this.events.map(e=>({...e,values:[...e.values]}))};}
   download(){const a=document.createElement('a'),url=URL.createObjectURL(new Blob([JSON.stringify({build:'E03-1',configSha256:this.sha,sent:this.sent,events:this.events})],{type:'application/json'}));a.href=url;a.download='walkit-live-diagnostic.json';a.click();URL.revokeObjectURL(url);}
 }
