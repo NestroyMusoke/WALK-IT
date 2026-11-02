@@ -204,3 +204,8 @@ Validated and privately preserved the supplied 40-image start scan. The frozen f
 Ran synthetic yaw stress and a multi-view descriptor candidate on author validation data. Both failed their predeclared robustness screens; no production matcher or threshold changed. The student declined the printed-marker fallback.
 
 \n
+## 2 November: E11d-3a approved start marker preparation
+
+Added a print-size-checked A4 start marker PDF, pinned its physical dimensions in vision config, archived the previous configuration, and added an OpenCV 5 detector that refuses wrong IDs. The synthetic detector test passed. Phone pose, route scale and live guidance remain open.
+
+\n
