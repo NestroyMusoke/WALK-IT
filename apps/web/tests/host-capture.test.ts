@@ -38,3 +38,12 @@ it('rejects mismatched pixel buffers and stationary-only capture',()=>{
  const stationary=new HostCapture('test','a'.repeat(64),true);stationary.start();stationary.offer(sample(0,0),0);stationary.offer(sample(1000,0),1000);
  expect(()=>stationary.finish()).toThrow();
 });
+it('labels a visitor start scan and requires enough translated start views',()=>{
+ const r=new HostCapture('visitor-scan','a'.repeat(64),true,'visitor-start-scan');r.start();
+ for(let i=0;i<settings.START_MAP_FRAME_CAPACITY_COUNT-1;i++)r.offer(sample(i*1000,-i),i*1000);
+ expect(()=>r.finish()).toThrow();
+ r.offer(sample((settings.START_MAP_FRAME_CAPACITY_COUNT-1)*1000,-settings.START_MAP_FRAME_CAPACITY_COUNT),
+   (settings.START_MAP_FRAME_CAPACITY_COUNT-1)*1000);
+ r.finish();for(let i=0;i<r.count;i++)r.review(`kf${i}`,[]);
+ expect(r.exportReviewed().purpose).toBe('visitor-start-scan');
+});

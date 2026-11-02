@@ -34,3 +34,8 @@ it('recovers a complete reviewed route and mark taps after offline download',()=
  expect(recovered.diagnostic?.events.map(event=>event.label)).toEqual(['mark-2m']);
  expect(JSON.stringify(saved)).not.toContain('token');
 });
+it('retains visitor start-scan purpose in a private evidence backup',()=>{
+ const visitor={...capture,purpose:'visitor-start-scan'};
+ const backup=makePrivateRouteBackup(visitor,diagnostic);
+ expect(parsePrivateRouteBackup(backup).capture.purpose).toBe('visitor-start-scan');
+});

@@ -2,6 +2,7 @@ import {PerspectiveCamera} from 'three';
 import {ViewportCalibration,projectReference,type CameraFrame,type WorldPoint} from './display';
 import {ReferenceRenderer} from './reference-renderer';
 import {settings,configurationHash} from './settings';
+import type {AuthorizedRouteArrow} from './route-arrow';
 export function fixtureCamera(width:number,height:number,moved=false):CameraFrame{
   const camera=new PerspectiveCamera(settings.QA_CAMERA_FOV_DEG,width/height,settings.NEAR_CLIP_M,settings.FAR_CLIP_M);
   if(moved){camera.position.set(0.25,0.1,0.1);camera.rotation.y=0.1;}
@@ -33,4 +34,18 @@ export async function runDisplayCheck(){
     return {build:'E02-1',kind:'synthetic GPU rasterization; not phone tracking',configSha256:await configurationHash(),
       passed:results.every(r=>r.passed),results};
   }finally{renderer.dispose();}
+}
+/** Synthetic WebGL arrow raster check. No camera or localization claim. */
+export function runArrowRasterCheck(arrow:AuthorizedRouteArrow,frame:CameraFrame){
+ const canvas=document.createElement('canvas');canvas.width=500;canvas.height=500;
+ const renderer=new ReferenceRenderer(canvas);
+ try{
+  renderer.draw(null,frame,canvas.width,canvas.height,1,true,arrow);
+  const gl=renderer.renderer.getContext();const pixels=new Uint8Array(canvas.width*canvas.height*4);
+  gl.readPixels(0,0,canvas.width,canvas.height,gl.RGBA,gl.UNSIGNED_BYTE,pixels);
+  let coloredPixels=0;
+  for(let i=0;i<pixels.length;i+=4)if(pixels[i+1]>pixels[i]&&pixels[i]>pixels[i+2])coloredPixels++;
+  const glError=gl.getError();
+  return {kind:'synthetic WebGL route arrow; not phone navigation',coloredPixels,glError,passed:coloredPixels>0&&glError===gl.NO_ERROR};
+ }finally{renderer.dispose();}
 }

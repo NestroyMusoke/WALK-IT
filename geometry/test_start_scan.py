@@ -29,6 +29,7 @@ def fixture():
     frames = [{"id": f"q{i}", "width": 100, "height": 100, "intrinsics": [1, 0, 50, 0, 1, 50, 0, 0, 1]}
               for i in range(CFG["START_MAP_FRAME_CAPACITY_COUNT"] + 2)]
     capture = {
+        "purpose": "visitor-start-scan",
         "manifest": {"privacy": {"capturePermitted": True, "imagesReviewed": True},
                      "configSha256": "c" * 64, "keyframes": frames},
         "images": [{"id": frame["id"], "png": "private"} for frame in frames],
@@ -50,6 +51,7 @@ class StartScanTests(unittest.TestCase):
         self.assertEqual(report["attemptedFrames"], len(calls))
         self.assertEqual(report["acceptedHypotheses"], len(calls))
         self.assertEqual(report["geometryConfigSha256"], CFG_SHA)
+        self.assertEqual(report["capturePurpose"], "visitor-start-scan")
         self.assertEqual(report["reason"], "offline-query-only-live-freshness-unknown")
         self.assertFalse(report["navigationReady"])
         self.assertFalse(report["arrowAuthorized"])
@@ -71,6 +73,9 @@ class StartScanTests(unittest.TestCase):
         same_source = copy.deepcopy(model)
         same_source["captureSha256"] = hashlib.sha256(json.dumps(capture, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
         cases.append((same_source, capture))
+        wrong_role = copy.deepcopy(capture)
+        wrong_role["purpose"] = "admin"
+        cases.append((model, wrong_role))
         for bad_map, bad_capture in cases:
             with self.subTest(case=len(cases)):
                 with self.assertRaises(ValueError):

@@ -4,10 +4,14 @@ function object(v:unknown,keys:string[]){
  return v as Record<string,unknown>;
 }
 export function validateCapture(value:unknown,limits:Record<string,number>){
- const c=object(value,['manifest','images','timing']);
+ const keys=value&&typeof value==='object'&&'purpose' in value?['purpose','manifest','images','timing']:['manifest','images','timing'];
+ const c=object(value,keys);
+ const purpose=c.purpose??'author-route';
+ if(purpose!=='author-route'&&purpose!=='visitor-start-scan')throw Error('Invalid capture purpose');
  const manifest=validateRouteBundle(c.manifest,limits.QUATERNION_NORM_TOLERANCE);
  if(manifest.source!=='captured'||manifest.keyframes.length>limits.HOST_MAX_KEYFRAMES_COUNT)throw Error('Invalid capture source or capacity');
  if(!Array.isArray(c.images)||!Array.isArray(c.timing)||c.images.length!==manifest.keyframes.length||c.timing.length!==manifest.keyframes.length)throw Error('Incomplete capture');
+ if(purpose==='visitor-start-scan'&&manifest.keyframes.length<limits.START_MAP_FRAME_CAPACITY_COUNT)throw Error('Incomplete visitor start scan');
  const images=c.images.map((v,i)=>{
   const f=object(v,['id','png']),k=manifest.keyframes[i];
   if(f.id!==k.id||k.image!==`frames/${k.id}.png`||k.width>limits.HOST_IMAGE_MAX_EDGE_PX||k.height>limits.HOST_IMAGE_MAX_EDGE_PX||typeof f.png!=='string'||!(/^[A-Za-z0-9+/]+={0,2}$/).test(f.png))throw Error('Invalid capture image');
@@ -21,5 +25,5 @@ export function validateCapture(value:unknown,limits:Record<string,number>){
   if(t.id!==manifest.keyframes[i].id||typeof t.receivedAtMs!=='number'||!Number.isFinite(t.receivedAtMs)||t.receivedAtMs<0||t.receivedAtMs<=lastT||typeof t.videoTime!=='number'||!Number.isFinite(t.videoTime)||t.videoTime<=lastVideo)throw Error('Invalid capture timing');
   lastT=t.receivedAtMs;lastVideo=t.videoTime;return {id:t.id,receivedAtMs:lastT,videoTime:lastVideo};
  });
- return {manifest,images,timing};
+ return {purpose,manifest,images,timing};
 }

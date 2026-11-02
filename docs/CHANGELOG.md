@@ -1,5 +1,17 @@
 # Changes
 
+## 2 November — Live camera guidance hook
+
+Connected the route-arrow selector to each frame of the phone camera renderer. Tracking loss, expiry and rejected replacement evidence clear the guidance controller. It starts empty until a verified route and live OpenCV anchor are available.
+
+## 2 November — World-locked camera arrow fixture
+
+Added a directional arrow sprite to the camera WebGL renderer, selected from a route segment only when route, localization and tracking evidence pass the configured gates. Added a synthetic raster page to inspect the drawing. The visitor route and verified live anchor are not connected yet, so this does not claim live navigation.
+
+## 2 November — Separate visitor start scan
+
+Added a labelled visitor scan action on the phone capture page. It requires the same tracked, translated frames and manual image review as the author walk, with at least ten start views. The private backup and resumable upload preserve the capture purpose. This supplies offline visitor evidence for localization; the live camera arrow experience is still a separate build and field gate.
+
 ## 2 November — Reviewed start-scan query
 
 Added an offline scan command that runs the existing OpenCV 5 start-map query on the configured first frames of a separately captured, privacy-reviewed walk. Its report counts refused frames and records raw input/config hashes without copying images. It explicitly leaves live freshness, metric scale, navigation and arrow authorization unresolved. Two existing author validation walks ran successfully; no visitor navigation claim follows from them.
@@ -168,3 +180,7 @@ Added a semantic React liquid button for entry links and the matching lightweigh
 Rebuilt the entry page with a tactile split hero, framed flock, clear product journey, Hairline route study, pause rule and honest field-build actions. Used the supplied 8B template as layout inspiration without importing its product content or scripts. Removed em dashes from page copy.
 
 Tightened flock convergence so WALK IT becomes legible inside the smaller framed hero. Added a failed-first convergence test and inspected the formed result in the browser.
+
+# 2 November: E11d-2d, E11d-2e and E12b visitor camera preparation
+
+Added a separate, privacy-reviewed visitor start scan and offline OpenCV 5 query contract. Compared frozen author stair routes with unchanged gates. Added a guarded route arrow in the live camera renderer and a visitor status that waits for verification or pauses when evidence expires. The synthetic browser arrow raster passed, and the full web check passed 56 tests. Real visitor navigation remains unverified.

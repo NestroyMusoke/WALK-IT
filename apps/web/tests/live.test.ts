@@ -2,6 +2,7 @@ import {it,expect} from 'vitest';
 import {PerspectiveCamera} from 'three';
 import {readReality} from '../src/tracker';
 import {validateLiveBatch} from '../../../server/live-schema';
+import {readFileSync} from 'node:fs';
 const reality=()=>({trackingStatus:'NORMAL',position:{x:0,y:0,z:0},rotation:{x:0,y:0,z:0,w:1},intrinsics:new PerspectiveCamera().projectionMatrix.toArray()});
 it('accepts a complete normal pose and rejects degraded or malformed camera data',()=>{
   expect(readReality(reality())).not.toBeNull();
@@ -14,4 +15,16 @@ it('retains timestamped rejected frames while rejecting image payloads and nonfi
   expect(validateLiveBatch(batch).events[0].label).toBe('LIMITED');
   expect(()=>validateLiveBatch({...batch,image:'private'})).toThrow();
   expect(()=>validateLiveBatch({...batch,events:[{...batch.events[0],values:[NaN]}]})).toThrow();
+});
+it('offers a separate visitor start scan with honest offline wording',()=>{
+ const html=readFileSync(new URL('../live.html',import.meta.url),'utf8');
+ expect(html).toContain('id="record-start-scan"');
+ expect(html).toContain('Record visitor start scan');
+ expect(html).toContain('offline localization testing');
+});
+it('puts a truthful visitor guidance state over the live camera',()=>{
+ const html=readFileSync(new URL('../live.html',import.meta.url),'utf8');
+ expect(html).toContain('id="visitor-guidance"');
+ expect(html).toContain('id="guidance-status"');
+ expect(html).toContain('Waiting for a verified start');
 });

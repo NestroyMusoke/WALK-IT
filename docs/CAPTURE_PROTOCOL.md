@@ -4,6 +4,8 @@ Goal: collect data good enough to answer, with evidence, "does fresh-session loc
 
 Labels: all thresholds are **targets** until measured. Keep raw logs private (never in Git).
 
+**2 November capture update:** The phone page now has distinct **Record author walk** and **Record visitor start scan** actions. For a fresh visitor trial, open a new camera session at the known start, perform the three-second sideways sway, choose the visitor scan, and keep moving slowly sideways until at least ten tracked images are recorded. Tap **Finish start scan**, review and mask every image, then download the private backup and save to the laptop. Record the physical start mark, independent visitor identity, attempt number and whether it was a correct or wrong start on the private session sheet. The uploaded capture carries `purpose: visitor-start-scan`; that label does not itself prove independence. The current scan is an **offline localization input**. Do not ask the visitor to follow guidance or score a guided arrival until the live camera arrows and their safety gates are implemented and field verified. Preserve every attempted scan, including refusals and upload failures.
+
 ## 0. Before leaving the desk (10 min)
 **1 November critical-path addendum (supersedes smaller example counts below):** prepare five separately initiated correct fresh-session start trials and five wrong-start/decoy start trials. Separately declare twenty labelled approach attempts, five each correct/decoy/wrong-direction/wrong-start, for the paired verification ablation. Record any shared session IDs; these denominators are not interchangeable. The start map uses author walk 1 only; author walk 2 is validation; visitor starts/approaches are held-out. Collect enough calibrated translated views at the start to establish scale and map-to-route alignment, with independently measured position and heading uncertainty at query stops. A stationary pan cannot supply baseline. Save sticker screen evidence for the 15 CSS pixel / 3 m arc target in DEMO_SPEC. Live follow is not ready: record offline query/approach inputs until its gates pass. Ask before shortening/changing the approved route or taking any fallback. Three pilot walkers are optional and require their participation/recording permission; do not claim them if unavailable.
 
@@ -35,7 +37,7 @@ Walk the permitted route twice, at different times if possible (first in even li
 ## 3. Visitor session (E08 visitor part, different person if possible)
 - A person who has not walked the route opens the link on the same phone first (fresh session, app fully closed and reopened), then a different phone if available.
 - Start at the landmark; scan 3 to 5 s with a small sideways sway. Do NOT help or point.
-- Follow the guidance; record screen plus a second phone filming the walker from behind if possible.
+- Once live guidance passes its separate gate, follow the camera arrows and record screen evidence. Until then, collect the labelled offline start scan and approach inputs without scoring a guided arrival.
 - Run these approach cases, **n declared before starting** (example: 5 each): correct destination; the similar alternative; approach from the wrong direction; scan from a slightly wrong start spot (about 2 m off).
 - Log every outcome (arrived / refused / unsure / lost) with timestamps. Do not discard failures.
 

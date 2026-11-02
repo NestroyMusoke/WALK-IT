@@ -8,6 +8,7 @@ import {LiveUpload} from './live-upload';
 import {CaptureUI} from './capture-ui';
 import {viewportCoversCanvas} from './capture-frame';
 import {medianWorldPointDepth,serializeSdkCall} from './capture-telemetry';
+import {GuidanceRuntime} from './guidance-runtime';
 import './live.css';
 type Pipeline=Record<string,unknown>;
 type LiveSdk={initialize:()=>Promise<void>;run:(options:Record<string,unknown>)=>void;stop:()=>void;clearCameraPipelineModules:()=>void;addCameraPipelineModules:(modules:Pipeline[])=>void;
@@ -17,6 +18,13 @@ const el=(id:string)=>document.getElementById(id)!;
 const button=(id:string)=>el(id) as HTMLButtonElement;
 const canvas=el('camera') as HTMLCanvasElement;
 const calibration=new ViewportCalibration(),anchor=new DiagnosticAnchor();
+const guidance=new GuidanceRuntime();
+function showGuidanceStatus(){
+ const message=guidance.status==='following'?'Following the verified route. Keep walking and watching your surroundings.':
+  guidance.status==='paused'?'Guidance paused. No route arrow. Stop and rescan the starting place.':
+  'Waiting for a verified start. No route arrow yet.';
+ if(el('guidance-status').textContent!==message)el('guidance-status').textContent=message;
+}
 const upload=new LiveUpload(message=>{el('upload').textContent=message;});
 let sdk:LiveSdk,renderer:ReferenceRenderer|undefined,gl:WebGL2RenderingContext|undefined;
 let running=false,frame:CameraFrame|null=null,lastFresh=-Infinity,lastStatus='',phase=0,lastUi=0;
@@ -37,13 +45,14 @@ const instructions=[
 function hide(reason:string){anchor.clear();el('blocked').hidden=false;el('blocked').style.background='#081514';el('blocked').textContent=reason;}
 function geometry(){
   const rect=canvas.getBoundingClientRect();size=calibration.sync(canvas,rect.width,rect.height,devicePixelRatio);
-  if(size.changed){capture.interrupt('display resized');anchor.clear();frame=null;
+  if(size.changed){capture.interrupt('display resized');anchor.clear();guidance.clear();frame=null;
     if(sdk&&running)updateProjection({cam:{pixelRectWidth:size.width,pixelRectHeight:size.height,nearClipPlane:settings.NEAR_CLIP_M,farClipPlane:settings.FAR_CLIP_M}});
     upload.add('status','display-resized',[size.width,size.height,size.cssWidth,size.cssHeight,size.ratio]);
   }
 }
 function stop(reason='user-finished'){
   capture.interrupt(reason);
+  guidance.clear();
   window.removeEventListener('devicemotion',onDeviceMotion);
   if(!running)return;running=false;upload.add('end',reason);hide('Test ended. Keep this page open until logs are saved.');
   try{sdk.stop();sdk.clearCameraPipelineModules();}catch{}
@@ -93,7 +102,7 @@ button('start').addEventListener('click',async()=>{
           if(!frame)capture.interrupt('tracking lost');
           const vp=processGpuResult?.gltexturerenderer?.viewport;viewport=vp?[vp.width,vp.height,vp.offsetX,vp.offsetY]:[0,0,0,0];
           if(frame&&!frameStartResult?.repeatFrame)lastFresh=now;
-          if(!frame)anchor.clear();
+          if(!frame){anchor.clear();guidance.clear();showGuidanceStatus();}
           if(status!==lastStatus){upload.add('status',status);lastStatus=status;}
           const depth=frame?medianWorldPointDepth(reality?.worldPoints,frame):{count:0,validDepthCount:0,medianDepth:null};
           upload.add('world-points',status,[depth.count,depth.validDepthCount,depth.medianDepth??-1,videoTime,now]);
@@ -109,7 +118,9 @@ button('start').addEventListener('click',async()=>{
           const point=anchor.read({revision:size.revision,tracking:true,frameMs:lastFresh,nowMs:performance.now()});
           const visible=point&&projectReference(point,frame,size.cssWidth,size.cssHeight);
           const state=sdk.GlTextureRenderer.getGLctxParameters(gl,[gl.TEXTURE0]);
-          try{renderer.draw(visible?point:null,frame,canvas.width,canvas.height,size.ratio);}finally{sdk.GlTextureRenderer.setGLctxParameters(gl,state);}
+          const routeArrow=guidance.read(frame,lastStatus,performance.now(),lastFresh,size.cssWidth,size.cssHeight);
+          showGuidanceStatus();
+          try{renderer.draw(visible?point:null,frame,canvas.width,canvas.height,size.ratio,false,routeArrow);}finally{sdk.GlTextureRenderer.setGLctxParameters(gl,state);}
         },
         onException:(error:unknown)=>fail(error instanceof Error?error.message:'Camera engine exception'),
         onCameraStatusChange:({status}:{status:string})=>{upload.add('status',`camera-${status}`);if(status==='failed')fail('Camera permission or device failed');}

@@ -8,11 +8,11 @@ import {mkdtemp,readFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {createHash} from 'node:crypto';
-const limits={HOST_MAX_KEYFRAMES_COUNT:60,HOST_IMAGE_MAX_EDGE_PX:640,QUATERNION_NORM_TOLERANCE:.01};
-function fixture(){
+const limits={HOST_MAX_KEYFRAMES_COUNT:60,HOST_IMAGE_MAX_EDGE_PX:640,QUATERNION_NORM_TOLERANCE:.01,START_MAP_FRAME_CAPACITY_COUNT:10};
+function fixture(count=2){
  const r=new HostCapture('route','a'.repeat(64),true);r.start();
- for(let i=0;i<2;i++)r.offer({t:i*1000,videoTime:i,revision:1,tracking:true,width:1,height:1,rgba:new Uint8ClampedArray(4),frame:{position:[i,0,0],rotation:[0,0,0,1],projection:new PerspectiveCamera().projectionMatrix.toArray()}},i*1000);
- r.finish();r.review('kf0',[]);r.review('kf1',[]);const out=r.exportReviewed();
+ for(let i=0;i<count;i++)r.offer({t:i*1000,videoTime:i,revision:1,tracking:true,width:1,height:1,rgba:new Uint8ClampedArray(4),frame:{position:[i,0,0],rotation:[0,0,0,1],projection:new PerspectiveCamera().projectionMatrix.toArray()}},i*1000);
+ r.finish();for(let i=0;i<count;i++)r.review(`kf${i}`,[]);const out=r.exportReviewed();
  const png='iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a0u8AAAAASUVORK5CYII=';
  return {...out,images:out.images.map(f=>({id:f.id,png}))};
 }
@@ -23,6 +23,12 @@ it('accepts a reviewed bounded capture and rejects missing images, wrong calibra
  expect(()=>validateCapture({...f,images:f.images.map(i=>({...i,png:'not an image'}))},limits)).toThrow();
  expect(()=>validateCapture({...f,timing:[f.timing[0],f.timing[0]]},limits)).toThrow();
  f.manifest.keyframes[0].width=2;expect(()=>validateCapture(f,limits)).toThrow();
+});
+it('preserves a declared visitor purpose and refuses unknown capture roles',()=>{
+ const f=fixture();
+ expect(()=>validateCapture({...f,purpose:'visitor-start-scan'},limits)).toThrow();
+ expect(validateCapture({...fixture(10),purpose:'visitor-start-scan'},limits).purpose).toBe('visitor-start-scan');
+ expect(()=>validateCapture({...f,purpose:'operator-admin'},limits)).toThrow();
 });
 it('persists privately before receipt, retries identically and rejects unauthenticated or conflicting uploads',async()=>{
  const dir=await mkdtemp(join(tmpdir(),'walkit-capture-')),receiver=createReceiver(dir,'test-key');

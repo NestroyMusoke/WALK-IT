@@ -1,6 +1,6 @@
 import {validateLiveBatch,type LiveEvent} from '../../../server/live-schema';
 
-type Capture={manifest:{configSha256:string};images:unknown[];timing:unknown[]};
+type Capture={purpose?:'author-route'|'visitor-start-scan';manifest:{configSha256:string};images:unknown[];timing:unknown[]};
 type Diagnostic={configSha256:string;events:LiveEvent[]};
 
 function record(value:unknown,keys:string[]):Record<string,unknown>{
@@ -11,7 +11,8 @@ function record(value:unknown,keys:string[]):Record<string,unknown>{
 }
 
 export function makePrivateRouteBackup(capture:unknown,diagnostic:unknown){
- const c=record(capture,['manifest','images','timing']) as Capture;
+ const c=record(capture,capture&&typeof capture==='object'&&'purpose' in capture?['purpose','manifest','images','timing']:['manifest','images','timing']) as Capture;
+ if(c.purpose!==undefined&&c.purpose!=='author-route'&&c.purpose!=='visitor-start-scan')throw Error('Invalid capture purpose');
  const manifest=c.manifest;
  if(!manifest||!/^[a-f0-9]{64}$/.test(manifest.configSha256)||!Array.isArray(c.images)||!Array.isArray(c.timing))throw Error('Invalid reviewed capture');
  const d=record(diagnostic,['configSha256','events']) as Diagnostic;
@@ -28,7 +29,8 @@ export function parsePrivateRouteBackup(input:unknown):{capture:Capture;diagnost
   const checked=makePrivateRouteBackup(envelope.capture,envelope.diagnostic);
   return {capture:checked.capture,diagnostic:checked.diagnostic};
  }
- const capture=record(input,['manifest','images','timing']) as Capture;
+ const capture=record(input,'purpose' in input?['purpose','manifest','images','timing']:['manifest','images','timing']) as Capture;
+ if(capture.purpose!==undefined&&capture.purpose!=='author-route'&&capture.purpose!=='visitor-start-scan')throw Error('Invalid capture purpose');
  if(!capture.manifest||!/^[a-f0-9]{64}$/.test(capture.manifest.configSha256))throw Error('Invalid legacy capture');
  return {capture,diagnostic:null};
 }

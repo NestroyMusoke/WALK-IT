@@ -18,7 +18,8 @@ export function imageIntrinsics(p:number[],width:number,height:number){
 export class HostCapture{
   state:'idle'|'recording'|'review'|'aborted'='idle';
   private frames:SavedFrame[]=[];private revision?:number;private lastVideo=-Infinity;
-  constructor(private routeId:string,private configSha256:string,private permitted:boolean){}
+  constructor(private routeId:string,private configSha256:string,private permitted:boolean,
+    private purpose:'author-route'|'visitor-start-scan'='author-route'){}
   start(){if(!this.permitted)throw Error('Site permission required');if(this.state!=='idle')throw Error('Recording already started');this.state='recording';}
   get count(){return this.frames.length;}
   needsFrame(t:number){return this.state==='recording'&&(!this.frames.length||t-this.frames.at(-1)!.sample.t>=settings.HOST_KEYFRAME_INTERVAL_MS);}
@@ -42,6 +43,7 @@ export class HostCapture{
   }
   finish(){
     if(this.state!=='recording'||this.frames.length<2)throw Error('At least two tracked keyframes required');
+    if(this.purpose==='visitor-start-scan'&&this.frames.length<settings.START_MAP_FRAME_CAPACITY_COUNT)throw Error('Start scan needs more tracked views');
     const start=this.frames[0].sample.frame.position;
     if(!this.frames.some(f=>f.sample.frame.position.some((n,i)=>n!==start[i])))throw Error('Translation required; a stationary pan is insufficient');
     this.state='review';
@@ -54,12 +56,12 @@ export class HostCapture{
     for(const m of masks)for(let y=m.y;y<m.y+m.height;y++)for(let x=m.x;x<m.x+m.width;x++)f.sample.rgba.set([0,0,0,255],4*(y*f.sample.width+x));
     f.reviewed=true;
   }
-  exportReviewed():{manifest:RouteBundle;images:{id:string;width:number;height:number;rgba:Uint8ClampedArray}[];timing:{id:string;receivedAtMs:number;videoTime:number}[]}{
+  exportReviewed():{purpose:'author-route'|'visitor-start-scan';manifest:RouteBundle;images:{id:string;width:number;height:number;rgba:Uint8ClampedArray}[];timing:{id:string;receivedAtMs:number;videoTime:number}[]}{
     if(this.state!=='review'||!this.frames.length||this.frames.some(f=>!f.reviewed))throw Error('Review every image before export');
     const keyframes=this.frames.map(({id,sample:s})=>({id,image:`frames/${id}.png`,width:s.width,height:s.height,intrinsics:imageIntrinsics(s.frame.projection,s.width,s.height),position:s.frame.position,rotation:s.frame.rotation}));
     const manifest=validateRouteBundle({schemaVersion:1,routeId:this.routeId,configSha256:this.configSha256,source:'captured',units:'tracker',scaleVerified:false,
       privacy:{capturePermitted:true,imagesReviewed:true},keyframes,path:keyframes.map(k=>({position:k.position,keyframeId:k.id})),destination:{pathIndex:keyframes.length-1,keyframeId:keyframes.at(-1)!.id}});
-    return {manifest,images:this.frames.map(f=>({id:f.id,width:f.sample.width,height:f.sample.height,rgba:f.sample.rgba.slice()})),timing:this.frames.map(f=>({id:f.id,receivedAtMs:f.sample.t,videoTime:f.sample.videoTime}))};
+    return {purpose:this.purpose,manifest,images:this.frames.map(f=>({id:f.id,width:f.sample.width,height:f.sample.height,rgba:f.sample.rgba.slice()})),timing:this.frames.map(f=>({id:f.id,receivedAtMs:f.sample.t,videoTime:f.sample.videoTime}))};
   }
   dispose(){this.clearPixels();this.state='aborted';}
 }

@@ -24,6 +24,9 @@ def evaluate_reviewed_start_scan(model, capture, cfg, config_sha256, query=None,
     if model["geometryConfigSha256"] != config_sha256:
         raise ValueError("Start map and query geometry configuration differ")
     manifest = capture.get("manifest")
+    purpose = capture.get("purpose", "legacy-unspecified")
+    if "purpose" in capture and purpose not in ("author-route", "visitor-start-scan"):
+        raise ValueError("Invalid capture purpose")
     if not isinstance(manifest, dict) or manifest.get("privacy") != {"capturePermitted": True, "imagesReviewed": True}:
         raise ValueError("Permission and completed image review required")
     if not re.fullmatch(r"[a-f0-9]{64}", str(manifest.get("configSha256", ""))):
@@ -67,7 +70,7 @@ def evaluate_reviewed_start_scan(model, capture, cfg, config_sha256, query=None,
                          "reason": result.get("reason", "unspecified"),
                          "descriptorMatches": result.get("descriptorMatches")})
     return {
-        "kind": "offline-reviewed-start-scan", "mapSha256": map_sha,
+        "kind": "offline-reviewed-start-scan", "capturePurpose": purpose, "mapSha256": map_sha,
         "captureSha256": capture_sha, "geometryConfigSha256": config_sha256,
         "captureConfigSha256": manifest["configSha256"],
         "attemptedFrames": len(outcomes),
