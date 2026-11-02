@@ -199,3 +199,8 @@ Ran fixed darkening, brightening and CLAHE variants on author validation scans o
 Validated and privately preserved the supplied 40-image start scan. The frozen first-ten OpenCV 5 query refused all ten for insufficient matches. Reviewed the external critique without adopting a fallback. Confirmed only that the pinned OpenCV runtime can detect a synthetic ArUco marker.
 
 \n
+## 2 November: E11d-2i and E11d-2j author-only matcher probes
+
+Ran synthetic yaw stress and a multi-view descriptor candidate on author validation data. Both failed their predeclared robustness screens; no production matcher or threshold changed. The student declined the printed-marker fallback.
+
+\n
