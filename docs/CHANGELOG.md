@@ -1,5 +1,9 @@
 # Changes
 
+## 2 November — Start-only map experiment
+
+Added a configured first-frame selection to the pinned OpenCV 5 track builder and archived the previous vision configuration before changing its hash. The private map from one author walk contains only its first ten frames. Two other author walks have first-ten PnP and alignment diagnostics, with the existing recent-support refusal retained. This is an offline author validation experiment, not a visitor or arrow result.
+
 ## 2 November — Recoverable field evidence backup
 
 The reviewed route backup now includes numeric camera, motion and mark events in one private download with a matching configuration hash and no access token. Saving starts that download before server upload. The marked-scale analyzer can read the new backup and selects taps from the latest recording attempt. The field protocol and task queue record why the five old route-only backups cannot support the marked-scale gate.

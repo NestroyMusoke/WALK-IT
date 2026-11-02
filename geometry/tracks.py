@@ -13,6 +13,12 @@ def frame_pairs(count,window):
  if type(count) is not int or count<0 or type(window) is not int or window<1:raise ValueError('Invalid frame window')
  return [(i,j) for i in range(count) for j in range(i+1,min(count,i+window+1))]
 
+def select_start_frames(keyframes,images,capacity,min_views):
+ if type(capacity) is not int or type(min_views) is not int or capacity<min_views or len(keyframes)<min_views or len(images)!=len(keyframes):raise ValueError('Invalid start-map frame capacity')
+ ids=[frame.get('id') for frame in keyframes]
+ if any(not isinstance(identity,str) or image.get('id')!=identity for image,identity in zip(images,ids)) or len(set(ids))!=len(ids):raise ValueError('Start-map frame and image IDs differ')
+ return keyframes[:capacity],images[:capacity]
+
 def observation_tracks(edges):
  parent={}
  def find(x):
@@ -58,13 +64,14 @@ def ratio_matches(a,b,ratio):
  if a is None or b is None or len(a)<2 or len(b)<2:return {}
  return {m.queryIdx:m.trainIdx for pair in cv2.BFMatcher(cv2.NORM_L2).knnMatch(a,b,k=2) if len(pair)==2 for m,n in [pair] if m.distance<ratio*n.distance}
 
-def run(path):
+def run(path,start_only=False):
  if cv2.__version__.split('.')[0]!='5':raise RuntimeError('OpenCV 5 required')
  raw=(Path(__file__).resolve().parents[1]/'config/vision.yaml').read_bytes();cfg=json.loads(raw)
- capture=json.loads(path.read_text());manifest=capture['manifest'];ks=manifest['keyframes']
+ capture=json.loads(path.read_text());manifest=capture['manifest'];ks=manifest['keyframes'];images=capture['images']
  if manifest['privacy']!={'capturePermitted':True,'imagesReviewed':True}:raise ValueError('Review required')
+ if start_only:ks,images=select_start_frames(ks,images,cfg['START_MAP_FRAME_CAPACITY_COUNT'],cfg['GEOMETRY_TRACK_MIN_VIEWS_COUNT'])
  sift=cv2.SIFT_create(nfeatures=cfg['GEOMETRY_SIFT_FEATURES_COUNT']);features=[]
- for image,k in zip(capture['images'],ks,strict=True):
+ for image,k in zip(images,ks,strict=True):
   im=cv2.imdecode(np.frombuffer(base64.b64decode(image['png'],validate=True),np.uint8),cv2.IMREAD_GRAYSCALE)
   if im is None or im.shape!=(k['height'],k['width']) or image['id']!=k['id']:raise ValueError('Image mismatch')
   features.append(sift.detectAndCompute(im,None))
@@ -92,9 +99,11 @@ def run(path):
  for landmark in landmarks:
   for obs in landmark['observations']:coverage[obs['keyframeId']]+=1
  report={'schemaVersion':1,'kind':'experimental known-pose SIFT tracks; no localization validation','captureSha256':hashlib.sha256(path.read_bytes()).hexdigest(),'captureConfigSha256':manifest['configSha256'],'geometryConfigSha256':hashlib.sha256(raw).hexdigest(),'opencv':cv2.__version__,'numpy':np.__version__,'units':manifest['units'],'scaleVerified':False,'navigationReady':False,'descriptorType':'SIFT-float32-128-L2','mutualMatchesByPair':pair_counts,'conflictingComponents':conflicts,'shortTracks':too_short,'geometryRejectedTracks':rejected,'landmarkCount':len(landmarks),'coverageByKeyframe':coverage,'landmarks':landmarks}
+ if start_only:report.update(mapScope='start-only',selectedKeyframeIds=[k['id'] for k in ks])
  report['pairWindowFrames']=cfg['GEOMETRY_PAIR_WINDOW_FRAMES_COUNT']
  report['pairGeometryFilter']=True
- path.with_name(path.stem+f"-tracks-window{cfg['GEOMETRY_PAIR_WINDOW_FRAMES_COUNT']}-filtered.json").write_text(json.dumps(report,allow_nan=False))
+ scope=f"-start{len(ks)}" if start_only else ''
+ path.with_name(path.stem+f"-tracks{scope}-window{cfg['GEOMETRY_PAIR_WINDOW_FRAMES_COUNT']}-filtered.json").write_text(json.dumps(report,allow_nan=False))
  print(json.dumps({k:v for k,v in report.items() if k!='landmarks'},indent=2))
 if __name__=='__main__':
- parser=argparse.ArgumentParser();parser.add_argument('capture',type=Path);run(parser.parse_args().capture)
+ parser=argparse.ArgumentParser();parser.add_argument('capture',type=Path);parser.add_argument('--start-only',action='store_true');args=parser.parse_args();run(args.capture,args.start_only)
