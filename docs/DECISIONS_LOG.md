@@ -1,5 +1,9 @@
 # Decision and gate log
 
+## 2 November 2026: measured field intake
+
+The user has an independent visitor but no tape measure. A nominal 1.992 m segment can be laid out from six 297 mm A4 long edges and one 210 mm short edge; physical gaps, overlaps and sheet identity remain measurement uncertainties, not assumed centimetre accuracy. The current capture UI logs taps at nominal 2 m steps through 10 m. `geometry/marked_scale.py` accepts the actual measured positions and a stated uncertainty or `unknown`; it reports local tracker displacement per segment and refuses a metric/navigation pass. This diagnostic is separate from the 20 to 25 m product route. The user explicitly approved a temporary protected Cloudflare tunnel after automatic review rejected external exposure of private route images without that approval. The new phone page, engine asset and session endpoint returned 200/200/created; no new phone capture has been received.
+
 ## 2 November 2026: tracker scale investigation
 
 The user-directed investigation supersedes the previous assumption that a single tracker scale could be used. Five private captures show 3.95 times spread between two author walks and 4.03 times among three approximately 10 m screening runs. A repeatable global scale fails. Within-session constant, stepped and drifting scale remain unidentifiable without marked positions. See `docs/SCALE_AUDIT.md`. The existing captures remain development and validation material, not held-out visitor trials.

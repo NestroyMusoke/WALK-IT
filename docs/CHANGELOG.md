@@ -1,5 +1,9 @@
 # Changes
 
+## 2 November — Marked field run preparation
+
+Added a private marked-walk analyzer and synthetic tests, plus one exact field protocol for three measured short walks and two author walks. It records per-segment tracker displacement, source/config hashes, missing marks and stated measurement uncertainty, without treating a diagnostic as navigation evidence. A user-approved temporary protected tunnel was verified for the existing iPhone capture page. The visitor share-link flow remains unconnected.
+
 ## 2 November — Tracker scale investigation
 
 Added a test-first read-only five-capture time-series audit, exact SDK and motion/depth/mark instrumentation for the next phone capture, synthetic-tested gravity-aligned robust windowed alignment, planar IPPE ambiguity abstention, image-spread coverage, and GL/OpenCV plus scale-equivariance tests. The old five captures cannot establish within-run scale behavior or pass a field-navigation gate. New instrumentation has only build and synthetic verification; no new phone result is claimed.
