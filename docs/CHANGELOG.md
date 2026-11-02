@@ -194,3 +194,8 @@ Validated and privately stored the supplied 20-image reviewed start scan. Ran it
 Ran fixed darkening, brightening and CLAHE variants on author validation scans only. All six variants retained 10/10 accepted starts in each author run, so no preprocessing change was made. Recorded read-only motion differences for the supplied scan and preserved the raw report privately.
 
 \n
+## 2 November: E11d-2h second start scan and architecture audit
+
+Validated and privately preserved the supplied 40-image start scan. The frozen first-ten OpenCV 5 query refused all ten for insufficient matches. Reviewed the external critique without adopting a fallback. Confirmed only that the pinned OpenCV runtime can detect a synthetic ArUco marker.
+
+\n
