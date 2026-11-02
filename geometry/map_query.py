@@ -45,6 +45,18 @@ def match_descriptors(query,reference,ratio):
  forward=ratio_matches(query,reference,ratio);reverse=ratio_matches(reference,query,ratio)
  return sorted((q,t) for q,t in forward.items() if reverse.get(t)==q)
 
+def query_frame(image,keyframe,landmarks,refs,cfg,sift):
+ if cv2.__version__.split('.')[0]!='5':raise RuntimeError('OpenCV 5 required')
+ im=cv2.imdecode(np.frombuffer(base64.b64decode(image['png'],validate=True),np.uint8),cv2.IMREAD_GRAYSCALE)
+ if im is None or im.shape!=(keyframe['height'],keyframe['width']) or image['id']!=keyframe['id']:raise ValueError('Query image/calibration mismatch')
+ points,descriptors=sift.detectAndCompute(im,None)
+ matches=match_descriptors(descriptors,refs,cfg['GEOMETRY_MATCH_RATIO']) if len(refs)>=2 else []
+ raw_matches=len(matches)
+ matches=unique_correspondences(matches,[p.pt for p in points],[l['position'] for l in landmarks],[float(np.linalg.norm(descriptors[q]-refs[t])) for q,t in matches])
+ xyz=np.asarray([landmarks[t]['position'] for q,t in matches]).reshape(-1,3);uv=np.asarray([points[q].pt for q,t in matches]).reshape(-1,2)
+ result=estimate_pose(xyz,uv,np.asarray(keyframe['intrinsics']).reshape(3,3),(keyframe['width'],keyframe['height']),[landmarks[t]['id'] for q,t in matches],cfg)
+ return {'queryFrame':keyframe['id'],'descriptorMatches':len(matches),'rawDescriptorMatches':raw_matches,**result}
+
 def run(map_path,capture_path):
  if cv2.__version__.split('.')[0]!='5':raise RuntimeError('OpenCV 5 required')
  map_bytes=map_path.read_bytes();m=json.loads(map_bytes);landmarks=validate_map(m)
@@ -53,14 +65,7 @@ def run(map_path,capture_path):
  if manifest['privacy']!={'capturePermitted':True,'imagesReviewed':True}:raise ValueError('Reviewed capture required')
  refs=np.asarray([l['descriptor'] for l in landmarks],dtype=np.float32);sift=cv2.SIFT_create(nfeatures=cfg['GEOMETRY_SIFT_FEATURES_COUNT']);results=[]
  for image,k in zip(capture['images'],manifest['keyframes'],strict=True):
-  im=cv2.imdecode(np.frombuffer(base64.b64decode(image['png'],validate=True),np.uint8),cv2.IMREAD_GRAYSCALE)
-  if im is None or im.shape!=(k['height'],k['width']) or image['id']!=k['id']:raise ValueError('Query image/calibration mismatch')
-  points,descriptors=sift.detectAndCompute(im,None);matches=match_descriptors(descriptors,refs,cfg['GEOMETRY_MATCH_RATIO']) if len(refs)>=2 else []
-  raw_matches=len(matches)
-  matches=unique_correspondences(matches,[p.pt for p in points],[l['position'] for l in landmarks],[float(np.linalg.norm(descriptors[q]-refs[t])) for q,t in matches])
-  xyz=np.asarray([landmarks[t]['position'] for q,t in matches]).reshape(-1,3);uv=np.asarray([points[q].pt for q,t in matches]).reshape(-1,2)
-  result=estimate_pose(xyz,uv,np.asarray(k['intrinsics']).reshape(3,3),(k['width'],k['height']),[landmarks[t]['id'] for q,t in matches],cfg)
-  results.append({'queryFrame':k['id'],'descriptorMatches':len(matches),'rawDescriptorMatches':raw_matches,**result})
+  results.append(query_frame(image,k,landmarks,refs,cfg,sift))
  report={'kind':'offline author-capture query diagnostic; not held-out visitor evaluation','mapSha256':hashlib.sha256(map_bytes).hexdigest(),'queryCaptureSha256':hashlib.sha256(raw).hexdigest(),'mapCaptureSha256':m['captureSha256'],'sameSourceCapture':m['captureSha256']==hashlib.sha256(raw).hexdigest(),'mapGeometryConfigSha256':m['geometryConfigSha256'],'queryCaptureConfigSha256':manifest['configSha256'],'navigationReady':False,'frames':len(results),'acceptedHypotheses':sum(r['accepted'] for r in results),'results':results}
  output=capture_path.with_name(capture_path.stem+'-query-'+hashlib.sha256(map_bytes).hexdigest()[:12]+'.json');output.write_text(json.dumps(report,allow_nan=False,indent=2))
  print(json.dumps({k:v for k,v in report.items() if k!='results'},indent=2))

@@ -1,5 +1,13 @@
 # Changes
 
+## 2 November — Fresh geometric anchor gate
+
+Added a tested decision function requiring current tracking, a fresh latest OpenCV pose and a contiguous run of consistent poses. It rejects stale or newly failed poses instead of carrying an older anchor forward. Its output remains a diagnostic candidate with arrows disabled until the separate metric, wrong-start and visitor gates pass.
+
+## 2 November — Single-frame OpenCV start query
+
+Extracted the reviewed-image descriptor and PnP query into a reusable OpenCV 5 function and made the existing batch diagnostic call it. It retains calibration and image identity checks. Author validation results were unchanged after the refactor; no phone visitor endpoint exists yet.
+
 ## 2 November — Start-only map experiment
 
 Added a configured first-frame selection to the pinned OpenCV 5 track builder and archived the previous vision configuration before changing its hash. The private map from one author walk contains only its first ten frames. Two other author walks have first-ten PnP and alignment diagnostics, with the existing recent-support refusal retained. This is an offline author validation experiment, not a visitor or arrow result.
