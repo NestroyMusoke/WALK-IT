@@ -1,5 +1,6 @@
 import {settings,configurationHash} from './settings';
 import type {LiveEvent} from '../../../server/live-schema';
+import {transferReviewedCapture} from './capture-transfer';
 export class LiveUpload{
   events:LiveEvent[]=[];private sent=0;private seq=0;private busy=false;
   private session?:{id:string;token:string};private sha='';
@@ -33,15 +34,8 @@ export class LiveUpload{
   }
   async saveCapture(report:unknown){
     if(!this.session)throw Error('No connected session. Keep the page open and retry.');
-    const body=JSON.stringify({id:this.session.id,report});
-    if(new Blob([body]).size>settings.HOST_UPLOAD_LIMIT_BYTES)throw Error('Route is too large. Record a shorter walk.');
-    // The route can be tens of MB on slow field Wi-Fi. Session expiry remains
-    // enforced by the receiver; a local backup remains available during upload.
-    const response=await fetch('/__walkit/capture',{method:'POST',headers:{'Content-Type':'application/json','X-Walkit-Token':this.session.token},body});
-    if(!response.ok)throw Error(`Route not saved (${response.status}). Keep this page open and retry.`);
-    const receipt=await response.json();
-    if(receipt.saved!==true||receipt.id!==this.session.id||!/^[a-f0-9]{64}$/.test(receipt.sha256))throw Error('Invalid route receipt');
-    return receipt as {id:string;frames:number;sha256:string};
+    try{return await transferReviewedCapture('',this.session,report);}
+    catch(error){throw Error(`Route not saved: ${(error as Error).message}. Your private backup is safe; tap Save again to resume.`);}
   }
   diagnosticSnapshot(){return {configSha256:this.sha,events:this.events.map(e=>({...e,values:[...e.values]}))};}
   download(){const a=document.createElement('a'),url=URL.createObjectURL(new Blob([JSON.stringify({build:'E03-1',configSha256:this.sha,sent:this.sent,events:this.events})],{type:'application/json'}));a.href=url;a.download='walkit-live-diagnostic.json';a.click();URL.revokeObjectURL(url);}

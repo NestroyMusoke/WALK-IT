@@ -1,7 +1,7 @@
 import type {IncomingMessage,ServerResponse} from 'node:http';
 import {createHash,randomBytes,randomUUID} from 'node:crypto';
 import {readFileSync} from 'node:fs';
-import {mkdir,writeFile,readFile} from 'node:fs/promises';
+import {mkdir,writeFile,readFile,unlink} from 'node:fs/promises';
 import {validateLiveBatch} from './live-schema.ts';
 import {validateCapture} from './capture-schema.ts';
 import {join} from 'node:path';
@@ -36,7 +36,17 @@ export function validateReport(value:unknown){
   return {...r,configSha256:r.configSha256,passed:results.every(c=>c.passed),results};
 }
 export function createReceiver(directory:string,accessKey?:string){
-  const sessions=new Map<string,{token:string;expires:number;saved?:string}>();
+  type Upload={count:number;total:number;sha256:string};
+  const sessions=new Map<string,{token:string;expires:number;saved?:string;upload?:Upload;captureReceipt?:{saved:true;id:string;frames:number;sha256:string}}>();
+  const chunkSize=Math.floor(settings.HOST_UPLOAD_LIMIT_BYTES/settings.HOST_MAX_KEYFRAMES_COUNT);
+  const uploadMeta=(value:unknown):Upload&{id:string}=>{
+    const m=object(value,['id','count','total','sha256']);
+    if(typeof m.id!=='string'||!Number.isSafeInteger(m.count)||!Number.isSafeInteger(m.total)||
+       (m.total as number)<=0||(m.total as number)>settings.HOST_UPLOAD_LIMIT_BYTES||
+       m.count!==Math.ceil((m.total as number)/chunkSize)||
+       typeof m.sha256!=='string'||!/^[a-f0-9]{64}$/.test(m.sha256))throw Error('Invalid upload metadata');
+    return m as Upload&{id:string};
+  };
   return (req:IncomingMessage,res:ServerResponse,next:()=>void)=>{
     if(!req.url?.startsWith('/__walkit/')){next();return;}
     const reply=(status:number,value:unknown)=>{res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(value));};
@@ -52,6 +62,63 @@ export function createReceiver(directory:string,accessKey?:string){
         await writeFile(join(directory,`${id}.json`),JSON.stringify({status:'started; awaiting result',receivedAt:new Date().toISOString(),serverConfigSha256:configSha256}),{flag:'wx'});
         sessions.set(id,{token,expires:Date.now()+settings.DIAGNOSTIC_SESSION_TTL_MS});
         reply(201,{id,token});return;
+      }
+      if(['/__walkit/capture-part','/__walkit/capture-status','/__walkit/capture-complete'].includes(req.url||'')){
+        let meta:Upload&{id:string};
+        if(req.url==='/__walkit/capture-part'){
+          meta=uploadMeta({id:req.headers['x-walkit-id'],count:Number(req.headers['x-walkit-count']),
+            total:Number(req.headers['x-walkit-total']),sha256:req.headers['x-walkit-sha256']});
+        }else{
+          let input='';for await(const chunk of req){input+=chunk.toString();if(Buffer.byteLength(input)>settings.DIAGNOSTIC_UPLOAD_LIMIT_BYTES){reply(413,{error:'Metadata too large'});return;}}
+          meta=uploadMeta(JSON.parse(input));
+        }
+        const session=sessions.get(meta.id);
+        if(!session||session.expires<Date.now()||req.headers['x-walkit-token']!==session.token){reply(403,{error:'Invalid session'});return;}
+        const identity={count:meta.count,total:meta.total,sha256:meta.sha256};
+        if(session.upload&&JSON.stringify(session.upload)!==JSON.stringify(identity)){reply(409,{error:'Upload conflict'});return;}
+        session.upload=identity;
+        if(req.url==='/__walkit/capture-part'){
+          const index=Number(req.headers['x-walkit-index']);
+          if(!Number.isSafeInteger(index)||index<0||index>=meta.count){reply(422,{error:'Invalid part index'});return;}
+          const pieces:Buffer[]=[];let length=0;
+          for await(const piece of req){length+=piece.length;if(length>chunkSize){reply(413,{error:'Part too large'});return;}pieces.push(piece);}
+          const expected=index===meta.count-1?meta.total-index*chunkSize:chunkSize;
+          if(length!==expected){reply(422,{error:'Incomplete part'});return;}
+          const bytes=Buffer.concat(pieces),path=join(directory,`${meta.id}-capture-part-${index}`);
+          try{await writeFile(path,bytes,{flag:'wx'});}catch(error){
+            if((error as NodeJS.ErrnoException).code!=='EEXIST')throw error;
+            if(!(await readFile(path)).equals(bytes)){reply(409,{error:'Part conflict'});return;}
+          }
+          reply(201,{saved:true,id:meta.id,index});return;
+        }
+        if(req.url==='/__walkit/capture-status'){
+          if(session.captureReceipt){reply(200,{received:[],completed:true,receipt:session.captureReceipt});return;}
+          const received:number[]=[];
+          for(let index=0;index<meta.count;index++){
+            try{await readFile(join(directory,`${meta.id}-capture-part-${index}`));received.push(index);}
+            catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
+          }
+          reply(200,{received,completed:false});return;
+        }
+        if(session.captureReceipt){reply(201,session.captureReceipt);return;}
+        const parts:Buffer[]=[];
+        for(let index=0;index<meta.count;index++){
+          try{parts.push(await readFile(join(directory,`${meta.id}-capture-part-${index}`)));}
+          catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT'){reply(409,{error:'Missing part'});return;}throw error;}
+        }
+        const bytes=Buffer.concat(parts);
+        if(bytes.length!==meta.total||createHash('sha256').update(bytes).digest('hex')!==meta.sha256){reply(409,{error:'Upload digest mismatch'});return;}
+        const capture=validateCapture(JSON.parse(bytes.toString('utf8')),settings);
+        if(capture.manifest.configSha256!==configSha256){reply(409,{error:'Reload the current build before recording'});return;}
+        const encoded=JSON.stringify(capture),path=join(directory,`${meta.id}-capture.json`);
+        try{await writeFile(path,encoded,{flag:'wx'});}catch(error){
+          if((error as NodeJS.ErrnoException).code!=='EEXIST')throw error;
+          if(await readFile(path,'utf8')!==encoded){reply(409,{error:'A different route is already saved in this session'});return;}
+        }
+        const receipt={saved:true as const,id:meta.id,frames:capture.images.length,sha256:createHash('sha256').update(encoded).digest('hex')};
+        session.captureReceipt=receipt;
+        for(let index=0;index<meta.count;index++)await unlink(join(directory,`${meta.id}-capture-part-${index}`));
+        reply(201,receipt);return;
       }
       if(req.url!=='/__walkit/result'&&req.url!=='/__walkit/live'&&req.url!=='/__walkit/capture'){reply(404,{error:'Unknown endpoint'});return;}
       if(req.url==='/__walkit/capture'&&![...sessions.values()].some(s=>s.expires>=Date.now()&&s.token===req.headers['x-walkit-token'])){reply(403,{error:'Invalid session'});return;}

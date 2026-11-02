@@ -4,6 +4,10 @@
 
 The reviewed route backup now includes numeric camera, motion and mark events in one private download with a matching configuration hash and no access token. Saving starts that download before server upload. The marked-scale analyzer can read the new backup and selects taps from the latest recording attempt. The field protocol and task queue record why the five old route-only backups cannot support the marked-scale gate.
 
+## 2 November — Resumable private route upload
+
+Added authenticated route parts, saved-part status and a final integrity-checked receipt. A retry sends only missing parts. Temporary parts are removed after a completed save. The browser now uses this route transfer after downloading its private backup. An interrupted-response integration test and a full-size local replay passed; HTTPS phone upload still needs its own observed receipt.
+
 ## 2 November — Marked field run preparation
 
 Added a private marked-walk analyzer and synthetic tests, plus one exact field protocol for three measured short walks and two author walks. It records per-segment tracker displacement, source/config hashes, missing marks and stated measurement uncertainty, without treating a diagnostic as navigation evidence. A user-approved temporary protected tunnel was verified for the existing iPhone capture page. The visitor share-link flow remains unconnected.
