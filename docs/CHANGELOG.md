@@ -189,3 +189,8 @@ Added a separate, privacy-reviewed visitor start scan and offline OpenCV 5 query
 Validated and privately stored the supplied 20-image reviewed start scan. Ran its first ten images against the frozen backup 6 start map using OpenCV 5. All ten were refused for insufficient descriptor matches; no navigation claim or threshold change was made. The input and frame report remain ignored under `eval/sessions/`.
 
 \n
+## 2 November: E11d-2g author lighting diagnostic
+
+Ran fixed darkening, brightening and CLAHE variants on author validation scans only. All six variants retained 10/10 accepted starts in each author run, so no preprocessing change was made. Recorded read-only motion differences for the supplied scan and preserved the raw report privately.
+
+\n

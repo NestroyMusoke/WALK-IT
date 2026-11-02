@@ -86,3 +86,10 @@ E11d-2f was declared before inspecting the supplied private visitor start scan. 
 Visual spot inspection shows the same corridor in the author and new scan, with changed lighting and viewpoints. That suggests a matching coverage problem but does not isolate the cause. The file does not prove who held the phone, independent ground-truth pose or heading, metric scale, wrong-start refusal or live freshness. The declared field gate is not passed, and no arrow is authorized. The map, matcher, thresholds and held-out scan were not changed or tuned. Per the user-directed rule, any fallback architecture requires the user's choice after a concrete proposal.
 
 \n
+## 2 November 2026: author-only photometric stress did not justify preprocessing
+
+E11d-2g kept the backup 6 start map and OpenCV 5 SIFT/PnP gates frozen. On first-ten-frame author validation backups 7 and 8, raw, 0.5× darkened, 1.5× brightened, and query-only CLAHE versions of all three each accepted 10/10. The predeclared screening rule passed, but CLAHE added no accepted frames; it was rejected as a product change. Private `eval/sessions/e11d-2g-author-lighting-stress.json` contains map/config/input hashes and frame-level match counts. Synthetic brightness stress does not reproduce the 0/10 supplied visitor-scan result, so we cannot attribute that failure to illumination alone.
+
+A separate read-only capture diagnostic found first-ten relative camera rotation maxima 9.0° (author 7), 5.1° (author 8), and 63.4° (supplied scan). First-to-tenth tracker displacement was 2.0802, 0.5576 and 0.2441 tracker units. These describe recorded motion, not metres, ground truth or a causal explanation. The supplied scan was not used to tune matching, map construction or thresholds. The next field scan should follow the already specified sideways movement while keeping the same corridor scene in view; any new localization algorithm must be selected using author validation and frozen before another visitor evaluation.
+
+\n
