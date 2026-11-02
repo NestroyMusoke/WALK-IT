@@ -4,6 +4,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 from reconstruct import extrinsic,triangulate_known
+from sift_profile import make_sift
 
 def geometric_pair_mask(a,b,k1,k2,e1,e2,max_error):
  if not len(a):return np.zeros(0,dtype=bool)
@@ -64,13 +65,13 @@ def ratio_matches(a,b,ratio):
  if a is None or b is None or len(a)<2 or len(b)<2:return {}
  return {m.queryIdx:m.trainIdx for pair in cv2.BFMatcher(cv2.NORM_L2).knnMatch(a,b,k=2) if len(pair)==2 for m,n in [pair] if m.distance<ratio*n.distance}
 
-def run(path,start_only=False):
+def run(path,start_only=False,config_path=None):
  if cv2.__version__.split('.')[0]!='5':raise RuntimeError('OpenCV 5 required')
- raw=(Path(__file__).resolve().parents[1]/'config/vision.yaml').read_bytes();cfg=json.loads(raw)
+ raw=(Path(config_path) if config_path is not None else Path(__file__).resolve().parents[1]/'config/vision.yaml').read_bytes();cfg=json.loads(raw)
  capture=json.loads(path.read_text());manifest=capture['manifest'];ks=manifest['keyframes'];images=capture['images']
  if manifest['privacy']!={'capturePermitted':True,'imagesReviewed':True}:raise ValueError('Review required')
  if start_only:ks,images=select_start_frames(ks,images,cfg['START_MAP_FRAME_CAPACITY_COUNT'],cfg['GEOMETRY_TRACK_MIN_VIEWS_COUNT'])
- sift=cv2.SIFT_create(nfeatures=cfg['GEOMETRY_SIFT_FEATURES_COUNT']);features=[]
+ sift=make_sift(cfg);features=[]
  for image,k in zip(images,ks,strict=True):
   im=cv2.imdecode(np.frombuffer(base64.b64decode(image['png'],validate=True),np.uint8),cv2.IMREAD_GRAYSCALE)
   if im is None or im.shape!=(k['height'],k['width']) or image['id']!=k['id']:raise ValueError('Image mismatch')

@@ -219,3 +219,27 @@ Added the one-session author capture instructions and linked them from the older
 ## 2 November: reference matching screen and one-walk intake
 
 Added an experimental OpenCV 5 reference-image matcher and a private one-walk intake CLI. Author-repeat poses passed the matcher screen, but two previously inspected fresh scans each remained at 0/10 accepted under frozen gates. The intake CLI checks reviewed images, calibration, map identity and start/end coverage. The prior recording passed these structural checks while spanning only 9.1805° at the start. No live guidance is authorized. Python geometry tests and the full web check passed.
+
+## 2 November: single-command author preflight
+
+Added a private CLI that takes one reviewed host backup, builds or reuses its OpenCV 5 track map, and writes a hash-bound structural intake report under ignored storage. It refuses unreviewed or visitor captures and cache conflicts. The old host backup passed structural intake; independent visitor localization and live arrows remain open.
+
+## 2 November: independent rescue-report audit
+
+Read the external rescue analysis, source scripts and outputs, then reproduced its four 2D-to-2D candidate frames with OpenCV 5. Corrected the interpretation: the reported position array had nine values, translation scale is unknown, and one adjacent orientation estimate differed from tracker motion by 22.55°. The aggressive-SIFT PnP lift had used feature indices from a differently configured SIFT map. The full audit is in `docs/RESCUE_AUDIT.md`; no production navigator changed.
+
+## 2 November: consistent experimental SIFT profile
+
+Added one OpenCV 5 SIFT constructor shared by experimental map building and reference-image query. The separately pinned aggressive profile changes requested features, contrast and edge thresholds without altering the production configuration. Tests cover exact arguments, incomplete-profile refusal and map config identity. No localization result is claimed yet.
+
+## 2 November: rebuilt aggressive map comparison
+
+Built a feature-index-consistent 2595-landmark map with aggressive SIFT and queried matching author frames. Both author repeats matched baseline acceptance (20/20 sampled each), but the frozen mixed-reference query still refused 0/10 on both previously inspected visitor scans and took roughly 1.5–3 seconds per frame. A single-reference diagnostic produced one geometrically accepted PnP hypothesis, motivating per-reference testing without authorizing guidance.
+
+## 2 November: reference-isolated geometry experiment
+
+Added a separate experimental query that tests each author image against a visitor frame, lifts only that image's own 3D observations and reports all OpenCV 5 PnP hypotheses without choosing an arrow pose. A failing test caught repeated pixel coordinates; the fix deduplicates them. The author screening passed 20/20 sampled frames on each repeat. Already inspected visitor scans yielded candidate frames at 4/10 and 6/10; correct position, metric scale and live navigation remain unverified. All 83 Python geometry tests and the 56-test web check, typecheck and build passed.
+
+## 2 November: author trajectory gate failed
+
+The reference-isolated candidate produced camera-center hypotheses on both author repeats, but the unchanged recent-window alignment gate passed only one of two repeats. The candidate remains offline and cannot authorize a visitor arrow. Its private report records the selected references, source hashes and refusal.

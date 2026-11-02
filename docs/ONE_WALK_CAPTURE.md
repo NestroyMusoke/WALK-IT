@@ -19,7 +19,7 @@ This is one continuous recording. The host records once and leaves with a privat
 
 ## Before leaving
 
-- Confirm the backup download exists and transfer it to Codex. Stay at the location until Codex confirms it can parse the backup, that the first ten images show the start scene, that the path includes the turn, and that the final images show the destination. A server receipt is helpful but the local backup is the recovery path.
+- Confirm the backup download exists and transfer it to the laptop. Run `\.venv\Scripts\python.exe geometry\author_preflight.py "C:\path\to\walkit-reviewed-route-backup.json"` from the WALK-IT folder. This builds a private map and reports structural intake without requiring a server upload. Stay at the location until the command finishes and the first ten images, turn and final destination have been visually checked. A server receipt is helpful but the local backup is the recovery path.
 - Note the physical start, turn and end marks, approximate lighting, phone model, and how route length was measured. Do not publish the images or commit the backup.
 - This is a data-quality check, not a promise that localization passes. The visitor test remains separate and must show live camera arrows, wrong-start refusal and a measured end error before those claims are made.
 
