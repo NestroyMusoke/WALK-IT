@@ -39,7 +39,7 @@ def align_visitor_marker(receipts,config_bytes,route_id):
  if not calibrated['accepted']:
   return {**reject(calibrated['reason']),**{key:calibrated[key] for key in
    ('markerBaselineM','maxOrientationDisagreementDeg','maxPairwiseScaleDisagreementFraction') if key in calibrated}}
- return {**identity,'accepted':True,'reason':'marker-session-transform-hypothesis-only',
+ return {**identity,'accepted':True,'ambiguous':False,'reason':'marker-session-transform-hypothesis-only',
          'routeToSession':calibrated['markerToSession'],
          'sourceFrameAtPhoneMs':last_phone,
          'startTrackerPosition':observations[-1]['trackerCameraCenter'],

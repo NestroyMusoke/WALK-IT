@@ -49,8 +49,8 @@ button('same-session-replay').addEventListener('click',()=>{
 const visitorLinkPresent=new URLSearchParams(location.search).has('route');
 let visitorRoute:VisitorRoute|undefined,sdkReady=false;
 const visitorSessionId=crypto.randomUUID();
-let markerScanActive=false,markerScanBusy=false,markerSequence=0,markerAccepted=0,lastMarkerAt=-Infinity;
-let authorCheckActive=false,authorCheckBusy=false,authorMarkerDetected=false,authorPassAt=-Infinity,authorLastAt=-Infinity,authorSequence=0;
+let markerScanActive=false,markerScanBusy=0,markerSequence=0,markerAccepted=0,lastMarkerAt=-Infinity;
+let authorCheckActive=false,authorCheckBusy=0,authorMarkerDetected=false,authorPassAt=-Infinity,authorLastAt=-Infinity,authorSequence=0,authorLastProcessedAt=-Infinity;
 const authorSessionId=crypto.randomUUID();
 const authorPrivacy=el('author-marker-privacy') as HTMLInputElement;
 const authorStatus=el('author-marker-status');
@@ -63,7 +63,7 @@ button('check-author-marker').addEventListener('click',()=>{
 document.addEventListener('walkit-preflight-start',()=>{if(running&&authorPrivacy.checked)authorCheckActive=true;});
 document.addEventListener('walkit-record-start',()=>{authorCheckActive=false;authorPassAt=-Infinity;authorMarkerDetected=false;});
 async function sendAuthorCheck(sample:ReturnType<typeof copyCaptureFrame>){
- authorCheckBusy=true;
+ authorCheckBusy++;
  try{
   const copy=document.createElement('canvas');copy.width=sample.width;copy.height=sample.height;
   copy.getContext('2d')!.putImageData(new ImageData(new Uint8ClampedArray(sample.rgba),sample.width,sample.height),0,0);
@@ -81,6 +81,8 @@ async function sendAuthorCheck(sample:ReturnType<typeof copyCaptureFrame>){
     sourceFrameAtPhoneMs?:number}};
   if(result.configSha256!==sha||result.frameAtPhoneMs!==sample.t||result.arrowAuthorized!==false)
    throw Error('Marker check provenance mismatch');
+  if(sample.t<authorLastProcessedAt)return;
+  authorLastProcessedAt=sample.t;
   if(result.alignment?.accepted===true&&
    performance.now()-(result.alignment.sourceFrameAtPhoneMs??sample.t)<=settings.ALIGNMENT_WINDOW_MAX_AGE_MS){
    authorMarkerDetected=true;authorPassAt=performance.now();
@@ -92,7 +94,7 @@ async function sendAuthorCheck(sample:ReturnType<typeof copyCaptureFrame>){
   }
   upload.add('status',`author-marker-${result.reason}`,[sample.t]);
  }catch(error){authorMarkerDetected=false;authorStatus.textContent=`Marker check paused: ${(error as Error).message}. Keep the page open and retry.`;}
- finally{sample.rgba.fill(0);authorCheckBusy=false;button('check-author-marker').disabled=!running||!authorPrivacy.checked;}
+ finally{sample.rgba.fill(0);authorCheckBusy--;button('check-author-marker').disabled=!running||!authorPrivacy.checked;}
 }
 const markerPrivacy=el('marker-privacy') as HTMLInputElement;
 const markerStatus=el('marker-status');
@@ -104,7 +106,7 @@ button('scan-marker').addEventListener('click',()=>{
 });
 markerPrivacy.addEventListener('change',()=>{button('scan-marker').disabled=!running||!visitorRoute||!markerPrivacy.checked||markerScanActive;});
 async function sendMarkerSample(sample:ReturnType<typeof copyCaptureFrame>){
- markerScanBusy=true;
+ markerScanBusy++;
  try{
   if(!visitorRoute||!markerPrivacy.checked)throw Error('Private route or image review missing');
   const copy=document.createElement('canvas');copy.width=sample.width;copy.height=sample.height;
@@ -123,6 +125,7 @@ async function sendMarkerSample(sample:ReturnType<typeof copyCaptureFrame>){
    alignment?:Parameters<typeof buildLiveAnchor>[1]};
   if(result.configSha256!==visitorRoute.configSha256||result.arrowAuthorized!==false||
    result.frameAtPhoneMs!==sample.t)throw Error('Marker response provenance mismatch');
+  if(!markerScanActive)return;
   if(result.accepted)markerAccepted++;
   markerStatus.textContent=result.alignment?.accepted===true?'Start fit passed. Checking live route binding…':
    coachMarkerPreflight(result.alignment?.reason||result.reason,result.alignment||{});
@@ -134,7 +137,7 @@ async function sendMarkerSample(sample:ReturnType<typeof copyCaptureFrame>){
    else markerStatus.textContent+=' Alignment receipt did not prove a current route-bound start. Keep scanning.';
   }
  }catch(error){markerStatus.textContent=`Marker scan paused: ${(error as Error).message}. Keep scanning; no arrow yet.`;}
- finally{sample.rgba.fill(0);markerScanBusy=false;button('scan-marker').disabled=!running||!visitorRoute||!markerPrivacy.checked;}
+ finally{sample.rgba.fill(0);markerScanBusy--;button('scan-marker').disabled=!running||!visitorRoute||!markerPrivacy.checked;}
 }
 function showGuidanceStatus(){
  const message=guidance.status==='following'?'Following the verified route. Keep walking and watching your surroundings.':
@@ -246,14 +249,14 @@ button('start').addEventListener('click',async()=>{
           if(!running||!renderer||!gl||!frame)return;
           if(!viewportCoversCanvas(viewport,canvas.width,canvas.height))capture.interrupt('camera image does not cover the calibrated canvas');
           else if(!repeatFrame){capture.frame(canvas,frame,lastFresh,videoTime,size.revision);if(!running)return;}
-          if(visitorRoute&&markerScanActive&&!markerScanBusy&&!repeatFrame&&
+          if(visitorRoute&&markerScanActive&&markerScanBusy<settings.ALIGNMENT_MIN_PAIRS_COUNT&&!repeatFrame&&
             lastStatus==='NORMAL'&&performance.now()-lastFresh<=settings.MARKER_MAX_AGE_MS&&
             performance.now()-lastMarkerAt>=settings.MARKER_SCAN_SAMPLE_INTERVAL_MS){
             lastMarkerAt=performance.now();
             try{void sendMarkerSample(copyCaptureFrame(canvas,{frame,t:lastFresh,videoTime,revision:size.revision}));}
             catch(error){markerScanActive=false;markerStatus.textContent=`Marker scan failed: ${(error as Error).message}. No arrow.`;}
           }
-          if(authorCheckActive&&!authorCheckBusy&&!repeatFrame&&lastStatus==='NORMAL'&&
+          if(authorCheckActive&&authorCheckBusy<settings.ALIGNMENT_MIN_PAIRS_COUNT&&!repeatFrame&&lastStatus==='NORMAL'&&
             performance.now()-lastFresh<=settings.MARKER_MAX_AGE_MS&&
             performance.now()-authorLastAt>=settings.MARKER_SCAN_SAMPLE_INTERVAL_MS&&
             viewportCoversCanvas(viewport,canvas.width,canvas.height)){

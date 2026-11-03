@@ -5,8 +5,10 @@ import {readPrivateRouteShare} from './route-share.ts';
 type Infer=(request:Record<string,unknown>)=>Promise<Record<string,unknown>>;
 type Align=(receipts:Record<string,unknown>[],routeId:string)=>Promise<Record<string,unknown>>;
 function keepFresh(receipts:Record<string,unknown>[],latest:number,maxAgeMs:number){
+ const newest=Math.max(latest,...receipts.map(item=>Number(item.frameAtPhoneMs)));
  return receipts.filter(item=>typeof item.frameAtPhoneMs==='number'&&
-  latest-item.frameAtPhoneMs>=0&&latest-item.frameAtPhoneMs<=maxAgeMs);
+  newest-item.frameAtPhoneMs>=0&&newest-item.frameAtPhoneMs<=maxAgeMs)
+  .sort((a,b)=>Number(a.frameAtPhoneMs)-Number(b.frameAtPhoneMs));
 }
 /** Protected, memory-only check before a single author walk. No route is issued here. */
 export function createAuthorMarkerCheckHandler(accessKey:string,configSha256:string,infer:Infer,maxBytes=10485760,

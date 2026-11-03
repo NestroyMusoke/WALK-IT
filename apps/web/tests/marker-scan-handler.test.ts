@@ -16,9 +16,10 @@ it('requires an active matching private route before running marker inference',a
  Date.now(),60000);
  let calls=0,alignCalls=0;
  const marker=createMarkerScanHandler(dir,sha,async()=>{calls++;return {accepted:true,reason:'single-frame-marker-pose-only',
-  frameId:`v${calls}`,frameAtPhoneMs:calls*250,imageSha256:`${calls}`.padStart(64,'0'),
+  frameId:`v${calls}`,frameAtPhoneMs:[250,750,500,1000][calls-1],imageSha256:`${calls}`.padStart(64,'0'),
   markerId:0,configSha256:sha,arrowAuthorized:false};},10485760,
-  async()=>{alignCalls++;return {accepted:true,reason:'marker-session-transform-hypothesis-only',arrowAuthorized:false};},4);
+  async receipts=>{alignCalls++;expect(receipts.map(item=>item.frameAtPhoneMs)).toEqual([250,500,750,1000]);
+   return {accepted:true,reason:'marker-session-transform-hypothesis-only',arrowAuthorized:false};},4);
  const server=createServer((req,res)=>{if(!marker(req,res))res.writeHead(404).end();});
  await new Promise<void>(resolve=>server.listen(0,'127.0.0.1',resolve));
  const address=server.address();if(!address||typeof address==='string')throw Error('No port');
