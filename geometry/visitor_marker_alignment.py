@@ -7,7 +7,7 @@ from pathlib import Path
 
 geometry_dir=str(Path(__file__).resolve().parent)
 if geometry_dir not in sys.path:sys.path.insert(0,geometry_dir)
-from marker_scale import calibrate_marker_to_session
+from calibration_window import select_calibration_window
 
 
 def align_visitor_marker(receipts,config_bytes,route_id):
@@ -35,16 +35,22 @@ def align_visitor_marker(receipts,config_bytes,route_id):
    'markerToCameraRotation':receipt.get('markerToCameraRotation'),
    'trackerRotation':receipt.get('trackerRotation'),
    'trackerCameraCenter':receipt.get('trackerCameraCenter')})
- calibrated=calibrate_marker_to_session(observations,config)
+ calibrated=select_calibration_window(observations,config)
+ selection=calibrated.get('windowSelection') or {}
+ start=selection.get('selectedStartIndex')
+ used=observations if start is None else observations[start:]
  if not calibrated['accepted']:
   return {**reject(calibrated['reason']),**{key:calibrated[key] for key in
-   ('markerBaselineM','maxOrientationDisagreementDeg','maxPairwiseScaleDisagreementFraction') if key in calibrated}}
+   ('markerBaselineM','maxOrientationDisagreementDeg','maxPairwiseScaleDisagreementFraction') if key in calibrated},
+   'windowSelection':selection}
  return {**identity,'accepted':True,'ambiguous':False,'reason':'marker-session-transform-hypothesis-only',
          'routeToSession':calibrated['markerToSession'],
          'sourceFrameAtPhoneMs':last_phone,
-         'startTrackerPosition':observations[-1]['trackerCameraCenter'],
+         'startTrackerPosition':used[-1]['trackerCameraCenter'],
          'opencvVersion':receipts[-1]['opencvVersion'],
-         'markerObservationCount':len(observations),
+         'markerObservationCount':len(used),
+         'discardedLeadingObservationCount':len(observations)-len(used),
+         'windowSelection':selection,
          'markerBaselineM':calibrated['markerBaselineM'],
          'maxOrientationDisagreementDeg':calibrated['maxOrientationDisagreementDeg'],
          'maxPairwiseScaleDisagreementFraction':calibrated['maxPairwiseScaleDisagreementFraction'],

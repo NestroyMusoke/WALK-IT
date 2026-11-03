@@ -18,9 +18,11 @@ it('refuses stale frame or missing privacy review',()=>{
  expect(()=>makeMarkerScanRequest(sample,'AA==','a'.repeat(64),'b'.repeat(48),'v0',2000,true)).toThrow();
  expect(()=>makeMarkerScanRequest(sample,'AA==','a'.repeat(64),'b'.repeat(48),'v0',1100,false)).toThrow();
 });
-it('prechecks the author marker from a fresh reviewed frame without a visitor route',()=>{
- const request=makeAuthorMarkerCheckRequest(sample,'AA==','a'.repeat(64),'pre0',1100,true);
+it('prechecks the author marker with its live calibration session',()=>{
+ const request=makeAuthorMarkerCheckRequest(sample,'AA==','a'.repeat(64),'pre0',1100,true,'author-start');
  expect(request).not.toHaveProperty('routeToken');
  expect(request.frameAtPhoneMs).toBe(1000);
- expect(()=>makeAuthorMarkerCheckRequest(sample,'AA==','a'.repeat(64),'pre0',2000,true)).toThrow();
+ expect(request.authorSessionId).toBe('author-start');
+ expect(()=>makeAuthorMarkerCheckRequest(sample,'AA==','a'.repeat(64),'pre0',2000,true,'author-start')).toThrow();
+ expect(()=>makeAuthorMarkerCheckRequest(sample,'AA==','a'.repeat(64),'pre0',1100,true,'short')).toThrow();
 });

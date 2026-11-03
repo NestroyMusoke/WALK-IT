@@ -23,6 +23,7 @@ export function makeMarkerScanRequest(sample:CaptureSample,imageJpegBase64:strin
  return {routeToken,...markerFrame(sample,imageJpegBase64,configSha256,frameId,nowMs,reviewedNoPeopleOrPlates)};
 }
 export function makeAuthorMarkerCheckRequest(sample:CaptureSample,imageJpegBase64:string,
- configSha256:string,frameId:string,nowMs:number,reviewedNoPeopleOrPlates:boolean){
- return markerFrame(sample,imageJpegBase64,configSha256,frameId,nowMs,reviewedNoPeopleOrPlates);
+ configSha256:string,frameId:string,nowMs:number,reviewedNoPeopleOrPlates:boolean,authorSessionId:string){
+ if(!/^[a-zA-Z0-9_-]{8,64}$/.test(authorSessionId))throw Error('Invalid author calibration session');
+ return {authorSessionId,...markerFrame(sample,imageJpegBase64,configSha256,frameId,nowMs,reviewedNoPeopleOrPlates)};
 }

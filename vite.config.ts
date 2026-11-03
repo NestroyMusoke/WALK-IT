@@ -4,20 +4,21 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import {createReceiver} from './server/receiver.ts';
 import {handleRouteShare} from './server/route-share-handler.ts';
-import {createMarkerScanHandler,createPythonMarkerInfer,createPythonMarkerAlign} from './server/marker-scan-handler.ts';
+import {createMarkerScanHandler,createPythonMarkerWorker} from './server/marker-scan-handler.ts';
 import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 export default defineConfig({root:'apps/web',base:'./',resolve:{alias:{'@':fileURLToPath(new URL('./apps/web/src/',import.meta.url))}},plugins:[react(),tailwindcss(),{name:'walkit-local-diagnostics',configureServer(server){
   const directory=fileURLToPath(new URL('./eval/sessions/',import.meta.url));
   const configRaw=readFileSync(new URL('./config/vision.yaml',import.meta.url));
   const config=JSON.parse(configRaw.toString());
+  const worker=createPythonMarkerWorker(fileURLToPath(new URL('./.venv/Scripts/python.exe',import.meta.url)),
+   fileURLToPath(new URL('./',import.meta.url)),config.MARKER_SCAN_REQUEST_TIMEOUT_MS);
   const markerScan=createMarkerScanHandler(directory,createHash('sha256').update(configRaw).digest('hex'),
-   createPythonMarkerInfer(fileURLToPath(new URL('./.venv/Scripts/python.exe',import.meta.url)),
-    fileURLToPath(new URL('./',import.meta.url)),config.MARKER_SCAN_REQUEST_TIMEOUT_MS),
+   worker.infer,
    config.E05_IMAGE_MAX_INPUT_BYTES,
-   createPythonMarkerAlign(fileURLToPath(new URL('./.venv/Scripts/python.exe',import.meta.url)),
-    fileURLToPath(new URL('./',import.meta.url)),config.MARKER_SCAN_REQUEST_TIMEOUT_MS),
-   config.ALIGNMENT_MIN_PAIRS_COUNT,config.ALIGNMENT_WINDOW_MAX_PAIRS_COUNT);
+   worker.align,
+   config.ALIGNMENT_MIN_PAIRS_COUNT,config.MARKER_CALIBRATION_BUFFER_MAX_COUNT,
+   config.MARKER_CALIBRATION_EVIDENCE_MAX_AGE_MS,config.MARKER_CALIBRATION_MAX_FRAME_GAP_MS);
   server.middlewares.use((req,res,next)=>{if(!handleRouteShare(req,res,directory))next();});
   server.middlewares.use((req,res,next)=>{if(!markerScan(req,res))next();});
   server.middlewares.use(createReceiver(directory));

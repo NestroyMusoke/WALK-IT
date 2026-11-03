@@ -1,5 +1,5 @@
 import {createServer} from 'node:http';
-import {readFile,writeFile,mkdir,stat} from 'node:fs/promises';
+import {readFile,writeFile,mkdir,stat,appendFile} from 'node:fs/promises';
 import {readFileSync} from 'node:fs';
 import {randomBytes,createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
@@ -8,7 +8,7 @@ import {gzip} from 'node:zlib';
 import {promisify} from 'node:util';
 import {createReceiver} from './receiver.ts';
 import {handleRouteShare} from './route-share-handler.ts';
-import {createMarkerScanHandler,createAuthorMarkerCheckHandler,createPythonMarkerInfer,createPythonMarkerAlign} from './marker-scan-handler.ts';
+import {createMarkerScanHandler,createAuthorMarkerCheckHandler,createPythonMarkerWorker,type ReceiptLog} from './marker-scan-handler.ts';
 const root=resolve(fileURLToPath(new URL('../dist/',import.meta.url)));
 const privateRoot=fileURLToPath(new URL('../eval/sessions/',import.meta.url));
 const accessKey=randomBytes(24).toString('hex');
@@ -16,18 +16,22 @@ const receiver=createReceiver(privateRoot,accessKey);
 const configRaw=readFileSync(new URL('../config/vision.yaml',import.meta.url));
 const config=JSON.parse(configRaw.toString());
 const configSha=createHash('sha256').update(configRaw).digest('hex');
-const markerInfer=createPythonMarkerInfer(fileURLToPath(new URL('../.venv/Scripts/python.exe',import.meta.url)),
+const worker=createPythonMarkerWorker(fileURLToPath(new URL('../.venv/Scripts/python.exe',import.meta.url)),
  fileURLToPath(new URL('../',import.meta.url)),config.MARKER_SCAN_REQUEST_TIMEOUT_MS);
-const markerAlign=createPythonMarkerAlign(fileURLToPath(new URL('../.venv/Scripts/python.exe',import.meta.url)),
- fileURLToPath(new URL('../',import.meta.url)),config.MARKER_SCAN_REQUEST_TIMEOUT_MS);
-const authorMarkerCheck=createAuthorMarkerCheckHandler(accessKey,configSha,markerInfer,
- config.E05_IMAGE_MAX_INPUT_BYTES,markerAlign,config.ALIGNMENT_MIN_PAIRS_COUNT,
- config.ALIGNMENT_WINDOW_MAX_PAIRS_COUNT,config.ALIGNMENT_WINDOW_MAX_AGE_MS);
+/** Numeric calibration evidence only; submitted pixels are never written anywhere. */
+const receiptLog:ReceiptLog=entry=>{
+ void appendFile(new URL('../tmp/marker-receipts.jsonl',import.meta.url),`${JSON.stringify(entry)}\n`).catch(()=>{});
+};
+const authorMarkerCheck=createAuthorMarkerCheckHandler(accessKey,configSha,worker.infer,
+ config.E05_IMAGE_MAX_INPUT_BYTES,worker.align,config.ALIGNMENT_MIN_PAIRS_COUNT,
+ config.MARKER_CALIBRATION_BUFFER_MAX_COUNT,config.MARKER_CALIBRATION_EVIDENCE_MAX_AGE_MS,
+ config.MARKER_CALIBRATION_MAX_FRAME_GAP_MS,receiptLog);
 const markerScan=createMarkerScanHandler(privateRoot,configSha,
- markerInfer,
+ worker.infer,
  config.E05_IMAGE_MAX_INPUT_BYTES,
- markerAlign,
- config.ALIGNMENT_MIN_PAIRS_COUNT,config.ALIGNMENT_WINDOW_MAX_PAIRS_COUNT,config.ALIGNMENT_WINDOW_MAX_AGE_MS);
+ worker.align,
+ config.ALIGNMENT_MIN_PAIRS_COUNT,config.MARKER_CALIBRATION_BUFFER_MAX_COUNT,
+ config.MARKER_CALIBRATION_EVIDENCE_MAX_AGE_MS,config.MARKER_CALIBRATION_MAX_FRAME_GAP_MS,receiptLog);
 const compress=promisify(gzip);
 const compressed=new Map<string,{modified:number;data:Buffer}>();
 const mime:Record<string,string>={'.html':'text/html','.js':'text/javascript','.css':'text/css','.wasm':'application/wasm','.json':'application/json','.svg':'image/svg+xml'};

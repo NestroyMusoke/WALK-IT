@@ -9,8 +9,8 @@
 | **What ships today** | A camera capture path, a metric localizer, an AR guidance runtime with per-frame authorization gates, a fail-closed destination verifier, and a recorded-replay playground — all runnable from a clean clone in three commands. |
 | **Meta models** | **Muse Spark** (`muse-spark-open-1026`, via Baseten) reads signage in the destination frame; **SAM 3.1** segments the door by concept. Both are called from the verifier and both have real, logged receipts. |
 | **Evidence rule** | Every claim in this file is tagged **LIVE**, **RECORDED REPLAY**, **SYNTHETIC** or **NOT YET**. There is no fifth category. Nothing is implied. |
-| **Config identity** | [`config/vision.yaml`](config/vision.yaml) — 95 thresholds, all units explicit, raw SHA-256 `9617ba8a18926fba1eeded4e25bb1eb4cb409897fe7330f9e349df14cba249c7`. OpenCV pinned to **5.0.0.93**; a version mismatch is a refusal, not a warning. |
-| **Tests** | geometry suite **123/123** · web suite **91/91** across 35 files · typecheck and production build clean — all re-run on 3 November against this checkout. |
+| **Config identity** | [`config/vision.yaml`](config/vision.yaml) — 98 thresholds, all units explicit, raw SHA-256 `f3474181db1da4cd4a8c75e21e8dc6ce3bcabc58039cdf87418091e98ba4a42d`. OpenCV pinned to **5.0.0.93**; a version mismatch is a refusal, not a warning. |
+| **Tests** | geometry suite **134/134** · web suite **98/98** across 36 files · typecheck and production build clean — all re-run on 3 November against this checkout. |
 | **Field truth** | Fresh-session visitor arrivals: **0**. Measured route-end errors: **0**. Committed photographs: **0** — 5,009 entries under `eval/sessions/` are deliberately gitignored. The headline demo has not passed yet, and this README says so in every place it matters. |
 
 ![WALK IT product surface](design/landing-desktop.png)
@@ -207,7 +207,9 @@ Six alternative hypotheses were tested and ruled out with data, not opinion:
 | Timing lag between pose and image | Scan offsets | Minimum at 0 ms. |
 | Tracker jumps / dropouts | Step-length audit | Max step 0.034 m. Clean. |
 
-**The permanent fix is a product change, not a patch.** Recording is now gated on a *time* window, not a frame count: the preflight refits continuously over accepted views inside the trailing `ALIGNMENT_WINDOW_MAX_AGE_MS: 2000` and unlocks *Record author walk* only when a window passes at the **unchanged** limits — 10° orientation spread, 5% pairwise scale disagreement, 0.4 m metric baseline, ≤2 m marker distance, ≥4 views — with the UI coaching on whichever single reason is binding. Early, unsettled frames cannot be recorded at all. The gate was not loosened to make the demo pass; the *capture* was moved later in the convergence curve to make the gate true.
+**The permanent fix is a product change, not a patch.** Recording is gated on a *time* window, not a frame count — and the two time limits are now separate, because they answer different questions. `MARKER_CALIBRATION_EVIDENCE_MAX_AGE_MS: 6000` is how long the preflight is allowed to **accumulate** views; `ALIGNMENT_WINDOW_MAX_AGE_MS: 2000` is how fresh a **pass** must be to unlock *Record author walk*, unchanged. The split is measured, not chosen: across the marker-visible stretch of the saved evidence4 walk, **no** 2 s window reached the 0.4 m baseline and the widest was 0.272 m — 0.136 m/s, so 0.4 m needs at least 2.94 s of accumulation. Elsewhere in the same recording 1,054 two-second windows exceed 0.4 m (widest 0.745 m). The same person moves fine; they slow to roughly a third of that speed while aiming at a sheet of paper. Every geometric limit stays **unchanged** — 10° orientation spread, 5% pairwise scale disagreement, 0.4 m metric baseline, ≤2 m marker distance, ≥4 views — and a pass is still anchored to the newest view, so the 2000 ms action freshness is intact.
+
+Inside that window the preflight no longer lets a bad start veto a good finish. `geometry/calibration_window.py` searches suffix windows — candidates always keep the newest view and may only drop *leading* views — and offers the best-conditioned one to the untouched gate, scoring by the largest minimum margin over baseline, orientation spread, pairwise scale and residual. Unsettled frames at the start of a session are set aside rather than allowed to refuse the walk that followed them. On a refusal the miner still reports the near-miss, and the phone now prints every measured gate against its own configured budget plus which gate is tightest (`span 0.48 m of 0.40 m · spread 12.5° of 10.0° ✗ · 5 of 8 views kept · tightest gate spread 1.25× over budget`), so a refusal tells the user what to change instead of just saying no.
 
 The saved evidence4 walk still refuses today: its last settled four-view window reached **3.8° spread** but only **0.31 m span** against the 0.4 m minimum. We kept the threshold and kept the refusal. That is the most useful line in this README.
 
@@ -297,7 +299,9 @@ Five days, one short route, a real phone, a printed marker, and no willingness t
 
 | Blocker | Measured cost | Status |
 |---|---|---|
-| VIO world frame converges slowly | 36.8° orientation disagreement in early frames | Solved as a product gate (2000 ms trailing window), not a threshold cut |
+| VIO world frame converges slowly | 36.8° orientation disagreement in early frames | Solved as a product gate (6000 ms accumulation, suffix-window search, 2000 ms action freshness), not a threshold cut |
+| Marker inference latency | 332 ms per cold-spawned Python frame — about one receipt a second, so a 2 s window held ~3 views and alignment was never even attempted | Solved with a warm persistent worker: 16.7 ms median, 20× faster, 4/4 byte-identical results |
+| Single-marker PnP conditioning | At a 45–72 px marker edge (1.1–1.6 m from an A4 sheet) position error is 2.4–8.7 cm; corner refinement cuts reprojection RMS 0.315→0.176 px but position error only 3.83→3.81 cm | Open; the error is conditioning, not corner accuracy. Coaching now asks for off-axis viewing, which the existing `planar-ambiguous` gate already detects |
 | Planar marker ambiguity | Second IPPE solution ≥12× worse RMS | Refused by the existing 1.5 gate |
 | Reference-view localization on ordinary architecture | 4/10 frames with candidates, all ambiguous | Open; needs a wider, better-spread capture |
 | Model latency | 24.9 s Spark, 26.5 s SAM | Open; forces per-capture rather than per-frame use |
@@ -316,7 +320,7 @@ Authored during the event window in this checkout, 27 Oct → 3 Nov 2026, 43 com
 | If you want to check | Go here | Command or file |
 |---|---|---|
 | Tests actually pass | §8 | `npx vitest run --configLoader native`, `unittest discover -s geometry -p 'test_*.py'` |
-| Thresholds were not softened | header | `sha256sum config/vision.yaml` = `9617ba8a…` |
+| Thresholds were not softened | header | `sha256sum config/vision.yaml` = `f3474181…`; the 6000 ms key only lengthens how long views accumulate, and every geometric limit is unchanged |
 | The arrow cannot be forged | §5 | [`apps/web/src/route-arrow.ts`](apps/web/src/route-arrow.ts) |
 | The certificate is not hardcoded | §7 rule 6 | [`apps/web/src/live-anchor-certificate.ts`](apps/web/src/live-anchor-certificate.ts) |
 | Model calls are real | §6 | [`docs/META_USAGE.md`](docs/META_USAGE.md) |

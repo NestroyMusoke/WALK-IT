@@ -58,7 +58,7 @@ authorPrivacy.addEventListener('change',()=>{button('check-author-marker').disab
 button('check-author-marker').addEventListener('click',()=>{
  if(!running||!authorPrivacy.checked)return;
  authorCheckActive=true;button('check-author-marker').disabled=true;
- authorStatus.textContent='Keep swaying with the printed marker visible until the live window passes.';
+ authorStatus.textContent='Take real sideways steps, about half a metre, with the marker visible until the live window passes. Leaning or turning in place does not count.';
 });
 document.addEventListener('walkit-preflight-start',()=>{if(running&&authorPrivacy.checked)authorCheckActive=true;});
 document.addEventListener('walkit-record-start',()=>{authorCheckActive=false;authorPassAt=-Infinity;authorMarkerDetected=false;});
@@ -69,12 +69,13 @@ async function sendAuthorCheck(sample:ReturnType<typeof copyCaptureFrame>){
   copy.getContext('2d')!.putImageData(new ImageData(new Uint8ClampedArray(sample.rgba),sample.width,sample.height),0,0);
   const jpeg=copy.toDataURL('image/jpeg',0.82).split(',')[1];copy.width=copy.height=0;
   const sha=await configurationHash();
-  const request=makeAuthorMarkerCheckRequest(sample,jpeg,sha,`author-${authorSequence++}`,performance.now(),authorPrivacy.checked);
+  const request=makeAuthorMarkerCheckRequest(sample,jpeg,sha,`author-${authorSequence++}`,performance.now(),authorPrivacy.checked,authorSessionId);
   const key=new URLSearchParams(location.hash.slice(1)).get('key')||sessionStorage.getItem('walkit-live-access')||'';
   const response=await fetch('/__walkit/author-marker-check',{method:'POST',
    headers:{'Content-Type':'application/json','X-Walkit-Access':key},body:JSON.stringify(request),
    signal:AbortSignal.timeout(settings.MARKER_SCAN_REQUEST_TIMEOUT_MS),cache:'no-store'});
-  if(!response.ok)throw Error(`Marker check refused (${response.status})`);
+  if(!response.ok){let refusal='';try{refusal=(await response.json() as {error?:string}).error||'';}catch{}
+   throw Error(`Marker check refused (${response.status})${refusal?` · ${refusal}`:''}`);}
   const result=await response.json() as {accepted:boolean;reason:string;configSha256:string;
    frameAtPhoneMs:number;arrowAuthorized:boolean;alignment?:{accepted:boolean;reason:string;
     maxOrientationDisagreementDeg?:number;markerBaselineM?:number;maxPairwiseScaleDisagreementFraction?:number;
