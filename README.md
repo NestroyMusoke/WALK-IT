@@ -241,7 +241,7 @@ npm ci
 npm run build
 node server/phone-server.ts
 # second terminal
-cloudflared tunnel --url http://127.0.0.1:5180 --no-autoupdate --protocol http2
+powershell -ExecutionPolicy Bypass -File .\scripts\start-live-phone-test.ps1
 ```
 
 Python geometry needs OpenCV **5.0.0.93** exactly:

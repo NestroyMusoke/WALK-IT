@@ -1,5 +1,9 @@
 # Build ledger
 
+## 3 November — phone tunnel interruption
+
+During a new iPhone preflight, numeric logs reached the laptop and tracking reached NORMAL. The Cloudflare quick tunnel lost its edge connection; the phone displayed `Marker check paused: fetch aborted`. This is a transport failure, with no marker calibration result. Added `scripts/start-live-phone-test.ps1` so the operator can start the QUIC tunnel from their own PowerShell window and receive a fresh protected link. The script parsed without errors; the new user-run tunnel still needs a phone check.
+
 ## 3 November — live arrow wiring and rolling preflight
 
 The position-only same-session fallback records tracker positions in memory and draws a separate blue arrow through the same WebGL scene. Its on-screen label explicitly says it is not fresh-start navigation. A synthetic test exercised the replay arrow and tracking-loss refusal. No phone result or end error has been measured for this fallback.
