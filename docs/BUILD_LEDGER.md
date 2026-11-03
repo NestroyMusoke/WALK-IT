@@ -2,6 +2,8 @@
 
 ## 3 November — phone tunnel interruption
 
+Added visible camera framing guides for the marker preflight and the first marker frames of author recording. The screen shows a marker box, horizontal reference line and sideways movement cue, then a forward route line. These are composition aids, not measured camera-level or marker-distance evidence; OpenCV and tracker gates still determine PASS. The 91 web tests, typecheck and build passed after the UI change. A phone visual check is pending.
+
 During a new iPhone preflight, numeric logs reached the laptop and tracking reached NORMAL. The Cloudflare quick tunnel lost its edge connection; the phone displayed `Marker check paused: fetch aborted`. This is a transport failure, with no marker calibration result. Added `scripts/start-live-phone-test.ps1` so the operator can start the QUIC tunnel from their own PowerShell window and receive a fresh protected link. The script parsed without errors; the new user-run tunnel still needs a phone check.
 
 ## 3 November — live arrow wiring and rolling preflight

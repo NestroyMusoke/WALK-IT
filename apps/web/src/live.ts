@@ -243,6 +243,9 @@ button('start').addEventListener('click',async()=>{
           el('blocked').hidden=Boolean(frame&&now-lastFresh<=settings.MARKER_MAX_AGE_MS);
           if(!frame){el('blocked').style.background='#08151466';el('blocked').textContent='Tracking limited. Slowly scan a textured area.';}
           if(now-lastUi>settings.LIVE_STATUS_INTERVAL_MS){el('tracking').textContent=`${status} · ${upload.events.length} events · ${canvas.width} × ${canvas.height}`;lastUi=now;}
+          const recordingMarkerStart=capture.recording&&capture.recordedCount<settings.START_MAP_FRAME_CAPACITY_COUNT;
+          el('recording-guide').hidden=status!=='NORMAL'||!(authorCheckActive||markerScanActive||recordingMarkerStart);
+          el('route-guide').hidden=status!=='NORMAL'||!capture.recording||recordingMarkerStart;
           capture.refreshPreflight();
         },
         onRender:()=>{

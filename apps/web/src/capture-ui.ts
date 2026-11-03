@@ -72,6 +72,7 @@ export class CaptureUI{
   this.message.textContent=`Review image ${this.index+1} of ${this.recorder!.count}. Drag rectangles over faces, plates or private details. Then approve.`;
  }
  get recording(){return this.recorder?.state==='recording';}
+ get recordedCount(){return this.recorder?.count??0;}
  interrupt(reason:string){if(this.recorder?.state!=='recording')return;this.recorder.abort();this.pendingFinish=false;this.btn('finish-walk').hidden=true;this.btn('mark-distance').hidden=true;this.btn('record-walk').disabled=true;this.btn('sway-first').disabled=false;this.message.textContent=`Recording discarded: ${reason}. Wait for stable tracking, repeat the sway and start again.`;this.upload.add('error','host-capture-aborted');}
  frame(source:HTMLCanvasElement,frame:CameraFrame,t:number,videoTime:number,revision:number){
   const r=this.recorder;if(r?.state!=='recording'||!r.needsFrame(t))return;
