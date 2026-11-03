@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>WALK IT · Arrow design preview</title>
+  <style>
+    :root {font-family:system-ui,sans-serif;color:#fff;background:#102724}
+    * {box-sizing:border-box}
+    body {margin:0;min-height:100svh}
+    video {position:fixed;inset:0;width:100%;height:100%;object-fit:cover;background:#102724}
+    .shade {position:fixed;inset:0;background:linear-gradient(#001b1b6b,transparent 26%,transparent 64%,#001b1bab)}
+    .arrow {position:fixed;left:50%;top:46%;width:28px;height:28px;transform:translate(-50%,-50%) rotate(-28deg);filter:drop-shadow(0 2px 3px #09211b);pointer-events:none}
+    header {position:fixed;left:18px;right:18px;top:calc(16px + env(safe-area-inset-top));font-size:12px;font-weight:700;letter-spacing:.12em}
+    .card {position:fixed;left:14px;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));padding:16px;background:#102724ec;border:1px solid #6c8276;border-radius:16px;box-shadow:0 12px 36px #0006}
+    .card strong {display:block;font-size:18px;margin-bottom:5px}
+    .card p {font-size:13px;line-height:1.4;margin:6px 0 12px;color:#d4e6d6}
+    button {border:0;border-radius:10px;padding:13px 16px;background:#bcf48b;color:#142519;font:700 15px system-ui}
+  </style>
+</head>
+<body>
+  <video id="camera" autoplay muted playsinline aria-label="Live camera preview"></video>
+  <div class="shade"></div>
+  <header>WALK IT · DESIGN PREVIEW</header>
+  <svg class="arrow" viewBox="0 0 28 28" aria-label="Lime navigation arrow"><path fill="#baf554" d="M0 12H14V0L28 14 14 28V16H0Z"/></svg>
+  <div class="card">
+    <strong>How the arrow looks</strong>
+    <p>This shows the current 28 px arrow over your camera. It stays fixed here for preview. No route, tracking, or destination is being tested. No images are saved or uploaded.</p>
+    <button id="start" type="button">Open camera preview</button>
+    <p id="status" role="status">Camera is off.</p>
+  </div>
+  <script>
+    document.getElementById('start').addEventListener('click',async()=>{
+      const status=document.getElementById('status');
+      try {
+        const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false});
+        document.getElementById('camera').srcObject=stream;
+        status.textContent='Camera preview running. The arrow position is illustrative.';
+        document.getElementById('start').hidden=true;
+        addEventListener('pagehide',()=>stream.getTracks().forEach(track=>track.stop()),{once:true});
+      } catch {status.textContent='Camera unavailable. Open this HTTPS page in Safari and allow camera access.';}
+    });
+  </script>
+</body>
+</html>
