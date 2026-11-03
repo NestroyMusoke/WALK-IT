@@ -17,3 +17,8 @@ it('allows the protected phone marker check enough time for upload and OpenCV st
  const source=readFileSync(new URL('../src/live.ts',import.meta.url),'utf8');
  expect(source).toContain('AbortSignal.timeout(settings.MARKER_SCAN_REQUEST_TIMEOUT_MS)');
 });
+
+it('starts the reviewed route upload automatically after the final image approval',()=>{
+ const source=readFileSync(new URL('../src/capture-ui.ts',import.meta.url),'utf8');
+ expect(source).toMatch(/else\{this\.clearReview\(\);[^\n]+void this\.save\(\)/);
+});

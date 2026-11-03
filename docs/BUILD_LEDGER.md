@@ -2,6 +2,8 @@
 
 ## 3 November — live arrow wiring and rolling preflight
 
+The position-only same-session fallback records tracker positions in memory and draws a separate blue arrow through the same WebGL scene. Its on-screen label explicitly says it is not fresh-start navigation. A synthetic test exercised the replay arrow and tracking-loss refusal. No phone result or end error has been measured for this fallback.
+
 The visitor path now derives an anchor from a route-bound OpenCV 5 multi-view fit and installs it in `GuidanceRuntime`; the existing renderer can draw the arrow while NORMAL tracking, route progress and the drift proxy hold. The code derives `arrowAuthorized` from the live fit, while `fieldGatePassed` remains false without a measured field record. A synthetic browser fixture installed a candidate route and returned an arrow. This is a code-path result, not a phone result. The private field-record script requires a route id, source capture SHA, evidence file and measured end error within the existing 3 m budget.
 
 The marker server now discards receipts older than 2000 ms relative to the latest phone frame. Author recording unlocks only after a fresh four-view passing fit, and visitor scanning keeps looping with reason-specific coaching. No existing geometric threshold was loosened; the only new config entries are the 2000 ms window and 250 ms sample cadence. The archived prior config SHA is `a6a25ae01ad9f4fad14fca8206f06502e3c6188e83692878758d8c36372d2fd4`; new SHA is `9617ba8a18926fba1eeded4e25bb1eb4cb409897fe7330f9e349df14cba249c7`.

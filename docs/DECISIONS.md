@@ -2,6 +2,8 @@
 
 ## 3 November: live geometry proof is separate from field accuracy
 
+If the three-try live marker gate fails, the fallback is a position-only trail within one uninterrupted tracker session. The renderer labels it on screen and uses a separate replay-arrow type; it never becomes a `VerifiedAnchor`, route share or field pass. This can provide honest world-locked footage while leaving cross-session localization unproven.
+
 Permit a provisional live arrow only after this visitor's own recent four-view OpenCV 5 marker fit is bound to the private route, source capture and config hashes, with NORMAL tracking and drift/progress gates active. `fieldGatePassed` means independently measured route-end accuracy and is never inferred from the fit. The previous field-qualified-only condition prevented the phone from ever displaying an arrow, so it cannot be the precondition for the first field test. An arrow during that test is a geometry hypothesis, not a validated product claim. Existing numeric geometry and drift thresholds stay fixed.
 
 Evidence4's settled window passed orientation consistency at 3.8° but missed the 0.4 m metric span with 0.31 m. The earlier 54° world-frame ramp is treated as tracker settling. A rolling 2000 ms preflight window, rather than a blind timer or a single-frame marker detection, now controls recording. No repeat walk is requested before an on-phone PASS appears.

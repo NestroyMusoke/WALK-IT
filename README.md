@@ -10,6 +10,8 @@ On the author phone, wait for NORMAL tracking, check the privacy box, start mark
 
 The visitor code now installs a route-bound live OpenCV fit in the guidance runtime. A live arrow is a **geometry hypothesis during the field test**; independent route-end accuracy has not been measured. The app hides the arrow on tracking loss, route ambiguity or drift overrun. The private record command is `python scripts/record-field-gate.py --route-id <id> --source-capture-sha256 <sha> --evidence <private-field-log> --end-error-m <measured-metres> --output eval/sessions/<new-record>.json`. It refuses an end error above the unchanged 3 m budget and does not create a measurement for you.
 
+If the bounded preflight cannot pass, the live page also offers **Record position-only trail**. Keep the same camera session open, walk once, tap **Finish trail**, return to the same start, and tap **Replay in this session**. A blue arrow is rendered in the live 3D canvas with the banner **“Same-session live replay, not fresh-start navigation”**. This path records no images, issues no route certificate or visitor link, and measures no cross-session accuracy.
+
 Verification: `powershell -ExecutionPolicy Bypass -File .\scripts\check.ps1` and `.venv\Scripts\python.exe -m unittest discover -s geometry -p 'test_*.py'`. The saved evidence4 walk remains refused: the last settled four-view window reached 3.8° orientation spread but only 0.31 m span against the 0.4 m minimum. No fresh visitor end error exists yet.
 
 Meta Global AI Developer Hackathon · **Build for Your World / Indie** (supplied guide).

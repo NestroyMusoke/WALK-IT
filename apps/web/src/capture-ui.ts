@@ -35,7 +35,7 @@ export class CaptureUI{
   this.btn('clear-masks').onclick=()=>{this.masks=[];this.draw();};
   this.btn('approve-frame').onclick=()=>{
    try{this.recorder!.review(`kf${this.index}`,this.masks);this.index++;this.masks=[];
-    if(this.index<this.recorder!.count)this.draw();else{this.clearReview();this.btn('save-walk').hidden=false;this.btn('backup-reviewed-route').hidden=false;this.message.textContent=this.mode==='visitor-start-scan'?'Every start-scan image reviewed. Save a private backup and upload the scan for offline testing.':'Every image reviewed. Saving will first download a private backup with the route and numeric logs.';}
+    if(this.index<this.recorder!.count)this.draw();else{this.clearReview();this.btn('save-walk').hidden=false;this.btn('backup-reviewed-route').hidden=false;this.message.textContent='All images reviewed. Downloading your private backup and saving to the laptop automatically…';void this.save();}
    }catch(e){this.message.textContent=(e as Error).message;}
   };
   this.btn('save-walk').onclick=()=>void this.save();

@@ -5,7 +5,7 @@
 - [x] **M05e, connect live arrow.** A route-bound OpenCV 5 visitor fit now builds a live geometry certificate and installs `GuidanceRuntime`. The renderer can receive its authorized arrow while tracking and drift hold. `fieldGatePassed` remains false until measured field evidence is recorded. Synthetic browser proof passed; no physical arrow observed yet.
 - [x] **M02e, rolling marker preflight lock.** Author and visitor marker checks use a trailing 2000 ms receipt window with at least four views and the existing geometric limits. The author record buttons unlock only while a passing live window is recent. Both scans loop with measured coaching. Evidence4 offline replay never unlocked; its final settled window had 3.8° spread and only 0.31 m span against the existing 0.4 m minimum. Phone validation is open.
 - [ ] **M05f, bounded fresh-session field run.** One author walk, independent visitor link and live arrow, physical route-end measurement, right and wrong destination approaches. Three coached preflight attempts maximum. Record every attempt and refusal. No field result is claimed yet.
-- [ ] **M05g, package measured evidence and labelled fallback.** Update the README after M05f. Same-session live replay must carry its own banner and cannot be described as fresh navigation.
+- [ ] **M05g, package measured evidence and labelled fallback.** Position-only same-session live replay with an on-screen banner is built and synthetic-tested. The README has commands and honest evidence status. A measured field card and phone test remain open.
 
 ## 3 November live marker workflow, user-directed
 

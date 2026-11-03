@@ -14,6 +14,7 @@ import {routeTokenFromSearch} from './visitor-route';
 import {makeMarkerScanRequest,makeAuthorMarkerCheckRequest} from './marker-scan-client';
 import {buildLiveAnchor} from './live-anchor-certificate';
 import {coachMarkerPreflight} from './marker-preflight-ui';
+import {SameSessionTrail} from './same-session-trail';
 import './live.css';
 type Pipeline=Record<string,unknown>;
 type LiveSdk={initialize:()=>Promise<void>;run:(options:Record<string,unknown>)=>void;stop:()=>void;clearCameraPipelineModules:()=>void;addCameraPipelineModules:(modules:Pipeline[])=>void;
@@ -24,6 +25,27 @@ const button=(id:string)=>el(id) as HTMLButtonElement;
 const canvas=el('camera') as HTMLCanvasElement;
 const calibration=new ViewportCalibration(),anchor=new DiagnosticAnchor();
 const guidance=new GuidanceRuntime();
+const sameSessionTrail=new SameSessionTrail();
+let sameSessionReplayActive=false;
+button('same-session-record').addEventListener('click',()=>{
+ if(!running||lastStatus!=='NORMAL'||capture.recording)return;
+ sameSessionTrail.begin();sameSessionReplayActive=false;el('same-session-banner').hidden=true;
+ button('same-session-record').hidden=true;button('same-session-finish').hidden=false;
+ el('same-session-status').textContent='Recording tracker positions only. Walk the route once; no camera images are saved.';
+});
+button('same-session-finish').addEventListener('click',()=>{
+ button('same-session-finish').hidden=true;
+ if(sameSessionTrail.finish()){
+  button('same-session-replay').hidden=false;
+  el('same-session-status').textContent=`${sameSessionTrail.count} positions saved only in this phone session. Return to the start without closing the camera, then tap Replay.`;
+ }else el('same-session-status').textContent='Trail too short; record again.';
+ button('same-session-record').hidden=false;
+});
+button('same-session-replay').addEventListener('click',()=>{
+ if(!running||!sameSessionTrail.isReady)return;
+ sameSessionReplayActive=true;el('same-session-banner').hidden=false;
+ el('same-session-status').textContent='Same-session live replay active. This does not test a fresh visitor or metric accuracy.';
+});
 const visitorLinkPresent=new URLSearchParams(location.search).has('route');
 let visitorRoute:VisitorRoute|undefined,sdkReady=false;
 const visitorSessionId=crypto.randomUUID();
@@ -156,6 +178,7 @@ function geometry(){
 function stop(reason='user-finished'){
   capture.interrupt(reason);
   guidance.clear();
+  sameSessionTrail.clear();sameSessionReplayActive=false;el('same-session-banner').hidden=true;
   markerScanActive=false;button('scan-marker').disabled=true;
   authorCheckActive=false;authorMarkerDetected=false;authorPassAt=-Infinity;button('check-author-marker').disabled=true;
   window.removeEventListener('devicemotion',onDeviceMotion);
@@ -207,6 +230,8 @@ button('start').addEventListener('click',async()=>{
           if(!frame)capture.interrupt('tracking lost');
           const vp=processGpuResult?.gltexturerenderer?.viewport;viewport=vp?[vp.width,vp.height,vp.offsetX,vp.offsetY]:[0,0,0,0];
           if(frame&&!frameStartResult?.repeatFrame)lastFresh=now;
+          if(frame&&status==='NORMAL'&&!repeatFrame&&sameSessionTrail.isRecording)
+           sameSessionTrail.add(frame.position,now);
           if(!frame){anchor.clear();guidance.clear();showGuidanceStatus();}
           if(status!==lastStatus){upload.add('status',status);lastStatus=status;}
           const depth=frame?medianWorldPointDepth(reality?.worldPoints,frame):{count:0,validDepthCount:0,medianDepth:null};
@@ -240,8 +265,10 @@ button('start').addEventListener('click',async()=>{
           const visible=point&&projectReference(point,frame,size.cssWidth,size.cssHeight);
           const state=sdk.GlTextureRenderer.getGLctxParameters(gl,[gl.TEXTURE0]);
           const routeArrow=guidance.read(frame,lastStatus,performance.now(),lastFresh,size.cssWidth,size.cssHeight);
+          const replayArrow=sameSessionReplayActive&&!routeArrow?
+           sameSessionTrail.read(frame,lastStatus,performance.now(),lastFresh,size.cssWidth,size.cssHeight):null;
           showGuidanceStatus();
-          try{renderer.draw(visible?point:null,frame,canvas.width,canvas.height,size.ratio,false,routeArrow);}finally{sdk.GlTextureRenderer.setGLctxParameters(gl,state);}
+          try{renderer.draw(visible?point:null,frame,canvas.width,canvas.height,size.ratio,false,routeArrow,replayArrow);}finally{sdk.GlTextureRenderer.setGLctxParameters(gl,state);}
         },
         onException:(error:unknown)=>fail(error instanceof Error?error.message:'Camera engine exception'),
         onCameraStatusChange:({status}:{status:string})=>{upload.add('status',`camera-${status}`);if(status==='failed')fail('Camera permission or device failed');}
@@ -251,6 +278,7 @@ button('start').addEventListener('click',async()=>{
     runAtMs=performance.now();logSdk('run',runArgs);
     sdk.run({canvas,webgl2:true,glContextConfig:runArgs.glContextConfig});
     button('start').hidden=true;button('place').hidden=false;button('stop').hidden=false;button('backup').hidden=false;
+    button('same-session-record').hidden=false;
     button('scan-marker').disabled=!visitorRoute||!markerPrivacy.checked;
     button('check-author-marker').disabled=!authorPrivacy.checked;
   }catch(error){fail((error as Error).message);button('start').disabled=false;}

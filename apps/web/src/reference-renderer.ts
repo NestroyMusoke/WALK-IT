@@ -2,6 +2,7 @@ import {BufferGeometry,Float32BufferAttribute,PerspectiveCamera,Points,Scene,Sha
 import type {CameraFrame,WorldPoint} from './display';
 import {isAuthorizedRouteArrow,type AuthorizedRouteArrow} from './route-arrow';
 import {settings} from './settings';
+import type {SameSessionReplayArrow} from './same-session-trail';
 export class ReferenceRenderer {
   readonly renderer:WebGLRenderer;
   readonly camera=new PerspectiveCamera();
@@ -16,9 +17,9 @@ export class ReferenceRenderer {
   private reference=new Points(this.geometry,this.material);
   private arrowGeometry=new BufferGeometry().setAttribute('position',new Float32BufferAttribute([0,0,0],3));
   private arrowMaterial=new ShaderMaterial({
-    uniforms:{pointSize:{value:settings.MARKER_SIZE_CSS_PX},stroke:{value:settings.CROSS_HALF_STROKE_FRACTION},angle:{value:0}},
+    uniforms:{pointSize:{value:settings.MARKER_SIZE_CSS_PX},stroke:{value:settings.CROSS_HALF_STROKE_FRACTION},angle:{value:0},color:{value:[0.73,0.96,0.33]}},
     vertexShader:'uniform float pointSize; void main(){gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);gl_PointSize=pointSize;}',
-    fragmentShader:'uniform float stroke; uniform float angle; void main(){vec2 p=2.0*gl_PointCoord-1.0;float c=cos(angle),s=sin(angle);vec2 q=vec2(c*p.x+s*p.y,-s*p.x+c*p.y);bool shaft=q.x>=-1.0&&q.x<=0.0&&abs(q.y)<=stroke;bool head=q.x>=0.0&&q.x<=1.0&&abs(q.y)<=1.0-q.x;if(!shaft&&!head)discard;gl_FragColor=vec4(0.73,0.96,0.33,1.0);}',
+    fragmentShader:'uniform float stroke; uniform float angle; uniform vec3 color; void main(){vec2 p=2.0*gl_PointCoord-1.0;float c=cos(angle),s=sin(angle);vec2 q=vec2(c*p.x+s*p.y,-s*p.x+c*p.y);bool shaft=q.x>=-1.0&&q.x<=0.0&&abs(q.y)<=stroke;bool head=q.x>=0.0&&q.x<=1.0&&abs(q.y)<=1.0-q.x;if(!shaft&&!head)discard;gl_FragColor=vec4(color,1.0);}',
     depthTest:false,depthWrite:false
   });
   private arrow=new Points(this.arrowGeometry,this.arrowMaterial);
@@ -27,18 +28,20 @@ export class ReferenceRenderer {
     this.renderer.autoClear=false;this.reference.frustumCulled=false;this.arrow.frustumCulled=false;
     this.scene.add(this.reference,this.arrow);
   }
-  draw(point:WorldPoint|null,frame:CameraFrame,width:number,height:number,ratio:number,clear=false,routeArrow:AuthorizedRouteArrow|null=null){
+  draw(point:WorldPoint|null,frame:CameraFrame,width:number,height:number,ratio:number,clear=false,routeArrow:AuthorizedRouteArrow|null=null,replayArrow:SameSessionReplayArrow|null=null){
     this.renderer.resetState();this.renderer.setViewport(0,0,width,height);
     if(clear){this.renderer.setClearColor(this.transparent?0x000000:0x101e22,this.transparent?0:1);this.renderer.clear(true,true,true);}
-    this.reference.visible=Boolean(point);this.arrow.visible=isAuthorizedRouteArrow(routeArrow);
+    this.reference.visible=Boolean(point);this.arrow.visible=isAuthorizedRouteArrow(routeArrow)||replayArrow?.mode==='same-session-live-replay';
     if(point||this.arrow.visible){
       this.camera.position.fromArray(frame.position);this.camera.quaternion.fromArray(frame.rotation);
       this.camera.projectionMatrix.fromArray(frame.projection);this.camera.projectionMatrixInverse.copy(this.camera.projectionMatrix).invert();
       this.camera.updateMatrixWorld(true);if(point)this.reference.position.fromArray(point);
       this.material.uniforms.pointSize.value=settings.MARKER_SIZE_CSS_PX*ratio;
-      if(routeArrow){this.arrow.position.fromArray(routeArrow.worldPoint);
+      const visibleArrow=isAuthorizedRouteArrow(routeArrow)?routeArrow:replayArrow;
+      if(visibleArrow){this.arrow.position.fromArray(visibleArrow.worldPoint);
         this.arrowMaterial.uniforms.pointSize.value=settings.MARKER_SIZE_CSS_PX*ratio;
-        this.arrowMaterial.uniforms.angle.value=routeArrow.angleRad;}
+        this.arrowMaterial.uniforms.angle.value=visibleArrow.angleRad;
+        this.arrowMaterial.uniforms.color.value=isAuthorizedRouteArrow(routeArrow)?[0.73,0.96,0.33]:[0.42,0.78,1.0];}
       this.renderer.render(this.scene,this.camera);
     }
     this.renderer.resetState();
