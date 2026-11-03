@@ -13,7 +13,8 @@ function fixture(){
   privacy:{capturePermitted:true,imagesReviewed:true},keyframes,
   path:keyframes.map(k=>({position:k.position,keyframeId:k.id})),destination:{pathIndex:1,keyframeId:'kf1'}};
  const anchor={accepted:true,ambiguous:false,opencvVersion:'5.0.0',routeId:'route-a',sourceFrameAtPhoneMs:100,
-  metricScaleVerified:true,navigationReady:true,arrowAuthorized:true,
+  metricScaleVerified:true,navigationReady:true,arrowAuthorized:true,mode:'marker-vio' as const,
+  fieldGatePassed:true,startTrackerPosition:[0,0,0],estimatedDriftBoundM:0.1,
   routeToSession:{direction:'map-to-session',scale:1,rotation:[1,0,0,0,1,0,0,0,1],translation:[0,0,0]}};
  return {route,anchor,frame,nowMs:101,frameMs:100,trackingStatus:'NORMAL',pathIndex:0,cssWidth:500,cssHeight:500};
 }
@@ -33,16 +34,22 @@ it('hides the arrow for stale, lost, ambiguous, wrong-route and nonmetric eviden
  const input=fixture();
  for(const change of [
   {trackingStatus:'LIMITED'},
-  {nowMs:100+settings.VERIFY_MAX_GEOMETRY_AGE_MS+1},
+  {nowMs:100+settings.VERIFY_MAX_GEOMETRY_AGE_MS+1,frameMs:100},
   {frameMs:100-settings.MARKER_MAX_AGE_MS-1},
   {anchor:{...input.anchor,ambiguous:true}},
   {anchor:{...input.anchor,routeId:'different'}},
   {anchor:{...input.anchor,opencvVersion:'4.12.0'}},
   {anchor:{...input.anchor,arrowAuthorized:false}},
-  {anchor:{...input.anchor,sourceFrameAtPhoneMs:100-settings.VERIFY_MAX_GEOMETRY_AGE_MS-1}},
+  {anchor:{...input.anchor,sourceFrameAtPhoneMs:102}},
+  {anchor:{...input.anchor,estimatedDriftBoundM:settings.VIO_DRIFT_BUDGET_M+0.01}},
   {route:{...input.route,scaleVerified:false,units:'tracker' as const}},
   {pathIndex:1},
  ])expect(selectRouteArrow({...input,...change})).toBeNull();
+});
+
+it('keeps a marker-calibrated arrow beyond the image-age window with a fresh tracker frame',()=>{
+ const input=fixture(),later=100+settings.VERIFY_MAX_GEOMETRY_AGE_MS+1000;
+ expect(selectRouteArrow({...input,nowMs:later,frameMs:later-1})).not.toBeNull();
 });
 
 it('hides an arrow with an invalid transform or a point behind the camera',()=>{

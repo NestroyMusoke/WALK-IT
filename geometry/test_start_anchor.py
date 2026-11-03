@@ -36,7 +36,7 @@ class StartAnchorTests(unittest.TestCase):
     def test_stale_or_lost_tracking_never_returns_an_anchor(self):
         poses, session = fixture()
         cases = [
-            (CFG["VERIFY_MAX_GEOMETRY_AGE_MS"] + 1, "NORMAL", 0, "stale-pose"),
+            (CFG["MARKER_MAX_AGE_MS"] + 1, "NORMAL", 0, "stale-pose"),
             (0, "LIMITED", 0, "tracking-unavailable"),
             (0, "NORMAL", CFG["MARKER_MAX_AGE_MS"] + 1, "stale-tracker"),
         ]

@@ -22,14 +22,14 @@ export class ReferenceRenderer {
     depthTest:false,depthWrite:false
   });
   private arrow=new Points(this.arrowGeometry,this.arrowMaterial);
-  constructor(canvas:HTMLCanvasElement,context?:WebGL2RenderingContext){
-    this.renderer=new WebGLRenderer({canvas,context,antialias:false,alpha:false,preserveDrawingBuffer:false});
+  constructor(canvas:HTMLCanvasElement,context?:WebGL2RenderingContext,private transparent=false){
+    this.renderer=new WebGLRenderer({canvas,context,antialias:false,alpha:transparent,preserveDrawingBuffer:false});
     this.renderer.autoClear=false;this.reference.frustumCulled=false;this.arrow.frustumCulled=false;
     this.scene.add(this.reference,this.arrow);
   }
   draw(point:WorldPoint|null,frame:CameraFrame,width:number,height:number,ratio:number,clear=false,routeArrow:AuthorizedRouteArrow|null=null){
     this.renderer.resetState();this.renderer.setViewport(0,0,width,height);
-    if(clear){this.renderer.setClearColor(0x101e22,1);this.renderer.clear(true,true,true);}
+    if(clear){this.renderer.setClearColor(this.transparent?0x000000:0x101e22,this.transparent?0:1);this.renderer.clear(true,true,true);}
     this.reference.visible=Boolean(point);this.arrow.visible=isAuthorizedRouteArrow(routeArrow);
     if(point||this.arrow.visible){
       this.camera.position.fromArray(frame.position);this.camera.quaternion.fromArray(frame.rotation);

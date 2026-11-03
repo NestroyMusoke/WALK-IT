@@ -4,8 +4,12 @@ import {settings} from './settings';
 
 type Transform={direction:string;scale:number;rotation:number[];translation:number[]};
 export type VerifiedAnchor={accepted:boolean;ambiguous:boolean;opencvVersion:string;routeId:string;sourceFrameAtPhoneMs:number;
- metricScaleVerified:boolean;navigationReady:boolean;arrowAuthorized:boolean;routeToSession:Transform};
-type ArrowInput={route:RouteBundle;anchor:VerifiedAnchor;frame:CameraFrame;nowMs:number;frameMs:number;
+ metricScaleVerified:boolean;navigationReady:boolean;arrowAuthorized:boolean;routeToSession:Transform;
+ mode:'marker-vio';fieldGatePassed:boolean;startTrackerPosition:number[];estimatedDriftBoundM:number;
+ sourceCaptureSha256?:string;configSha256?:string};
+export type MetricPath={source:'captured';units:'metres';scaleVerified:true;routeId:string;configSha256:string;
+ path:{position:number[];keyframeId:string}[];destination:{pathIndex:number;keyframeId:string}};
+type ArrowInput={route:RouteBundle|MetricPath;anchor:VerifiedAnchor;frame:CameraFrame;nowMs:number;frameMs:number;
  trackingStatus:string;pathIndex:number;cssWidth:number;cssHeight:number};
 const authorizedArrow=Symbol('verified-route-arrow');
 export type AuthorizedRouteArrow={worldPoint:WorldPoint;angleRad:number;arrowAuthorized:true;routeId:string;sourceFrameAtPhoneMs:number;[authorizedArrow]:true};
@@ -34,6 +38,15 @@ function transform(point:number[],t:Transform):WorldPoint{
   t.scale*(r[6]*point[0]+r[7]*point[1]+r[8]*point[2])+t.translation[2],
  ];
 }
+function validMetricPath(value:MetricPath){
+ return value?.source==='captured'&&value.units==='metres'&&value.scaleVerified===true&&
+  /^[a-zA-Z0-9_-]+$/.test(value.routeId)&&/^[a-f0-9]{64}$/.test(value.configSha256)&&
+  Array.isArray(value.path)&&value.path.length>=2&&value.path.every(p=>
+   /^[a-zA-Z0-9_-]+$/.test(p.keyframeId)&&Array.isArray(p.position)&&
+   p.position.length===3&&p.position.every(Number.isFinite))&&
+  value.destination?.pathIndex===value.path.length-1&&
+  value.destination?.keyframeId===value.path.at(-1)?.keyframeId;
+}
 
 /** Selects one world-locked camera arrow. All evidence is required on each frame. */
 export function selectRouteArrow(input:ArrowInput):AuthorizedRouteArrow|null{
@@ -43,10 +56,14 @@ export function selectRouteArrow(input:ArrowInput):AuthorizedRouteArrow|null{
   !anchor||anchor.accepted!==true||anchor.ambiguous!==false||
   anchor.navigationReady!==true||anchor.metricScaleVerified!==true||anchor.arrowAuthorized!==true||
   !/^5\./.test(anchor.opencvVersion)||!Number.isFinite(anchor.sourceFrameAtPhoneMs)||
-  nowMs-anchor.sourceFrameAtPhoneMs<0||nowMs-anchor.sourceFrameAtPhoneMs>settings.VERIFY_MAX_GEOMETRY_AGE_MS||
+  nowMs-anchor.sourceFrameAtPhoneMs<0||
+  anchor.mode!=='marker-vio'||
+  !Number.isFinite(anchor.estimatedDriftBoundM)||anchor.estimatedDriftBoundM<0||
+  anchor.estimatedDriftBoundM>settings.VIO_DRIFT_BUDGET_M||
   !anchor.routeToSession||!validTransform(anchor.routeToSession))return null;
- let route:RouteBundle;
- try{route=validateRouteBundle(input.route);}catch{return null;}
+ let route:RouteBundle|MetricPath;
+ if('keyframes' in input.route){try{route=validateRouteBundle(input.route);}catch{return null;}}
+ else{if(!validMetricPath(input.route))return null;route=input.route;}
  if(route.source!=='captured'||route.units!=='metres'||route.scaleVerified!==true||route.routeId!==anchor.routeId||
   !Number.isSafeInteger(pathIndex)||pathIndex<0||pathIndex+1>=route.path.length)return null;
  const first=route.path[pathIndex].position,second=route.path[pathIndex+1].position;

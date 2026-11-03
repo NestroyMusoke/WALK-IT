@@ -1,14 +1,19 @@
 import {XR8Promise} from '@8thwall/engine-binary';
 import {prepareSdk} from './sdk';
-import {settings} from './settings';
+import {settings,configurationHash} from './settings';
 import {ViewportCalibration,DiagnosticAnchor,projectReference,type CameraFrame} from './display';
 import {ReferenceRenderer} from './reference-renderer';
 import {readReality} from './tracker';
 import {LiveUpload} from './live-upload';
 import {CaptureUI} from './capture-ui';
-import {viewportCoversCanvas} from './capture-frame';
+import {viewportCoversCanvas,copyCaptureFrame} from './capture-frame';
 import {medianWorldPointDepth,serializeSdkCall} from './capture-telemetry';
 import {GuidanceRuntime} from './guidance-runtime';
+import {loadVisitorRoute,type VisitorRoute} from './visitor-route';
+import {routeTokenFromSearch} from './visitor-route';
+import {makeMarkerScanRequest,makeAuthorMarkerCheckRequest} from './marker-scan-client';
+import {buildLiveAnchor} from './live-anchor-certificate';
+import {coachMarkerPreflight} from './marker-preflight-ui';
 import './live.css';
 type Pipeline=Record<string,unknown>;
 type LiveSdk={initialize:()=>Promise<void>;run:(options:Record<string,unknown>)=>void;stop:()=>void;clearCameraPipelineModules:()=>void;addCameraPipelineModules:(modules:Pipeline[])=>void;
@@ -19,11 +24,109 @@ const button=(id:string)=>el(id) as HTMLButtonElement;
 const canvas=el('camera') as HTMLCanvasElement;
 const calibration=new ViewportCalibration(),anchor=new DiagnosticAnchor();
 const guidance=new GuidanceRuntime();
+const visitorLinkPresent=new URLSearchParams(location.search).has('route');
+let visitorRoute:VisitorRoute|undefined,sdkReady=false;
+const visitorSessionId=crypto.randomUUID();
+let markerScanActive=false,markerScanBusy=false,markerSequence=0,markerAccepted=0,lastMarkerAt=-Infinity;
+let authorCheckActive=false,authorCheckBusy=false,authorMarkerDetected=false,authorPassAt=-Infinity,authorLastAt=-Infinity,authorSequence=0;
+const authorSessionId=crypto.randomUUID();
+const authorPrivacy=el('author-marker-privacy') as HTMLInputElement;
+const authorStatus=el('author-marker-status');
+authorPrivacy.addEventListener('change',()=>{button('check-author-marker').disabled=!running||!authorPrivacy.checked;});
+button('check-author-marker').addEventListener('click',()=>{
+ if(!running||!authorPrivacy.checked)return;
+ authorCheckActive=true;button('check-author-marker').disabled=true;
+ authorStatus.textContent='Keep swaying with the printed marker visible until the live window passes.';
+});
+document.addEventListener('walkit-preflight-start',()=>{if(running&&authorPrivacy.checked)authorCheckActive=true;});
+document.addEventListener('walkit-record-start',()=>{authorCheckActive=false;authorPassAt=-Infinity;authorMarkerDetected=false;});
+async function sendAuthorCheck(sample:ReturnType<typeof copyCaptureFrame>){
+ authorCheckBusy=true;
+ try{
+  const copy=document.createElement('canvas');copy.width=sample.width;copy.height=sample.height;
+  copy.getContext('2d')!.putImageData(new ImageData(new Uint8ClampedArray(sample.rgba),sample.width,sample.height),0,0);
+  const png=copy.toDataURL('image/png').split(',')[1];copy.width=copy.height=0;
+  const sha=await configurationHash();
+  const request=makeAuthorMarkerCheckRequest(sample,png,sha,`author-${authorSequence++}`,performance.now(),authorPrivacy.checked);
+  const key=new URLSearchParams(location.hash.slice(1)).get('key')||sessionStorage.getItem('walkit-live-access')||'';
+  const response=await fetch('/__walkit/author-marker-check',{method:'POST',
+   headers:{'Content-Type':'application/json','X-Walkit-Access':key},body:JSON.stringify(request),
+   signal:AbortSignal.timeout(settings.MARKER_SCAN_REQUEST_TIMEOUT_MS),cache:'no-store'});
+  if(!response.ok)throw Error(`Marker check refused (${response.status})`);
+  const result=await response.json() as {accepted:boolean;reason:string;configSha256:string;
+   frameAtPhoneMs:number;arrowAuthorized:boolean;alignment?:{accepted:boolean;reason:string;
+    maxOrientationDisagreementDeg?:number;markerBaselineM?:number;maxPairwiseScaleDisagreementFraction?:number;
+    sourceFrameAtPhoneMs?:number}};
+  if(result.configSha256!==sha||result.frameAtPhoneMs!==sample.t||result.arrowAuthorized!==false)
+   throw Error('Marker check provenance mismatch');
+  if(result.alignment?.accepted===true&&
+   performance.now()-(result.alignment.sourceFrameAtPhoneMs??sample.t)<=settings.ALIGNMENT_WINDOW_MAX_AGE_MS){
+   authorMarkerDetected=true;authorPassAt=performance.now();
+   authorStatus.textContent=`PASS · span ${result.alignment.markerBaselineM?.toFixed(2)??'?'} m · spread ${result.alignment.maxOrientationDisagreementDeg?.toFixed(1)??'?'}° · scale disagreement ${result.alignment.maxPairwiseScaleDisagreementFraction===undefined?'?':(result.alignment.maxPairwiseScaleDisagreementFraction*100).toFixed(1)}%. Record while this pass is fresh.`;
+  }else{
+   authorMarkerDetected=false;
+   const fit=result.alignment;
+   authorStatus.textContent=coachMarkerPreflight(fit?.reason||result.reason,fit||{});
+  }
+  upload.add('status',`author-marker-${result.reason}`,[sample.t]);
+ }catch(error){authorMarkerDetected=false;authorStatus.textContent=`Marker check paused: ${(error as Error).message}. Keep the page open and retry.`;}
+ finally{sample.rgba.fill(0);authorCheckBusy=false;button('check-author-marker').disabled=!running||!authorPrivacy.checked;}
+}
+const markerPrivacy=el('marker-privacy') as HTMLInputElement;
+const markerStatus=el('marker-status');
+button('scan-marker').addEventListener('click',()=>{
+ if(!running||!visitorRoute||!markerPrivacy.checked)return;
+ markerScanActive=true;markerAccepted=0;markerSequence=0;lastMarkerAt=-Infinity;
+ button('scan-marker').disabled=true;
+ markerStatus.textContent='Scanning four distinct tracked views. Keep the marker visible and move gently sideways.';
+});
+markerPrivacy.addEventListener('change',()=>{button('scan-marker').disabled=!running||!visitorRoute||!markerPrivacy.checked||markerScanActive;});
+async function sendMarkerSample(sample:ReturnType<typeof copyCaptureFrame>){
+ markerScanBusy=true;
+ try{
+  if(!visitorRoute||!markerPrivacy.checked)throw Error('Private route or image review missing');
+  const copy=document.createElement('canvas');copy.width=sample.width;copy.height=sample.height;
+  copy.getContext('2d')!.putImageData(new ImageData(new Uint8ClampedArray(sample.rgba),sample.width,sample.height),0,0);
+  const png=copy.toDataURL('image/png').split(',')[1];copy.width=copy.height=0;
+  const request=makeMarkerScanRequest(sample,png,visitorRoute.configSha256,
+   routeTokenFromSearch(location.search),`v${markerSequence++}`,performance.now(),markerPrivacy.checked);
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),settings.MARKER_SCAN_REQUEST_TIMEOUT_MS);
+  let response:Response;
+  try{response=await fetch('/__walkit/marker-scan',{method:'POST',headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({...request,visitorSessionId}),signal:controller.signal,cache:'no-store'});}
+  finally{clearTimeout(timer);}
+  if(!response.ok)throw Error(`Marker request refused (${response.status})`);
+  const result=await response.json() as {accepted:boolean;reason:string;frameAtPhoneMs:number;configSha256:string;arrowAuthorized:boolean;
+   alignment?:Parameters<typeof buildLiveAnchor>[1]};
+  if(result.configSha256!==visitorRoute.configSha256||result.arrowAuthorized!==false||
+   result.frameAtPhoneMs!==sample.t)throw Error('Marker response provenance mismatch');
+  if(result.accepted)markerAccepted++;
+  markerStatus.textContent=result.alignment?.accepted===true?'Start fit passed. Checking live route binding…':
+   coachMarkerPreflight(result.alignment?.reason||result.reason,result.alignment||{});
+  upload.add('status',`marker-${result.reason}`,[sample.t,markerAccepted]);
+  if(result.alignment?.accepted===true){
+   const certificate=buildLiveAnchor(visitorRoute,result.alignment,lastStatus,performance.now());
+   if(certificate){guidance.installMarkerPath(visitorRoute,certificate,Date.now());markerScanActive=false;
+    markerStatus.textContent+=' Live start verified. Follow the arrow while tracking stays NORMAL.';}
+   else markerStatus.textContent+=' Alignment receipt did not prove a current route-bound start. Keep scanning.';
+  }
+ }catch(error){markerStatus.textContent=`Marker scan paused: ${(error as Error).message}. Keep scanning; no arrow yet.`;}
+ finally{sample.rgba.fill(0);markerScanBusy=false;button('scan-marker').disabled=!running||!visitorRoute||!markerPrivacy.checked;}
+}
 function showGuidanceStatus(){
  const message=guidance.status==='following'?'Following the verified route. Keep walking and watching your surroundings.':
   guidance.status==='paused'?'Guidance paused. No route arrow. Stop and rescan the starting place.':
+  visitorRoute?`Private route ${visitorRoute.routeId} loaded. Scan its printed start marker. No route arrow until the live anchor and scale pass verification.`:
+  visitorLinkPresent?'Checking the private visitor link. No route arrow yet.':
   'Waiting for a verified start. No route arrow yet.';
  if(el('guidance-status').textContent!==message)el('guidance-status').textContent=message;
+}
+if(visitorLinkPresent){
+ void loadVisitorRoute(location.search,Date.now()).then(route=>{
+  visitorRoute=route;el('marker-controls').hidden=false;showGuidanceStatus();
+  if(sdkReady)button('start').disabled=false;
+ }).catch(error=>{el('guidance-status').textContent=`Visitor link unavailable: ${(error as Error).message}. No arrow.`;button('start').disabled=true;});
 }
 const upload=new LiveUpload(message=>{el('upload').textContent=message;});
 let sdk:LiveSdk,renderer:ReferenceRenderer|undefined,gl:WebGL2RenderingContext|undefined;
@@ -35,7 +138,7 @@ let runAtMs=NaN,markIndex=0;
 const marks=[0,2,4,6,8,10];
 function logSdk(method:'configure'|'updateCameraProjectionMatrix'|'run',args:Record<string,unknown>){const call=serializeSdkCall(method,args,performance.now(),runAtMs);upload.add(call.kind,call.label,call.values);}
 function updateProjection(args:Record<string,unknown>){logSdk('updateCameraProjectionMatrix',args);sdk.XrController.updateCameraProjectionMatrix(args);}
-const capture=new CaptureUI(upload,()=>running&&Boolean(frame)&&performance.now()-lastFresh<=settings.MARKER_MAX_AGE_MS,()=>stop('host-capture-review'));
+const capture=new CaptureUI(upload,()=>running&&Boolean(frame)&&lastStatus==='NORMAL'&&performance.now()-lastFresh<=settings.MARKER_MAX_AGE_MS,()=>stop('host-capture-review'),()=>authorMarkerDetected&&performance.now()-authorPassAt<=settings.ALIGNMENT_WINDOW_MAX_AGE_MS);
 const instructions=[
   'Slowly move the phone sideways to scan the textured floor. Aim the centre crosshair at a tile corner or distinctive mark, then press Place reference.',
   '1/3 · Keep the phone still for about 10 seconds. Look for a magenta cross on your chosen spot. Then press Next step.',
@@ -53,6 +156,8 @@ function geometry(){
 function stop(reason='user-finished'){
   capture.interrupt(reason);
   guidance.clear();
+  markerScanActive=false;button('scan-marker').disabled=true;
+  authorCheckActive=false;authorMarkerDetected=false;authorPassAt=-Infinity;button('check-author-marker').disabled=true;
   window.removeEventListener('devicemotion',onDeviceMotion);
   if(!running)return;running=false;upload.add('end',reason);hide('Test ended. Keep this page open until logs are saved.');
   try{sdk.stop();sdk.clearCameraPipelineModules();}catch{}
@@ -68,7 +173,7 @@ setInterval(()=>{
 },settings.LIVE_WATCHDOG_INTERVAL_MS);
 setInterval(()=>void upload.flush(),settings.LIVE_UPLOAD_INTERVAL_MS);
 prepareSdk(XR8Promise,settings.SDK_READY_TIMEOUT_MS).then(value=>{
-  sdk=value as unknown as LiveSdk;button('start').disabled=false;el('tracking').textContent='Ready. Start the camera test and allow camera access.';
+  sdk=value as unknown as LiveSdk;sdkReady=true;button('start').disabled=visitorLinkPresent&&!visitorRoute;el('tracking').textContent='Ready. Start the camera test and allow camera access.';
 }).catch(error=>{el('tracking').textContent=`Engine load failed: ${error.message}. Reload with an internet connection.`;});
 button('start').addEventListener('click',async()=>{
   button('start').disabled=true;
@@ -110,11 +215,27 @@ button('start').addEventListener('click',async()=>{
           el('blocked').hidden=Boolean(frame&&now-lastFresh<=settings.MARKER_MAX_AGE_MS);
           if(!frame){el('blocked').style.background='#08151466';el('blocked').textContent='Tracking limited. Slowly scan a textured area.';}
           if(now-lastUi>settings.LIVE_STATUS_INTERVAL_MS){el('tracking').textContent=`${status} · ${upload.events.length} events · ${canvas.width} × ${canvas.height}`;lastUi=now;}
+          capture.refreshPreflight();
         },
         onRender:()=>{
           if(!running||!renderer||!gl||!frame)return;
           if(!viewportCoversCanvas(viewport,canvas.width,canvas.height))capture.interrupt('camera image does not cover the calibrated canvas');
           else if(!repeatFrame){capture.frame(canvas,frame,lastFresh,videoTime,size.revision);if(!running)return;}
+          if(visitorRoute&&markerScanActive&&!markerScanBusy&&!repeatFrame&&
+            lastStatus==='NORMAL'&&performance.now()-lastFresh<=settings.MARKER_MAX_AGE_MS&&
+            performance.now()-lastMarkerAt>=settings.MARKER_SCAN_SAMPLE_INTERVAL_MS){
+            lastMarkerAt=performance.now();
+            try{void sendMarkerSample(copyCaptureFrame(canvas,{frame,t:lastFresh,videoTime,revision:size.revision}));}
+            catch(error){markerScanActive=false;markerStatus.textContent=`Marker scan failed: ${(error as Error).message}. No arrow.`;}
+          }
+          if(authorCheckActive&&!authorCheckBusy&&!repeatFrame&&lastStatus==='NORMAL'&&
+            performance.now()-lastFresh<=settings.MARKER_MAX_AGE_MS&&
+            performance.now()-authorLastAt>=settings.MARKER_SCAN_SAMPLE_INTERVAL_MS&&
+            viewportCoversCanvas(viewport,canvas.width,canvas.height)){
+            authorLastAt=performance.now();
+            try{void sendAuthorCheck(copyCaptureFrame(canvas,{frame,t:lastFresh,videoTime,revision:size.revision}));}
+            catch(error){authorCheckActive=false;authorStatus.textContent=`Marker check failed: ${(error as Error).message}`;}
+          }
           const point=anchor.read({revision:size.revision,tracking:true,frameMs:lastFresh,nowMs:performance.now()});
           const visible=point&&projectReference(point,frame,size.cssWidth,size.cssHeight);
           const state=sdk.GlTextureRenderer.getGLctxParameters(gl,[gl.TEXTURE0]);
@@ -130,6 +251,8 @@ button('start').addEventListener('click',async()=>{
     runAtMs=performance.now();logSdk('run',runArgs);
     sdk.run({canvas,webgl2:true,glContextConfig:runArgs.glContextConfig});
     button('start').hidden=true;button('place').hidden=false;button('stop').hidden=false;button('backup').hidden=false;
+    button('scan-marker').disabled=!visitorRoute||!markerPrivacy.checked;
+    button('check-author-marker').disabled=!authorPrivacy.checked;
   }catch(error){fail((error as Error).message);button('start').disabled=false;}
 });
 function onDeviceMotion(event:DeviceMotionEvent){

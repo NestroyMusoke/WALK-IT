@@ -11,12 +11,13 @@ export class CaptureUI{
  private canvas=document.getElementById('review-image') as HTMLCanvasElement;
  private message=document.getElementById('capture-status')!;
  private btn=(id:string)=>document.getElementById(id) as HTMLButtonElement;
- constructor(private upload:LiveUpload,private ready:()=>boolean,private finishCamera:()=>void){
+ constructor(private upload:LiveUpload,private ready:()=>boolean,private finishCamera:()=>void,
+  private authorMarkerReady:()=>boolean){
   this.btn('sway-first').onclick=()=>{
    if(!this.ready()){this.message.textContent='Wait for NORMAL tracking, then start the sway.';return;}
-   const started=performance.now();this.btn('sway-first').disabled=true;this.message.textContent='Slowly sway sideways while keeping the scene visible. Record will unlock after three seconds.';
-   this.upload.add('step','sway-start',[started]);
-   setTimeout(()=>{this.btn('record-walk').disabled=false;this.btn('record-start-scan').disabled=false;this.message.textContent='Sway interval ended. If tracking is NORMAL, choose author walk or visitor start scan.';this.upload.add('step','sway-interval-ended',[performance.now()-started]);},3000);
+   this.message.textContent='Keep swaying with the printed marker visible. Recording unlocks only after a passing live calibration window.';
+   this.upload.add('step','sway-start',[performance.now()]);
+   document.dispatchEvent(new Event('walkit-preflight-start'));
   };
   this.btn('record-walk').onclick=()=>void this.startCapture('author-route');
   this.btn('record-start-scan').onclick=()=>void this.startCapture('visitor-start-scan');
@@ -43,9 +44,17 @@ export class CaptureUI{
    catch(e){this.message.textContent=(e as Error).message;}
   };
  }
+ refreshPreflight(){
+  if(this.recording)return;
+  const canRecord=this.ready()&&this.authorMarkerReady();
+  this.btn('record-walk').disabled=!canRecord;
+  this.btn('record-start-scan').disabled=!canRecord;
+  if(canRecord)this.message.textContent='Live marker and tracker fit PASSED. Keep the marker visible, then record now.';
+ }
  private async startCapture(mode:'author-route'|'visitor-start-scan'){
    try{
     if(!this.ready())throw Error('Wait for NORMAL tracking before recording.');
+    if(!this.authorMarkerReady())throw Error('Keep swaying with the marker visible until the live calibration window passes.');
     this.btn('record-walk').disabled=true;this.btn('record-start-scan').disabled=true;
     const sha=await configurationHash();if(!this.ready())throw Error('Tracking changed. Wait for NORMAL and retry.');
     this.mode=mode;this.recorder?.dispose();this.reviewedReport=undefined;this.recorder=new HostCapture(crypto.randomUUID(),sha,true,mode);this.recorder.start();document.dispatchEvent(new Event('walkit-record-start'));

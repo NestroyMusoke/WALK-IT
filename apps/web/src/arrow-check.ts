@@ -15,7 +15,8 @@ try{
   privacy:{capturePermitted:true,imagesReviewed:true},keyframes,
   path:keyframes.map(k=>({position:k.position,keyframeId:k.id})),destination:{pathIndex:1,keyframeId:'kf1'}};
  const arrow=selectRouteArrow({route,anchor:{accepted:true,ambiguous:false,opencvVersion:'5.0.0',routeId:route.routeId,sourceFrameAtPhoneMs:100,
-  metricScaleVerified:true,navigationReady:true,arrowAuthorized:true,
+  metricScaleVerified:true,navigationReady:true,arrowAuthorized:true,mode:'marker-vio',fieldGatePassed:true,
+  startTrackerPosition:[0,0,0],estimatedDriftBoundM:0.1,
   routeToSession:{direction:'map-to-session',scale:1,rotation:[1,0,0,0,1,0,0,0,1],translation:[0,0,0]}},
   frame,nowMs:101,frameMs:100,trackingStatus:'NORMAL',pathIndex:0,cssWidth:500,cssHeight:500});
  if(!arrow)throw Error('Synthetic route arrow refused');

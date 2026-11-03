@@ -25,7 +25,7 @@ def evaluate_start_anchor(poses, session_positions, pose_age_ms, tracking_status
         return reject("tracking-unavailable")
     if not isinstance(tracker_age_ms, (int, float)) or not math.isfinite(tracker_age_ms) or not 0 <= tracker_age_ms <= cfg["MARKER_MAX_AGE_MS"]:
         return reject("stale-tracker")
-    if not isinstance(pose_age_ms, (int, float)) or not math.isfinite(pose_age_ms) or not 0 <= pose_age_ms <= cfg["VERIFY_MAX_GEOMETRY_AGE_MS"]:
+    if not isinstance(pose_age_ms, (int, float)) or not math.isfinite(pose_age_ms) or not 0 <= pose_age_ms <= cfg["MARKER_MAX_AGE_MS"]:
         return reject("stale-pose")
     if not isinstance(poses, list) or not isinstance(session_positions, list) or not poses or len(poses) != len(session_positions):
         return reject("invalid-pose-trace")

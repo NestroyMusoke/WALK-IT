@@ -1,5 +1,17 @@
 # Changes
 
+## 3 November — live marker workflow preparation
+
+Added printable A4 start marker, one-walk author instructions, private author marker preflight, short-lived candidate route link, live OpenCV 5 visitor marker scan and four-view session-alignment hypothesis. Added synthetic 2D route image-agreement screen, which never authorizes arrows. The route-follow and destination gates remain open until real phone evidence exists.
+
+## 3 November — orientation-aided anchor and VIO lifetime
+
+Replaced the ill-conditioned centers-only marker rotation with an orientation-aided, per-session tracker-to-marker similarity. Added baseline, range, scale and rotation consistency refusals. Changed the arrow controller to use a field-qualified start calibration plus fresh NORMAL tracker frames and a predeclared travel-based drift proxy. Added guarded route progress and a protected before-walk marker check. Real marker responses still cannot authorize route arrows until the field gate passes.
+
+## 3 November — replay playground and offline evidence
+
+Added local reviewed-capture playback, per-frame verifier report generation, exact-hash browser report binding, private one-command OpenCV 5 repro and paired-ablation evaluator. The replay screen visibly labels recorded material and withholds arrows on unverified captures. README now gives exact measured counts and distinguishes real frames, replay and synthetic fixtures. No private images, credentials or model responses were added to Git.
+
 ## 2 November — Live camera guidance hook
 
 Connected the route-arrow selector to each frame of the phone camera renderer. Tracking loss, expiry and rejected replacement evidence clear the guidance controller. It starts empty until a verified route and live OpenCV anchor are available.
@@ -243,3 +255,25 @@ Added a separate experimental query that tests each author image against a visit
 ## 2 November: author trajectory gate failed
 
 The reference-isolated candidate produced camera-center hypotheses on both author repeats, but the unchanged recent-window alignment gate passed only one of two repeats. The candidate remains offline and cannot authorize a visitor arrow. Its private report records the selected references, source hashes and refusal.
+
+## 2 November: optional metric marker pose
+
+Added an OpenCV 5 square-marker pose solver that keeps both IPPE solutions, rejects ambiguous or inaccurate images, and reports camera position in marker metres for a valid synthetic observation. A single frame cannot establish tracker-to-metre route scale; the function always denies navigation and arrows. Archived the prior config, pinned four numeric marker gates, and passed five new synthetic tests plus the project checks.
+
+## 2 November: optional multi-view metric calibration
+
+Added an offline helper that fits the known marker's metre coordinates to one phone tracking session using at least four synchronized, accepted marker observations. Synthetic full-chain corner projections recover a known route transform; invalid or inconsistent samples refuse. The capture export still needs trustworthy paired timestamps and a real marker field trial before any route is marked metric or any visitor arrow is enabled.
+
+## 2 November: reviewed backup metric candidate adapter
+
+Added a private OpenCV 5 adapter for a fully reviewed author backup. It joins frames, pixels and SDK video times, estimates optional start-marker observations, fits the calibration and converts the whole path into marker metres. The output contains no PNG and stays a non-navigable hypothesis. Four adapter tests and full project checks pass; no real printed-marker recording has been processed.
+# 3 November 2026: protected marker check timeout
+
+- Raised `MARKER_SCAN_REQUEST_TIMEOUT_MS` from 3000 to 30000 after a real iPhone request aborted and a synthetic 1.23 MB HTTPS request took 9.472 seconds. Archived the prior config and restarted the protected receiver; fresh access link required.
+- Added a failing-first browser config test. Full web check passed 84 tests, typecheck and build. Physical marker detection and navigation remain untested.
+
+# 3 November 2026: reviewed author capture intake
+
+- Fixed the metric-route adapter to accept the actual serialized `{id,png}` image schema while validating decoded pixels against the paired frame dimensions. The matching-schema test failed first, then passed. All 123 geometry tests and the project check passed.
+- Ran the user's reviewed 57-frame recording through the unchanged OpenCV marker and calibration gates. Eight first-ten marker poses were accepted; orientation and scale consistency failed. The capture and private numeric diagnostic were retained, and no arrow was authorized.
+# 3 November: connected visitor alignment to live guidance and added route-bound certificate derivation; added rolling author/visitor marker preflight, measured coaching and private field-gate record command. No field pass claimed.
