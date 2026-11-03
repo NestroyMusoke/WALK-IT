@@ -281,3 +281,4 @@ Added a private OpenCV 5 adapter for a fully reviewed author backup. It joins fr
 ## 3 November 2026: camera arrow design preview
 
 - Added `arrow-preview.html` so a person can inspect the current 28 px lime arrow over their phone camera without recording a route. The page labels the overlay as a fixed design preview and keeps camera frames on the device. The project check passed 101 web tests, typecheck and build; the HTTPS page returned HTTP 200. This does not test localization or world locking.
+- Replaced the single-symbol preview after the student supplied the six-panel comic. The preview now shows six luminous blue chevrons that shrink toward the horizon, with a selectable turn. It remains labelled as an untracked design preview; the live renderer still has one authorized symbol.

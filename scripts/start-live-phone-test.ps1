@@ -34,6 +34,7 @@ Write-Host 'Tunnel starting. Leave this PowerShell window open while testing.'
         $base = $Matches[0]
         [System.IO.File]::WriteAllText($baseFile,$base)
         Write-Host "OPEN THIS IN IPHONE SAFARI: $base/live.html#key=$key"
+        Write-Host "AR TRAIL DESIGN PREVIEW: $base/arrow-preview.html"
     }
     Write-Host $line
 }

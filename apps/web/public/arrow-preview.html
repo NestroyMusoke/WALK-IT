@@ -3,39 +3,61 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>WALK IT · Arrow design preview</title>
+  <title>WALK IT · Trail design preview</title>
   <style>
-    :root {font-family:system-ui,sans-serif;color:#fff;background:#102724}
+    :root {font-family:system-ui,sans-serif;color:#fff;background:#111b1c}
     * {box-sizing:border-box}
-    body {margin:0;min-height:100svh}
-    video {position:fixed;inset:0;width:100%;height:100%;object-fit:cover;background:#102724}
-    .shade {position:fixed;inset:0;background:linear-gradient(#001b1b6b,transparent 26%,transparent 64%,#001b1bab)}
-    .arrow {position:fixed;left:50%;top:46%;width:28px;height:28px;transform:translate(-50%,-50%) rotate(-28deg);filter:drop-shadow(0 2px 3px #09211b);pointer-events:none}
-    header {position:fixed;left:18px;right:18px;top:calc(16px + env(safe-area-inset-top));font-size:12px;font-weight:700;letter-spacing:.12em}
-    .card {position:fixed;left:14px;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));padding:16px;background:#102724ec;border:1px solid #6c8276;border-radius:16px;box-shadow:0 12px 36px #0006}
-    .card strong {display:block;font-size:18px;margin-bottom:5px}
-    .card p {font-size:13px;line-height:1.4;margin:6px 0 12px;color:#d4e6d6}
-    button {border:0;border-radius:10px;padding:13px 16px;background:#bcf48b;color:#142519;font:700 15px system-ui}
+    body {margin:0;min-height:100svh;overflow:hidden}
+    video {position:fixed;inset:0;width:100%;height:100%;object-fit:cover;background:#111b1c}
+    .shade {position:fixed;inset:0;pointer-events:none;background:linear-gradient(#051b27a6,transparent 26%,transparent 54%,#051b27b8)}
+    .trail {position:fixed;inset:0;pointer-events:none;overflow:hidden}
+    .chevron {position:absolute;left:var(--x);top:var(--y);width:var(--w);transform:translate(-50%,-50%);overflow:visible;filter:drop-shadow(0 0 6px #32c9ff) drop-shadow(0 0 16px #087cfd)}
+    .chevron path {fill:#83e9ff;stroke:#e0fbff;stroke-width:1.5;paint-order:stroke fill}
+    .chevron:nth-child(1) {opacity:.98}.chevron:nth-child(2) {opacity:.93}.chevron:nth-child(3) {opacity:.86}.chevron:nth-child(4) {opacity:.76}.chevron:nth-child(5) {opacity:.65}.chevron:nth-child(6) {opacity:.52}
+    .turn .chevron:nth-child(4) {--x:54%!important;transform:translate(-50%,-50%) rotate(12deg)}
+    .turn .chevron:nth-child(5) {--x:61%!important;transform:translate(-50%,-50%) rotate(28deg)}
+    .turn .chevron:nth-child(6) {--x:68%!important;transform:translate(-50%,-50%) rotate(44deg)}
+    header {position:fixed;top:calc(18px + env(safe-area-inset-top));left:18px;right:18px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+    .brand {font-size:13px;font-weight:900;letter-spacing:.13em}.label {font-size:10px;font-weight:800;letter-spacing:.12em;background:#0b2736c9;border:1px solid #83e9ff8a;padding:7px 9px;border-radius:7px}
+    .direction {position:fixed;top:calc(70px + env(safe-area-inset-top));left:18px;right:18px;font-size:24px;line-height:1.12;font-weight:850;letter-spacing:-.03em;text-shadow:0 2px 10px #00161b}
+    .card {position:fixed;left:14px;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));padding:15px;background:#0b2736ed;border:1px solid #83e9ff71;border-radius:15px;box-shadow:0 12px 36px #0008}
+    .card p {font-size:12px;line-height:1.4;margin:0 0 12px;color:#d0ecf1}
+    .actions {display:flex;gap:8px;flex-wrap:wrap}
+    button {border:0;border-radius:9px;padding:11px 13px;background:#83e9ff;color:#0c2833;font:750 13px system-ui}
+    button.secondary {background:#173e4d;color:#e5fbff;border:1px solid #8edcf573}
+    #status {font-size:11px;margin:10px 0 0;color:#bbd9e2}
   </style>
 </head>
 <body>
   <video id="camera" autoplay muted playsinline aria-label="Live camera preview"></video>
   <div class="shade"></div>
-  <header>WALK IT · DESIGN PREVIEW</header>
-  <svg class="arrow" viewBox="0 0 28 28" aria-label="Lime navigation arrow"><path fill="#baf554" d="M0 12H14V0L28 14 14 28V16H0Z"/></svg>
+  <div class="trail" id="trail" aria-label="Illustrative trail of six blue chevrons leading forward">
+    <svg class="chevron" style="--x:50%;--y:69%;--w:86px" viewBox="0 0 100 44"><path d="M0 27 50 0 100 27 100 44 50 17 0 44Z"/></svg>
+    <svg class="chevron" style="--x:50%;--y:62%;--w:70px" viewBox="0 0 100 44"><path d="M0 27 50 0 100 27 100 44 50 17 0 44Z"/></svg>
+    <svg class="chevron" style="--x:50%;--y:56%;--w:56px" viewBox="0 0 100 44"><path d="M0 27 50 0 100 27 100 44 50 17 0 44Z"/></svg>
+    <svg class="chevron" style="--x:50%;--y:51%;--w:44px" viewBox="0 0 100 44"><path d="M0 27 50 0 100 27 100 44 50 17 0 44Z"/></svg>
+    <svg class="chevron" style="--x:50%;--y:47%;--w:34px" viewBox="0 0 100 44"><path d="M0 27 50 0 100 27 100 44 50 17 0 44Z"/></svg>
+    <svg class="chevron" style="--x:50%;--y:44%;--w:26px" viewBox="0 0 100 44"><path d="M0 27 50 0 100 27 100 44 50 17 0 44Z"/></svg>
+  </div>
+  <header><div class="brand">WALK IT</div><div class="label">DESIGN PREVIEW</div></header>
+  <div class="direction" id="direction">Follow the trail</div>
   <div class="card">
-    <strong>How the arrow looks</strong>
-    <p>This shows the current 28 px arrow over your camera. It stays fixed here for preview. No route, tracking, or destination is being tested. No images are saved or uploaded.</p>
-    <button id="start" type="button">Open camera preview</button>
+    <p>This follows your comic: glowing chevrons recede toward the destination and bend at turns. This preview stays fixed on screen. It does not track a floor, route or door. No camera images are saved or uploaded.</p>
+    <div class="actions"><button id="start" type="button">Open camera</button><button id="turn" class="secondary" type="button">Show a turn</button></div>
     <p id="status" role="status">Camera is off.</p>
   </div>
   <script>
+    document.getElementById('turn').addEventListener('click',()=>{
+      const active=document.getElementById('trail').classList.toggle('turn');
+      document.getElementById('direction').textContent=active?'Turn right ahead':'Follow the trail';
+      document.getElementById('turn').textContent=active?'Show straight path':'Show a turn';
+    });
     document.getElementById('start').addEventListener('click',async()=>{
       const status=document.getElementById('status');
       try {
         const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false});
         document.getElementById('camera').srcObject=stream;
-        status.textContent='Camera preview running. The arrow position is illustrative.';
+        status.textContent='Camera preview running. This trail is illustrative.';
         document.getElementById('start').hidden=true;
         addEventListener('pagehide',()=>stream.getTracks().forEach(track=>track.stop()),{once:true});
       } catch {status.textContent='Camera unavailable. Open this HTTPS page in Safari and allow camera access.';}
