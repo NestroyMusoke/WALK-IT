@@ -32,7 +32,6 @@ const compress=promisify(gzip);
 const compressed=new Map<string,{modified:number;data:Buffer}>();
 const mime:Record<string,string>={'.html':'text/html','.js':'text/javascript','.css':'text/css','.wasm':'application/wasm','.json':'application/json','.svg':'image/svg+xml'};
 await mkdir(new URL('../tmp/',import.meta.url),{recursive:true});
-await writeFile(new URL('../tmp/phone-access.json',import.meta.url),JSON.stringify({accessKey,port:5180}));
 createServer((req,res)=>{
   if(handleRouteShare(req,res,privateRoot))return;
   if(authorMarkerCheck(req,res))return;
@@ -49,4 +48,7 @@ createServer((req,res)=>{
   res.writeHead(200,{'Content-Type':mime[extname(file)]||'application/octet-stream','Content-Length':data.length,'Cache-Control':pathname.startsWith('/vendor/')?'public, max-age=3600':'no-store','Referrer-Policy':'no-referrer','X-Content-Type-Options':'nosniff','Vary':'Accept-Encoding',...(useGzip?{'Content-Encoding':'gzip'}:{})});
   res.end(req.method==='HEAD'?undefined:data);
 })().catch(()=>{if(!res.headersSent)res.writeHead(404);res.end();});});
-}).listen(5180,'127.0.0.1',()=>console.log('Phone test receiver ready on http://127.0.0.1:5180'));
+}).listen(5180,'127.0.0.1',()=>{
+  void writeFile(new URL('../tmp/phone-access.json',import.meta.url),JSON.stringify({accessKey,port:5180}))
+    .then(()=>console.log('Phone test receiver ready on http://127.0.0.1:5180'));
+});
