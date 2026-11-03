@@ -63,6 +63,8 @@ def scan_marker(request, config_bytes):
             'trackerCameraCenter': tracker.tolist(),
             'trackerRotation': rotation.tolist(),
             'reprojectionRmsPx': pose.get('reprojectionRmsPx'),
+            'panelCount': pose.get('panelCount'),
+            'nonCoplanarityRankRatio': pose.get('nonCoplanarityRankRatio'),
             'metricScaleVerified': False, 'navigationReady': False,
             'arrowAuthorized': False}
 

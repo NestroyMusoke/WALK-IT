@@ -9,8 +9,8 @@
 | **What ships today** | A camera capture path, a metric localizer, an AR guidance runtime with per-frame authorization gates, a fail-closed destination verifier, and a recorded-replay playground — all runnable from a clean clone in three commands. |
 | **Meta models** | **Muse Spark** (`muse-spark-open-1026`, via Baseten) reads signage in the destination frame; **SAM 3.1** segments the door by concept. Both are called from the verifier and both have real, logged receipts. |
 | **Evidence rule** | Every claim in this file is tagged **LIVE**, **RECORDED REPLAY**, **SYNTHETIC** or **NOT YET**. There is no fifth category. Nothing is implied. |
-| **Config identity** | [`config/vision.yaml`](config/vision.yaml) — 98 thresholds, all units explicit, raw SHA-256 `f3474181db1da4cd4a8c75e21e8dc6ce3bcabc58039cdf87418091e98ba4a42d`. OpenCV pinned to **5.0.0.93**; a version mismatch is a refusal, not a warning. |
-| **Tests** | geometry suite **134/134** · web suite **98/98** across 36 files · typecheck and production build clean — all re-run on 3 November against this checkout. |
+| **Config identity** | [`config/vision.yaml`](config/vision.yaml) — 103 thresholds, all units explicit. Raw SHA-256 **`2c9a4989cd11b899b75234a87cfd8957c971bbacdf340eed6e39d163a13f96d1`** as checked out here (CRLF); LF-normalised **`d7edef6dd5759455bc2c90d82dc874291b543e37f2f2acf90b127686f6cef68c`**; canonical-JSON SHA-256 (line-ending independent) **`178f9d44a051926d22b118bfeb3060ceb75a55a66861bd9001f465304627718f`**. See the note under §8. OpenCV pinned to **5.0.0.93**; a version mismatch is a refusal, not a warning. |
+| **Tests** | geometry suite **152/152** · web suite **101/101** across 36 files · typecheck and production build clean — all re-run on 3 November against this checkout. |
 | **Field truth** | Fresh-session visitor arrivals: **0**. Measured route-end errors: **0**. Committed photographs: **0** — 5,009 entries under `eval/sessions/` are deliberately gitignored. The headline demo has not passed yet, and this README says so in every place it matters. |
 
 ![WALK IT product surface](design/landing-desktop.png)
@@ -62,6 +62,8 @@ A judge who wants to catch us exaggerating will find nothing to catch, because t
 | Camera permission, tracking state, privacy review gate on a real phone | **LIVE** | [`docs/TESTING.md`](docs/TESTING.md), [`docs/E03_FIRST_PHONE_RESULT.md`](docs/E03_FIRST_PHONE_RESULT.md) |
 | One-walk host capture → reviewed keyframes → private JSON backup | **LIVE** | [`docs/HOST_CAPTURE.md`](docs/HOST_CAPTURE.md), [`docs/ONE_WALK_CAPTURE.md`](docs/ONE_WALK_CAPTURE.md) |
 | Printed DICT_4X4_50 marker detected, pose estimated, metric scale recovered | **LIVE code** | [`geometry/marker_scale.py`](geometry/marker_scale.py), [`design/start-marker-a4.svg`](design/start-marker-a4.svg) |
+| Folded two-panel target solved jointly with SQPNP; a flat pair refused as coplanar | **SYNTHETIC** | [`geometry/marker_anchor.py`](geometry/marker_anchor.py), [`geometry/test_folded_target.py`](geometry/test_folded_target.py), §10 |
+| Folded target walked on real paper | **NOT YET** | §10 — printed, taped and folded sheets have not been captured |
 | Trailing-window preflight that unlocks *Record author walk* only on a passed 4-view fit inside 2000 ms | **LIVE code** | [`apps/web/src/live.ts`](apps/web/src/live.ts) |
 | Route-bound live fit installed into the guidance runtime (visitor path) | **LIVE code** | [`apps/web/src/live-anchor-certificate.ts`](apps/web/src/live-anchor-certificate.ts) |
 | World-locked arrow, position-only, same camera session, visibly labelled as such | **LIVE code** | banner: *"Same-session live replay, not fresh-start navigation"* |
@@ -154,7 +156,7 @@ Design rule, from [`config/vision.yaml`](config/vision.yaml): `VERIFY_MIN_DISTIN
 1. **Uncertainty hides the arrow.** Loss of tracking, route ambiguity or drift overrun cancels guidance immediately. Silence is a valid output.
 2. **A segmented object is not a verified destination.** Semantics corroborate geometry; they never replace it.
 3. **No silent version drift.** OpenCV 5.0.0.93 is pinned; a mismatch refuses the run rather than degrading quietly.
-4. **Every threshold lives in config.** 95 keys with units, hash-checked, and the hash travels with the evidence so a result cannot be reinterpreted under different numbers.
+4. **Every threshold lives in config.** 103 keys with units, hash-checked, and the hash travels with the evidence so a result cannot be reinterpreted under different numbers.
 5. **Private imagery never enters Git.** 5,009 entries of real capture data are ignored on purpose; the review step masks faces and plates before anything is saved, and the backup is a local file.
 6. **A certificate is not a measurement.** The live arrow proves geometry the phone itself established. `fieldGatePassed` flips **only** when a separate record exists with a measured end error inside the 3 m budget and an evidence SHA-256 — see [`scripts/record-field-gate.py`](scripts/record-field-gate.py), which refuses to invent the number for you.
 
@@ -165,11 +167,11 @@ Rule 6 is the one that decided the shape of this project. It would have been tri
 | Metric | Value | Class | Reproduce |
 |---|---:|---|---|
 | Commits, 27 Oct → 3 Nov 2026 | 43 | **LIVE** | `git rev-list --count HEAD` |
-| Geometry unit tests | 123 / 123 | **LIVE** | `.venv\Scripts\python.exe -m unittest discover -s geometry -p 'test_*.py'` |
-| Web unit tests | 91 / 91 (35 files) | **LIVE** | `npx vitest run --configLoader native` |
+| Geometry unit tests | 152 / 152 | **LIVE** | `.venv\Scripts\python.exe -m unittest discover -s geometry -p 'test_*.py'` |
+| Web unit tests | 101 / 101 (36 files) | **LIVE** | `npx vitest run --configLoader native` |
 | Typecheck and production build | clean | **LIVE** | `npm run typecheck && npm run build` |
-| Config keys with explicit units | 95 | **LIVE** | `grep -c ':' config/vision.yaml` |
-| Archived config revisions | 9 | **LIVE** | [`config/`](config) |
+| Config keys with explicit units | 103 | **LIVE** | `grep -c ':' config/vision.yaml` |
+| Archived config revisions | 11 | **LIVE** | `ls config/archive/*.yaml \| wc -l` |
 | Logged real-data runs in the ledger | 27 | **RECORDED REPLAY** | [`docs/BUILD_LEDGER.md`](docs/BUILD_LEDGER.md) |
 | Private capture artifacts held out of Git | 5,009 entries | **LIVE** | `ls eval/sessions \| wc -l` |
 | Localizer attempts on first 10 visitor-scan frames | 10 | **RECORDED REPLAY** | `powershell -ExecutionPolicy Bypass -File .\scripts\replay-repro.ps1` |
@@ -182,7 +184,13 @@ Rule 6 is the one that decided the shape of this project. It would have been tri
 | …same window after dropping the first 4 frames | **3.8°** | **RECORDED REPLAY** | §9 |
 | …and the baseline that still refuses it | 0.31 m vs a 0.4 m minimum | **RECORDED REPLAY** | §9 |
 | End-to-end Meta model latency | 24.9 s and 26.5 s | **RECORDED REPLAY** | §6 |
-| Photo-real imagery committed to the repo | **0** (5 tracked files: 2 marker SVGs + 3 design renders, no photographs) | **LIVE** | `git ls-files \| grep -E '\.(jpg\|jpeg\|png\|svg)$'` |
+| Photo-real imagery committed to the repo | **0** (7 tracked files: 4 marker SVGs + 3 design renders, no photographs) | **LIVE** | `git ls-files \| grep -E '\.(jpg\|jpeg\|png\|svg)$'` |
+| Folded target calibrating through the untouched gate, 4 human-like walks × 3 seeds | **11 / 12** | **SYNTHETIC** | §10 |
+| Same walks, same gate, today's single square | **0 / 12** | **SYNTHETIC** | §10 |
+| Real capture frames where the folded path changed today's result | **0 of 57** | **RECORDED REPLAY** | §10 |
+| Spurious companion-panel detections in the real 57-frame capture | **0** | **RECORDED REPLAY** | §10 |
+
+**A note on the config hash, because it is a reproducibility hazard and not a tidiness issue.** This repository has `core.autocrlf=true` and no `.gitattributes`, so `config/vision.yaml` is stored with LF and checked out with CRLF. Both `geometry/marker_scan.py` and `apps/web/src/settings.ts` hash the bytes they are actually given, so the *raw* SHA-256 differs between a Windows checkout and a Linux one, and a route issued on one would be refused by the other with `Current configuration and image review required`. The **canonical-JSON** hash above is computed from parsed keys and is therefore line-ending independent — that is the one to compare across machines, and it is what `marker_scale.py` and `visitor_marker_alignment.py` already embed in their receipts. Adding `.gitattributes` would fix the raw hash too, but it rewrites every text file's checkout and was deliberately **not** done hours before a field session; it is recorded in [`docs/DECISIONS.md`](docs/DECISIONS.md) as an open item rather than silently patched.
 
 ## 9. The finding we paid for: the tracker needs four seconds
 
@@ -211,9 +219,36 @@ Six alternative hypotheses were tested and ruled out with data, not opinion:
 
 Inside that window the preflight no longer lets a bad start veto a good finish. `geometry/calibration_window.py` searches suffix windows — candidates always keep the newest view and may only drop *leading* views — and offers the best-conditioned one to the untouched gate, scoring by the largest minimum margin over baseline, orientation spread, pairwise scale and residual. Unsettled frames at the start of a session are set aside rather than allowed to refuse the walk that followed them. On a refusal the miner still reports the near-miss, and the phone now prints every measured gate against its own configured budget plus which gate is tightest (`span 0.48 m of 0.40 m · spread 12.5° of 10.0° ✗ · 5 of 8 views kept · tightest gate spread 1.25× over budget`), so a refusal tells the user what to change instead of just saying no.
 
-The saved evidence4 walk still refuses today: its last settled four-view window reached **3.8° spread** but only **0.31 m span** against the 0.4 m minimum. We kept the threshold and kept the refusal. That is the most useful line in this README.
+The saved evidence4 walk still refuses today: its last settled four-view window reached **3.8° spread** but only **0.31 m span** against the 0.4 m minimum. We kept the threshold and kept the refusal. That is the most useful line in this README — and it is why §10 changes the paper instead of the numbers.
 
-## 10. Two paths, and exactly what each one proves
+## 10. The loophole we found: the target's shape, not a threshold
+
+Every geometric limit in §9 stayed exactly where it was, and the saved walk still refused. So we stopped tuning the estimator and asked why a **plane** was being trusted to supply three things at once: orientation, metric scale and a unique pose. It cannot. IPPE hands back two solutions for a plane; the 1.5 second-error ratio refuses the bad ones; what is left is a depth along the camera axis that no amount of corner refinement can pin down.
+
+The literature says the cure is geometry. OpenCV issue #8813: *"If you have one or more additional markers that are not co-planar to the original marker, then you can resolve the ambiguity."* So the target is now **two A4 sheets taped at their white borders and folded to 90°** — a partly open book standing on a table — and both squares are solved **jointly** with `SOLVEPNP_SQPNP`, which is globally optimal for non-coplanar points and returns a single solution. The two-solution ratio test is not weakened by this; it is structurally inapplicable, and in exchange the path demands strictly more: two configured panels, both detected, and provable non-coplanarity (`MARKER_MIN_NONCOPLANARITY_RANK_RATIO`).
+
+Two decisions keep this honest:
+
+- **The target frame is panel zero's own frame.** `cameraCenterMarkerM` keeps its exact previous meaning, so every existing route, receipt and downstream consumer is untouched. Panel zero is byte-identical to the old single square — asserted, not assumed.
+- **A flat pair is refused, never jointly solved.** Two markers on one sheet are still coplanar and still ambiguous. `coplanar-target-ambiguous` is a real refusal with a test, so the fold cannot be faked by printing two squares side by side.
+
+Measured on rendered pixels at the real evidence4 scale (1.2464 tracker units per metre), judged against **ground-truth** session poses — deriving the tracker pose from the solver's own guess would make the orientation gate tautological, and that mistake was caught and fixed:
+
+| Target, at its own instructed stance | Calibrates | Accepted poses (of 25) | Orientation spread, median / max | Pairwise-scale refusals |
+|---|---:|---:|---|---:|
+| Folded pair, facing the crease (45°) | **11 / 12** | 25 | **0.45° / 0.80°** | 1 |
+| Single square, square-on (today) | **0 / 12** | 11–23 | 3.49° / 4.24° | 12 |
+| Folded pair, laid **flat** | **0 / 12** | — | — | refused `coplanar-target-ambiguous` |
+
+The single square is not refused for want of frames — it supplies plenty. It is refused because the pairwise scale it implies disagrees by more than the 5% the gate allows. That is the planar-depth defect, and the fold removes it: spread falls roughly tenfold and every gate is met with margin.
+
+**The stance is a real cost, and it is stated rather than hidden.** A 90° fold shows one panel exactly edge-on from straight ahead, so both squares are only visible from the crease's bisector. Sweeping fold angle against stance measured that square-on never works for *any* fold — 75° and 90° give 0/12, 120° gives 0/12 and 60° only 6/12 — while 90° at 45° gives 11/12 with the best non-coplanarity of the practical set (0.606). So the phone now says *"Stand at the fold, not square-on to it: face the crease so BOTH sheets show at once"*, before any refusal, and repeats it with the live panel count whenever fewer panels than configured are in frame. Practical distance band is **0.7–1.0 m**; beyond that `MARKER_POSE_MIN_EDGE_PX` refuses for `marker-too-small`, unchanged.
+
+**No regression on real data.** Across all 57 frames of the saved evidence4 capture the companion panel is spuriously detected **0** times and `estimate_start_marker_pose` diverges from today's single-square path on **0** frames. The folded path is inert unless the second sheet is physically there.
+
+**What this is not.** It is **SYNTHETIC** evidence: rendered markers, simulated trajectories, a known similarity. No folded target has been printed, taped, folded and walked yet. The claim is *the gate that refused every real attempt now passes on rendered walks that behave like a person, with no threshold moved* — and the honest next step is one recording session against paper.
+
+## 11. Two paths, and exactly what each one proves
 
 **Path A — fresh-session navigation (the real product).**
 Author preflight locks → one-walk capture → private backup → [`scripts/marker-preflight.ps1`](scripts/marker-preflight.ps1) accepts → [`scripts/issue-route.ts`](scripts/issue-route.ts) issues a route link → visitor scans the same physical marker in a **new** session → route-bound fit is installed in the guidance runtime → arrow appears → the walker's actual end error is measured with a tape and recorded with `scripts/record-field-gate.py`.
@@ -224,7 +259,7 @@ Author preflight locks → one-walk capture → private backup → [`scripts/mar
 *Proves:* the world-lock, the gate cascade and the render path are real and running on a phone.
 *Proves nothing about:* cross-session localization. It records no images, issues no route certificate, no visitor link, and measures no accuracy. The banner says so on screen, because a fallback that looks like the feature is the thing we most refuse to ship.
 
-## 11. Privacy and security, as implemented
+## 12. Privacy and security, as implemented
 
 | Control | Implementation |
 |---|---|
@@ -236,7 +271,7 @@ Author preflight locks → one-walk capture → private backup → [`scripts/mar
 | Never while driving | The UI states camera navigation is for stationary or walking use only. |
 | No secrets committed | Keys, tunnel hosts and `tmp/phone-access.json` stay local; nothing in this repo authenticates a caller-supplied model receipt. |
 
-## 12. Run it
+## 13. Run it
 
 ```bash
 npm ci
@@ -257,18 +292,19 @@ powershell -ExecutionPolicy Bypass -File .\scripts\check.ps1
 
 Field protocol, in order:
 
-1. Print [`design/start-marker-a4.svg`](design/start-marker-a4.svg) at actual size and measure the 100 mm check bar. A4, DICT_4X4_50 ID 0, 0.16 m black square.
-2. Confirm the config SHA-256 matches the header. Capture, preflight, route issue and visitor fit must share one config.
-3. On the author phone: wait for `NORMAL`, check the privacy box, start marker preflight, sway gently for 6–10 s.
-4. *Record author walk* unlocks only while a four-view fit has passed inside the trailing 2000 ms.
-5. Keep the marker visible in the first ten recorded frames, walk once, mark the destination, review every frame, save the private backup.
-6. `powershell -ExecutionPolicy Bypass -File .\scripts\marker-preflight.ps1 -CapturePath "<absolute backup path>"` → only an accepted report may be issued: `node scripts/issue-route.ts eval/sessions/tomorrow-marker-preflight.json`.
-7. Give that link to the visitor, who scans the same physical marker in a fresh session.
-8. Measure the real end error and record it: `python scripts/record-field-gate.py --route-id <id> --source-capture-sha256 <sha> --evidence <private-field-log> --end-error-m <measured-m> --output eval/sessions/<new-record>.json`. It refuses anything above 3 m and will not fabricate the measurement.
+1. Print [`design/start-marker-a4.svg`](design/start-marker-a4.svg) **and** [`design/start-marker-a4-panel2.svg`](design/start-marker-a4-panel2.svg) at actual size, and measure the 100 mm check bar on each. A4, DICT_4X4_50 IDs 0 and 1, 0.16 m black squares.
+2. Tape sheet 2's **left** white border to sheet 1's **right** white border and fold it backwards to **90°**, so the pair stands like a partly open book. Never cut the 25 mm white border — measured: panels touching at the fold are not detected at all.
+3. Confirm the config SHA-256 matches the header. Capture, preflight, route issue and visitor fit must share one config. A config change invalidates every previously issued route link by design.
+4. On the author phone: wait for `NORMAL`, check the privacy box, start marker preflight, then **face the crease** from 0.7–1.0 m so both squares are in frame, and take real sideways steps of about half a metre for 6–10 s. The status line reports the live panel count; if one sheet is missing, turn toward the crease rather than moving closer.
+5. *Record author walk* unlocks only while a four-view fit has passed inside the trailing 2000 ms.
+6. Keep the marker visible in the first ten recorded frames, walk once, mark the destination, review every frame, save the private backup.
+7. `powershell -ExecutionPolicy Bypass -File .\scripts\marker-preflight.ps1 -CapturePath "<absolute backup path>"` → only an accepted report may be issued: `node scripts/issue-route.ts eval/sessions/tomorrow-marker-preflight.json`.
+8. Give that link to the visitor, who scans the same physical folded target in a fresh session, standing at the crease.
+9. Measure the real end error and record it: `python scripts/record-field-gate.py --route-id <id> --source-capture-sha256 <sha> --evidence <private-field-log> --end-error-m <measured-m> --output eval/sessions/<new-record>.json`. It refuses anything above 3 m and will not fabricate the measurement.
 
 **Reproducibility, stated honestly:** `replay-repro.ps1` requires ignored private captures already on this laptop, so it is a local reproducibility result, **not yet a clean-clone judge command**. The replay and evidence pages publish no imagery; opened without a local capture they show an empty state, by design. `npm ci && npm run build && npm test` is clean-clone safe.
 
-## 13. Where this is usable now, and what it becomes
+## 14. Where this is usable now, and what it becomes
 
 The pattern — *a route is a physical measurement, an arrow is a privilege, and uncertainty is an output* — already fits places that no map pin serves:
 
@@ -293,7 +329,7 @@ That is also the investor argument, stated as claims we would accept in diligenc
 - **Regulatory posture**: privacy-by-construction (on-device review, no image retention, expiring links) is cheaper than retrofitting it, and here it is the architecture rather than a policy document.
 - **What we will not claim**: no TAM slide built on "everyone gets lost." We have 0 verified fresh-session arrivals. The number that opens the market is a measured end error inside 3 m on a real street, and we built the instrument to record it before we built the marketing.
 
-## 14. What the constraint cost
+## 15. What the constraint cost
 
 Five days, one short route, a real phone, a printed marker, and no willingness to fake the result. What that actually bought:
 
@@ -301,21 +337,23 @@ Five days, one short route, a real phone, a printed marker, and no willingness t
 |---|---|---|
 | VIO world frame converges slowly | 36.8° orientation disagreement in early frames | Solved as a product gate (6000 ms accumulation, suffix-window search, 2000 ms action freshness), not a threshold cut |
 | Marker inference latency | 332 ms per cold-spawned Python frame — about one receipt a second, so a 2 s window held ~3 views and alignment was never even attempted | Solved with a warm persistent worker: 16.7 ms median, 20× faster, 4/4 byte-identical results |
-| Single-marker PnP conditioning | At a 45–72 px marker edge (1.1–1.6 m from an A4 sheet) position error is 2.4–8.7 cm; corner refinement cuts reprojection RMS 0.315→0.176 px but position error only 3.83→3.81 cm | Open; the error is conditioning, not corner accuracy. Coaching now asks for off-axis viewing, which the existing `planar-ambiguous` gate already detects |
-| Planar marker ambiguity | Second IPPE solution ≥12× worse RMS | Refused by the existing 1.5 gate |
+| Single-marker PnP conditioning | At a 45–72 px marker edge (1.1–1.6 m from an A4 sheet) position error is 2.4–8.7 cm; corner refinement cuts reprojection RMS 0.315→0.176 px but position error only 3.83→3.81 cm | Solved by changing the target, not the estimator: a folded pair measured 0.22–1.00 cm over 0.70–1.60 m (§10). The residual error was conditioning all along |
+| Planar marker ambiguity | Second IPPE solution ≥12× worse RMS; on rendered human-like walks the single square calibrates **0/12**, refused as `inconsistent-scale` every time despite supplying 11–23 accepted poses | Solved by non-coplanarity: SQPNP over a folded pair returns one globally optimal pose and calibrates **11/12** through the identical gate (§10) |
+| The fold needs a stance | Square-on to the crease, one panel is exactly edge-on and the solve silently degrades to today's ambiguous square — measured 0/12 at 75° and 90°, 6/12 at 60° | Open, and coached rather than hidden: the phone states the stance before any refusal and repeats it with the live panel count. 90° at the bisector is the best practical pair measured (11/12, non-coplanarity 0.606) |
+| Folded target on real paper | Not yet printed, taped, folded or walked | **NOT YET** — all §10 evidence is **SYNTHETIC**. One recording session is the next step |
 | Reference-view localization on ordinary architecture | 4/10 frames with candidates, all ambiguous | Open; needs a wider, better-spread capture |
 | Model latency | 24.9 s Spark, 26.5 s SAM | Open; forces per-capture rather than per-frame use |
 | Cross-session accuracy | 0 measurements | Open; the instrument exists, the walk does not yet |
 
 The last-mile and street-addressing figures in §1 are cited from their publishers, labelled as such, and are context rather than proof of our own impact. We would rather print one measured metre than ten borrowed percentages.
 
-## 15. Provenance
+## 16. Provenance
 
 Authored during the event window in this checkout, 27 Oct → 3 Nov 2026, 43 commits, one human author with an AI pair on engineering and documentation. No code was copied from another workspace. Dependencies are pinned; OpenCV is version-gated rather than trusted. Model weights and SDK binaries are not committed. Asset and third-party licences are recorded separately in [`docs/ASSETS.md`](docs/ASSETS.md) and [`docs/RULES_AND_RESOURCES.md`](docs/RULES_AND_RESOURCES.md). Decisions and their reasoning are in [`docs/DECISIONS.md`](docs/DECISIONS.md); the day-by-day record is [`docs/BUILD_LEDGER.md`](docs/BUILD_LEDGER.md). Dates and results in this file are real, including the ones that are inconvenient.
 
 **Demo film (≤3:00):** submitted with the hackathon form; linked here once published.
 
-## 16. Verifiable claims index
+## 17. Verifiable claims index
 
 | If you want to check | Go here | Command or file |
 |---|---|---|
@@ -325,7 +363,9 @@ Authored during the event window in this checkout, 27 Oct → 3 Nov 2026, 43 com
 | The certificate is not hardcoded | §7 rule 6 | [`apps/web/src/live-anchor-certificate.ts`](apps/web/src/live-anchor-certificate.ts) |
 | Model calls are real | §6 | [`docs/META_USAGE.md`](docs/META_USAGE.md) |
 | The convergence finding is reproducible | §9 | [`docs/MOTION_EVIDENCE.md`](docs/MOTION_EVIDENCE.md), [`docs/SCALE_AUDIT.md`](docs/SCALE_AUDIT.md) |
-| No private imagery leaked | §11 | `git ls-files`, `git check-ignore -v eval/sessions` |
+| No private imagery leaked | §12 | `git ls-files`, `git check-ignore -v eval/sessions` |
+| The folded target is geometry, not a loosened gate | §10 | `sha256sum config/vision.yaml` = `2c9a4989…`; [`geometry/test_folded_target.py`](geometry/test_folded_target.py) reads every budget from config and includes the paired single-square control |
+| Paper and geometry agree | §10 | [`geometry/test_marker_print.py`](geometry/test_marker_print.py) — `(210 − 160) / 2 = 25 mm` is exactly `MARKER_PANEL_QUIET_MARGIN_M` |
 | What is still unfinished | §4 last row | [`TASKS.md`](TASKS.md), [`docs/PATH_TO_FINAL.md`](docs/PATH_TO_FINAL.md) |
 
 ---

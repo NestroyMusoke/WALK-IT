@@ -1,12 +1,12 @@
 import {expect,it} from 'vitest';
-import {calibrationProgress,coachMarkerPreflight} from '../src/marker-preflight-ui';
+import {calibrationProgress,coachMarkerPreflight,markerStanceInstruction} from '../src/marker-preflight-ui';
 import {settings} from '../src/settings';
 
 it('coaches the binding live calibration reason with measured numbers',()=>{
  expect(coachMarkerPreflight('inconsistent-marker-orientation',{maxOrientationDisagreementDeg:22.4})).toContain('22.4°');
  expect(coachMarkerPreflight('insufficient-metric-baseline',{markerBaselineM:0.31})).toContain('0.31 m');
  expect(coachMarkerPreflight('marker-too-far',{})).toContain('Move closer');
- expect(coachMarkerPreflight('planar-ambiguous',{})).toContain('Tilt');
+ expect(coachMarkerPreflight('planar-ambiguous',{})).toContain('square-on');
 });
 it('coaches real body translation because the baseline is measured in the marker frame',()=>{
  const coach=coachMarkerPreflight('insufficient-metric-baseline',{markerBaselineM:0.04});
@@ -37,5 +37,28 @@ it('names the tightest gate from the miner margins so the user knows what to cha
 });
 it('never invents progress when the refusal came before any alignment window',()=>{
  expect(calibrationProgress({})).toBe('');
- expect(coachMarkerPreflight('marker-too-small',{})).toBe('Move closer to the marker.');
+ expect(coachMarkerPreflight('marker-too-small',{panelCount:settings.MARKER_PANEL_COUNT}))
+  .toBe('Move closer: about 0.7 to 1.0 m from the fold.');
+});
+it('says the folded stance first, because one visible sheet is exactly the ambiguous square',()=>{
+ expect(settings.MARKER_PANEL_COUNT).toBeGreaterThan(1);
+ expect(markerStanceInstruction()).toContain('BOTH sheets');
+ expect(markerStanceInstruction()).toContain('crease');
+ // Every panel in frame: no stance nagging, only the reason's own coaching.
+ expect(coachMarkerPreflight('insufficient-observations',{panelCount:settings.MARKER_PANEL_COUNT}))
+  .not.toContain('crease');
+ // One panel short: the stance leads, whatever the refusal reason was.
+ for(const reason of ['marker-not-found','planar-ambiguous','insufficient-marker-panels','inconsistent-scale']){
+  const coach=coachMarkerPreflight(reason,{panelCount:1});
+  expect(coach.startsWith('Stand at the fold')).toBe(true);
+  expect(coach).toContain('only 1 visible now');
+ }
+ // No panel count at all - a refusal raised before any detection - still gets the stance.
+ expect(coachMarkerPreflight('marker-not-found',{})).toContain('Stand at the fold');
+});
+it('refuses a flat pair in words, because a flat pair is refused in code',()=>{
+ const coach=coachMarkerPreflight('coplanar-target-ambiguous',{panelCount:settings.MARKER_PANEL_COUNT});
+ expect(coach).toContain('FOLDED, not laid flat');
+ expect(coach).toContain(`${settings.MARKER_FOLD_ANGLE_DEG} degrees`);
+ expect(coach).not.toContain('Stand at the fold');
 });

@@ -20,7 +20,8 @@ function keepFresh(receipts:Record<string,unknown>[],latest:number,maxAgeMs:numb
 /** Allowlist, so no submitted pixel can ever reach a log file. */
 const RECEIPT_TELEMETRY_FIELDS=['frameId','frameAtPhoneMs','imageVideoTime','poseVideoTime','markerId','accepted',
  'reason','opencvVersion','reprojectionRmsPx','imageSha256','configSha256','cameraCenterMarkerM',
- 'markerToCameraRotation','trackerCameraCenter','trackerRotation'] as const;
+ 'markerToCameraRotation','trackerCameraCenter','trackerRotation','panelCount',
+ 'nonCoplanarityRankRatio'] as const;
 const ALIGNMENT_TELEMETRY_FIELDS=['accepted','reason','markerBaselineM','maxOrientationDisagreementDeg',
  'maxPairwiseScaleDisagreementFraction','maxRelativeResidual','markerObservationCount',
  'discardedLeadingObservationCount','sourceFrameAtPhoneMs','windowSelection'] as const;

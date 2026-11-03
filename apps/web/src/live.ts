@@ -13,7 +13,7 @@ import {loadVisitorRoute,type VisitorRoute} from './visitor-route';
 import {routeTokenFromSearch} from './visitor-route';
 import {makeMarkerScanRequest,makeAuthorMarkerCheckRequest} from './marker-scan-client';
 import {buildLiveAnchor} from './live-anchor-certificate';
-import {coachMarkerPreflight} from './marker-preflight-ui';
+import {coachMarkerPreflight,markerStanceInstruction} from './marker-preflight-ui';
 import {SameSessionTrail} from './same-session-trail';
 import './live.css';
 type Pipeline=Record<string,unknown>;
@@ -58,7 +58,7 @@ authorPrivacy.addEventListener('change',()=>{button('check-author-marker').disab
 button('check-author-marker').addEventListener('click',()=>{
  if(!running||!authorPrivacy.checked)return;
  authorCheckActive=true;button('check-author-marker').disabled=true;
- authorStatus.textContent='Take real sideways steps, about half a metre, with the marker visible until the live window passes. Leaning or turning in place does not count.';
+ authorStatus.textContent=markerStanceInstruction();
 });
 document.addEventListener('walkit-preflight-start',()=>{if(running&&authorPrivacy.checked)authorCheckActive=true;});
 document.addEventListener('walkit-record-start',()=>{authorCheckActive=false;authorPassAt=-Infinity;authorMarkerDetected=false;});
@@ -77,7 +77,7 @@ async function sendAuthorCheck(sample:ReturnType<typeof copyCaptureFrame>){
   if(!response.ok){let refusal='';try{refusal=(await response.json() as {error?:string}).error||'';}catch{}
    throw Error(`Marker check refused (${response.status})${refusal?` · ${refusal}`:''}`);}
   const result=await response.json() as {accepted:boolean;reason:string;configSha256:string;
-   frameAtPhoneMs:number;arrowAuthorized:boolean;alignment?:{accepted:boolean;reason:string;
+   frameAtPhoneMs:number;arrowAuthorized:boolean;panelCount?:number;alignment?:{accepted:boolean;reason:string;
     maxOrientationDisagreementDeg?:number;markerBaselineM?:number;maxPairwiseScaleDisagreementFraction?:number;
     sourceFrameAtPhoneMs?:number}};
   if(result.configSha256!==sha||result.frameAtPhoneMs!==sample.t||result.arrowAuthorized!==false)
@@ -87,11 +87,11 @@ async function sendAuthorCheck(sample:ReturnType<typeof copyCaptureFrame>){
   if(result.alignment?.accepted===true&&
    performance.now()-(result.alignment.sourceFrameAtPhoneMs??sample.t)<=settings.ALIGNMENT_WINDOW_MAX_AGE_MS){
    authorMarkerDetected=true;authorPassAt=performance.now();
-   authorStatus.textContent=`PASS · span ${result.alignment.markerBaselineM?.toFixed(2)??'?'} m · spread ${result.alignment.maxOrientationDisagreementDeg?.toFixed(1)??'?'}° · scale disagreement ${result.alignment.maxPairwiseScaleDisagreementFraction===undefined?'?':(result.alignment.maxPairwiseScaleDisagreementFraction*100).toFixed(1)}%. Record while this pass is fresh.`;
+   authorStatus.textContent=`PASS · span ${result.alignment.markerBaselineM?.toFixed(2)??'?'} m · spread ${result.alignment.maxOrientationDisagreementDeg?.toFixed(1)??'?'}° · scale disagreement ${result.alignment.maxPairwiseScaleDisagreementFraction===undefined?'?':(result.alignment.maxPairwiseScaleDisagreementFraction*100).toFixed(1)}% · panels ${result.panelCount??'?'}. Record while this pass is fresh.`;
   }else{
    authorMarkerDetected=false;
    const fit=result.alignment;
-   authorStatus.textContent=coachMarkerPreflight(fit?.reason||result.reason,fit||{});
+   authorStatus.textContent=coachMarkerPreflight(fit?.reason||result.reason,{...(fit||{}),panelCount:result.panelCount});
   }
   upload.add('status',`author-marker-${result.reason}`,[sample.t]);
  }catch(error){authorMarkerDetected=false;upload.add('error',`author-marker-check-${(error as Error).name}`,[sample.t]);void upload.flush();authorStatus.textContent=`Marker check paused: ${(error as Error).message}. Keep the page open and retry.`;}
@@ -103,7 +103,7 @@ button('scan-marker').addEventListener('click',()=>{
  if(!running||!visitorRoute||!markerPrivacy.checked)return;
  markerScanActive=true;markerAccepted=0;markerSequence=0;lastMarkerAt=-Infinity;
  button('scan-marker').disabled=true;
- markerStatus.textContent='Scanning four distinct tracked views. Keep the marker visible and move gently sideways.';
+ markerStatus.textContent=`Scanning four distinct tracked views. ${markerStanceInstruction()}`;
 });
 markerPrivacy.addEventListener('change',()=>{button('scan-marker').disabled=!running||!visitorRoute||!markerPrivacy.checked||markerScanActive;});
 async function sendMarkerSample(sample:ReturnType<typeof copyCaptureFrame>){
@@ -123,13 +123,13 @@ async function sendMarkerSample(sample:ReturnType<typeof copyCaptureFrame>){
   finally{clearTimeout(timer);}
   if(!response.ok)throw Error(`Marker request refused (${response.status})`);
   const result=await response.json() as {accepted:boolean;reason:string;frameAtPhoneMs:number;configSha256:string;arrowAuthorized:boolean;
-   alignment?:Parameters<typeof buildLiveAnchor>[1]};
+   panelCount?:number;alignment?:Parameters<typeof buildLiveAnchor>[1]};
   if(result.configSha256!==visitorRoute.configSha256||result.arrowAuthorized!==false||
    result.frameAtPhoneMs!==sample.t)throw Error('Marker response provenance mismatch');
   if(!markerScanActive)return;
   if(result.accepted)markerAccepted++;
   markerStatus.textContent=result.alignment?.accepted===true?'Start fit passed. Checking live route binding…':
-   coachMarkerPreflight(result.alignment?.reason||result.reason,result.alignment||{});
+   coachMarkerPreflight(result.alignment?.reason||result.reason,{...(result.alignment||{}),panelCount:result.panelCount});
   upload.add('status',`marker-${result.reason}`,[sample.t,markerAccepted]);
   if(result.alignment?.accepted===true){
    const certificate=buildLiveAnchor(visitorRoute,result.alignment,lastStatus,performance.now());
