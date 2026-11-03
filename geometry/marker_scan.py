@@ -31,7 +31,7 @@ def scan_marker(request, config_bytes):
         intrinsics = np.asarray(request['intrinsics'], dtype=float).reshape(3, 3)
         tracker = np.asarray(request['trackerPosition'], dtype=float)
         rotation = np.asarray(request['trackerRotation'], dtype=float)
-        encoded = request['imagePngBase64']
+        encoded = request.get('imageJpegBase64',request.get('imagePngBase64'))
         if not isinstance(encoded, str) or len(encoded) > config['E05_IMAGE_MAX_INPUT_BYTES'] * 2:
             raise ValueError('Image too large')
         pixels_bytes = base64.b64decode(encoded, validate=True)

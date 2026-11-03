@@ -12,6 +12,7 @@ it('binds a reviewed camera image to its same-frame pose and calibration',()=>{
  expect(request.frameAtPhoneMs).toBe(1000);
  expect(request.intrinsics).toHaveLength(9);
  expect(request.privacyReviewed).toBe(true);
+ expect(request.imageJpegBase64).toBe('AA==');
 });
 it('refuses stale frame or missing privacy review',()=>{
  expect(()=>makeMarkerScanRequest(sample,'AA==','a'.repeat(64),'b'.repeat(48),'v0',2000,true)).toThrow();

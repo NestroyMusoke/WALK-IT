@@ -35,6 +35,14 @@ def request():
 
 
 class MarkerScanTests(unittest.TestCase):
+    def test_compact_jpeg_marker_request_uses_the_same_pose_gate(self):
+        data=request()
+        pixels=cv2.imdecode(np.frombuffer(base64.b64decode(data.pop('imagePngBase64')),np.uint8),cv2.IMREAD_GRAYSCALE)
+        data['imageJpegBase64']=base64.b64encode(cv2.imencode('.jpg',pixels,[cv2.IMWRITE_JPEG_QUALITY,82])[1]).decode()
+        result=scan_marker(data,RAW)
+        self.assertTrue(result['accepted'],result)
+        self.assertLess(len(data['imageJpegBase64']),100000)
+
     def test_real_opencv_detection_returns_synced_pose_without_arrow(self):
         result=scan_marker(request(),RAW)
         self.assertTrue(result['accepted'],result)

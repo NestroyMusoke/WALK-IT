@@ -67,9 +67,9 @@ async function sendAuthorCheck(sample:ReturnType<typeof copyCaptureFrame>){
  try{
   const copy=document.createElement('canvas');copy.width=sample.width;copy.height=sample.height;
   copy.getContext('2d')!.putImageData(new ImageData(new Uint8ClampedArray(sample.rgba),sample.width,sample.height),0,0);
-  const png=copy.toDataURL('image/png').split(',')[1];copy.width=copy.height=0;
+  const jpeg=copy.toDataURL('image/jpeg',0.82).split(',')[1];copy.width=copy.height=0;
   const sha=await configurationHash();
-  const request=makeAuthorMarkerCheckRequest(sample,png,sha,`author-${authorSequence++}`,performance.now(),authorPrivacy.checked);
+  const request=makeAuthorMarkerCheckRequest(sample,jpeg,sha,`author-${authorSequence++}`,performance.now(),authorPrivacy.checked);
   const key=new URLSearchParams(location.hash.slice(1)).get('key')||sessionStorage.getItem('walkit-live-access')||'';
   const response=await fetch('/__walkit/author-marker-check',{method:'POST',
    headers:{'Content-Type':'application/json','X-Walkit-Access':key},body:JSON.stringify(request),
@@ -111,8 +111,8 @@ async function sendMarkerSample(sample:ReturnType<typeof copyCaptureFrame>){
   if(!visitorRoute||!markerPrivacy.checked)throw Error('Private route or image review missing');
   const copy=document.createElement('canvas');copy.width=sample.width;copy.height=sample.height;
   copy.getContext('2d')!.putImageData(new ImageData(new Uint8ClampedArray(sample.rgba),sample.width,sample.height),0,0);
-  const png=copy.toDataURL('image/png').split(',')[1];copy.width=copy.height=0;
-  const request=makeMarkerScanRequest(sample,png,visitorRoute.configSha256,
+  const jpeg=copy.toDataURL('image/jpeg',0.82).split(',')[1];copy.width=copy.height=0;
+  const request=makeMarkerScanRequest(sample,jpeg,visitorRoute.configSha256,
    routeTokenFromSearch(location.search),`v${markerSequence++}`,performance.now(),markerPrivacy.checked);
   const controller=new AbortController();
   const timer=setTimeout(()=>controller.abort(),settings.MARKER_SCAN_REQUEST_TIMEOUT_MS);
