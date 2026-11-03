@@ -93,7 +93,7 @@ async function sendAuthorCheck(sample:ReturnType<typeof copyCaptureFrame>){
    authorStatus.textContent=coachMarkerPreflight(fit?.reason||result.reason,fit||{});
   }
   upload.add('status',`author-marker-${result.reason}`,[sample.t]);
- }catch(error){authorMarkerDetected=false;authorStatus.textContent=`Marker check paused: ${(error as Error).message}. Keep the page open and retry.`;}
+ }catch(error){authorMarkerDetected=false;upload.add('error',`author-marker-check-${(error as Error).name}`,[sample.t]);void upload.flush();authorStatus.textContent=`Marker check paused: ${(error as Error).message}. Keep the page open and retry.`;}
  finally{sample.rgba.fill(0);authorCheckBusy--;button('check-author-marker').disabled=!running||!authorPrivacy.checked;}
 }
 const markerPrivacy=el('marker-privacy') as HTMLInputElement;
@@ -136,7 +136,7 @@ async function sendMarkerSample(sample:ReturnType<typeof copyCaptureFrame>){
     markerStatus.textContent+=' Live start verified. Follow the arrow while tracking stays NORMAL.';}
    else markerStatus.textContent+=' Alignment receipt did not prove a current route-bound start. Keep scanning.';
   }
- }catch(error){markerStatus.textContent=`Marker scan paused: ${(error as Error).message}. Keep scanning; no arrow yet.`;}
+ }catch(error){upload.add('error',`visitor-marker-scan-${(error as Error).name}`,[sample.t]);void upload.flush();markerStatus.textContent=`Marker scan paused: ${(error as Error).message}. Keep scanning; no arrow yet.`;}
  finally{sample.rgba.fill(0);markerScanBusy--;button('scan-marker').disabled=!running||!visitorRoute||!markerPrivacy.checked;}
 }
 function showGuidanceStatus(){
